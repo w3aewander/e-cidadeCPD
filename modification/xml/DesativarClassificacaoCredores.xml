@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>DesativarClassificacaoCredores</id>
+
+  <file path="func_empempenho001.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*c31_classificacaocredores)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*c31_justificativa)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+  </file>
+
+  <file path="forms/db_frmempempenhonota.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<fieldset.*\n?\s*<legend>Lista de Classifica)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(db_select\s*\(\s*['"]classificacao_credor_combo)]]></search>
+      <add><![CDATA[\$classificacao_credor_combo = 1; $1]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(db_textarea\s*\(\s*['"]cc31_justificativa)]]></search>
+      <add><![CDATA[\$cc31_justificativa = "Dispensa automática"; $1]]></add>
+    </operation>
+
+    <operation error="abort">
+      <search regex="true"><![CDATA[if\s*\(sDtRecebe\.trim\(\)\s*==.*\)]]></search>
+      <add><![CDATA[if (false)]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[if\s*\(.*sDtVence\.trim\(\)\s*==.*\)]]></search>
+      <add><![CDATA[if (false)]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[if\s*\(.*sLocalRecebe\.trim\(\)\s*==.*\)]]></search>
+      <add><![CDATA[if (false)]]></add>
+    </operation>
+
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<label.*e69_dtrecebe)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<label.*e69_localrecebimento)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[if (empty($('cc31_classificacaocredores').value) && !confirm(sMensagem)) {
+      return false;
+    }]]></search>
+      <add position="replace">
+        <![CDATA[]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[oComboDispensa.value = 0;]]></search>
+      <add position="replace">
+        <![CDATA[//oComboDispensa.value = 0;]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="emp4_empempenho004.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(\$oEmpenho\-\>getListaClassificacaoCredor\(\)\-\>validarParametros)]]></search>
+      <add><![CDATA[
+        \$e69_dtrecebe = \$e69_dtnota;
+        \$e69_dtvencimento = null;
+        \$e69_localrecebimento = '';
+
+        $1
+        ]]></add>
+    </operation>
+  </file>
+
+  <file path="forms/db_frmliquidasemordem.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<label.*e69_dtrecebe)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<label.*e69_localrecebimento)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<label.*codigo_classificacao)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]></add>
+    </operation>
+  </file>
+
+  <file path="model/empenho/ClassificacaoCredor.model.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(n\s*validaParametros\s*\(.*\)\s*\n?\s*\{)]]></search>
+      <add><![CDATA[$1 return true;]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(n\s*validaDatas\s*\(.*\)\s*\n?\s*\{)]]></search>
+      <add><![CDATA[$1 return true;]]></add>
+    </operation>
+  </file>
+
+  <file path="model/empenho/classificacaocredor/ListaClassificacaoCredor.model.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(n\s*validarParametros\s*\(.*\)\s*\n?\s*\{)]]></search>
+      <add><![CDATA[$1 return true;]]></add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(n\s*validarDatas\s*\(.*\)\s*\n?\s*\{)]]></search>
+      <add><![CDATA[$1 return true;]]></add>
+    </operation>
+  </file>
+
+  <file path="emp4_liquidacao004.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(geraOC['"]\s*:\n?)]]></search>
+      <add><![CDATA[$1
+        \$objJson->e69_dtnota = empty(\$objJson->e69_dtnota) ? date("d/m/Y", db_getsession("DB_datausu")) : \$objJson->e69_dtnota;
+        \$objJson->e69_dtrecebe = \$objJson->e69_dtnota;
+        \$objJson->e69_dtvencimento = null;
+        \$objJson->e69_localrecebimento = '';
+      ]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="forms/db_frmmanutencaoagenda.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<label.*codigo_classificacao)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]>
+      </add>
+    </operation>
+    <operation error="abort">
+      <search regex="true"><![CDATA[(<tr)(.*\n?\s*<td.*\n?\s*<label.*data_vencimento)]]></search>
+      <add><![CDATA[<tr style="display: none" $2]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="model/empenho/classificacaocredor/ListaClassificacaoCredorRepository.model.php">
+    <operation error="abort">
+      <search regex="true"><![CDATA[(n\s*getTodos\s*\(.*\)\s*\n?\s*\{)]]></search>
+      <add><![CDATA[$1 return self::getInstancia()->aListaClassificacaoCredor[ListaClassificacaoCredor::DISPENSA_MANUAL] = self::getPorCodigo(ListaClassificacaoCredor::DISPENSA_MANUAL);]]></add>
+    </operation>
+  </file>
+</modification>

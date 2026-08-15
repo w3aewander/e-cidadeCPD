@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>GrupoSubGrupoAlmox</id>
+  <name>Grupo SubGrupo Almoxarifado</name>
+
+  <ecidade-version>2.3.53</ecidade-version>
+  <file path='func_materialestoquegrupo.php'>
+
+
+    <operation>
+      <search><![CDATA[$iAnousu = db_getsession("DB_anousu");]]></search>
+      <add position="replace">
+        <![CDATA[//$iAnousu = db_getsession("DB_anousu");]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[$sWhere .= " and m66_anousu = {$iAnousu} ";]]></search>
+      <add position="replace">
+        <![CDATA[//$sWhere .= " and m66_anousu = {$iAnousu} ";]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[$sql = $clmaterialestoquegrupo->sql_query_conta(null,"distinct ".$campos,"dl_Grupo","m65_sequencial = {$chave_m65_sequencial} and {$sWhere}");]]></search>
+      <add position="replace">
+        <![CDATA[$sql = $clmaterialestoquegrupo->sql_query_conta(null,"distinct ".$campos,"dl_Descrição_do_Grupo","m65_sequencial = {$chave_m65_sequencial} and {$sWhere}");]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[$sql = $clmaterialestoquegrupo->sql_query_conta("","distinct ".$campos,"dl_Grupo"," db121_estrutural like '$chave_db121_estrutural%' and {$sWhere}");]]></search>
+      <add position="replace">
+        <![CDATA[$sql = $clmaterialestoquegrupo->sql_query_conta("","distinct ".$campos,"dl_Descrição_do_Grupo"," db121_estrutural like '$chave_db121_estrutural%' and {$sWhere}");]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[$sql = $clmaterialestoquegrupo->sql_query_conta("","distinct ".$campos,"dl_Grupo",$sWhere);]]></search>
+      <add position="replace">
+        <![CDATA[$sql = $clmaterialestoquegrupo->sql_query_conta("","distinct ".$campos,"dl_Descrição_do_Grupo",$sWhere);]]>
+      </add>
+    </operation>
+ 
+  </file>
+
+</modification>

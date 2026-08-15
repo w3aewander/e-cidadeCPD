@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+  <id>processamento_protelacoes_contagem_de_tempo_volta_redonda</id>
+    <file path="forms/db_frmrhpessoal.php">
+        <operation error="abort" label="#0 Bloqueio Campo trienio">
+          <search><![CDATA[db_inputdata(
+                                        'rh01_trienio',
+                                        @$rh01_trienio_dia,
+                                        @$rh01_trienio_mes,
+                                        @$rh01_trienio_ano,
+                                        true,
+                                        'text',
+                                        $db_opcao,
+                                        ""
+                                    );]]></search>
+          <add position="replace"><![CDATA[db_inputdata('rh01_trienio',@$rh01_trienio_dia,@$rh01_trienio_mes,@$rh01_trienio_ano,true,'text',3,"")]]></add>
+        </operation>
+        <operation error="abort" label="#1 Bloqueio Campo progressao">
+          <search><![CDATA[db_inputdata(
+                                        'rh01_progres',
+                                        @$rh01_progres_dia,
+                                        @$rh01_progres_mes,
+                                        @$rh01_progres_ano,
+                                        true,
+                                        'text',
+                                        $db_opcao,
+                                        ""
+                                    );]]></search>
+          <add position="replace"><![CDATA[db_inputdata('rh01_progres',@$rh01_progres_dia,@$rh01_progres_mes,@$rh01_progres_ano,true,'text',3,"")]]></add>
+        </operation>
+    </file>
+</modification>

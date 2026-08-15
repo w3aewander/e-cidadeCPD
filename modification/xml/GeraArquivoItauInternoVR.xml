@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>GeraArquivoItauInternoVR</id>
+  <name>Gera Arquivo Itau Interno VR</name>
+  <ecidade-version>2.3.53</ecidade-version>
+  <file path='emp4_empageconfgera001_ordem.php'>
+    <operation>
+      <search><![CDATA[echo ($HTTP_SERVER_VARS["QUERY_STRING"]);]]></search>
+      <add position="replace">
+        <![CDATA[//echo ($HTTP_SERVER_VARS["QUERY_STRING"]);]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[echo "<br><br>" . $sSqlTxt; die();]]></search>
+      <add position="replace">
+        <![CDATA[//echo "<br><br>" . $sSqlTxt; die();]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[$cor = "#999"]]></search>
+      <add position="replace">
+        <![CDATA[$cor="#999999"]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[<td class='table_header' align='center'><b>Empenho</b></td>]]></search>
+      <add position="replace">
+        <![CDATA[<td class='table_header' align='center'><b><?=$RLe60_codemp?></b></td>]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[nowrap><b>Banco - Agência - Conta (credor)]]></search>
+      <add position="replace">
+        <![CDATA[owrap><b><?/*=$RLe60_emiss*/?>Banco - Agência - Conta (credor)]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[define("OBN", "2");]]></search>
+      <add position="before">
+        <![CDATA[define("PAGFOR", "3");]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[<b><?php echo $RLe80_codage?>]]></search>
+      <add position="replace">
+        <![CDATA[<b><?=$RLe80_codage?>]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[$e25_empagetipotransmissao = null;]]></search>
+      <add position="replace">
+        <![CDATA[//$e25_empagetipotransmissao = null;]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[                  if ($filtroTipoTransmissao == PAGFOR && $e25_empagetipotransmissao != PAGFOR){
+                    continue;
+                  }
+                  if ($filtroTipoTransmissao != PAGFOR && $e25_empagetipotransmissao == PAGFOR){
+                    continue;
+                  }]]></search>
+      <add position="replace">
+        <![CDATA[/*                  if ($filtroTipoTransmissao == PAGFOR && $e25_empagetipotransmissao != PAGFOR){
+                    continue;
+                  }
+                  if ($filtroTipoTransmissao != PAGFOR && $e25_empagetipotransmissao == PAGFOR){
+                    continue;
+                  }*/]]>
+      </add>
+    </operation>
+  </file>
+
+</modification>

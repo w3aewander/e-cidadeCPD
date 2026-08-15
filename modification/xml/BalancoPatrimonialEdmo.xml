@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>BalancoPatrimonialEdmo</id>
+
+      <file path="model/contabilidade/relatorios/dcasp/BalancoPatrimonialDCASP{2015,2017}.model.php">
+
+        <operation error="log" label="#1">
+          <search><![CDATA[$rsRecursos = $oDaoSaltes]]></search>
+          <add position="before"><![CDATA[
+          	if ( $iAno >= 2016 ) {
+
+				    $sSql = " select * from (
+				    select c61_codigo, o15_descr, c61_reduz as k13_conta, c61_instit, 0 as e91_valor
+				    from conplano
+				    inner join conplanoreduz on c61_anousu = c60_anousu and c61_codcon = c60_codcon
+				    inner join orctiporec on c61_codigo = o15_codigo
+				    where c60_anousu = $iAno and c61_instit in ( $sIntituicoes ) and c60_identificadorfinanceiro = 'F' and substr(c60_estrut,1,1) in ('1','2')
+				 and ( substr(c60_estrut,1,3) != '211' and substr(c60_estrut,1,3) != '212' and substr(c60_estrut,1,3) != '213' and substr(c60_estrut,1,9) != '218910301' )
+
+
+
+				    union all
+
+				    select o58_codigo, o15_descr, 0 as k13_conta, o58_instit as c61_instit, round(e91_vlremp - e91_vlranu - e91_vlrliq,2) as e91_valor
+				    from empresto 
+				    inner join empempenho on e91_numemp = e60_numemp 
+				    inner join orcdotacao on o58_anousu = e60_anousu and o58_coddot = e60_coddot 
+				    inner join orctiporec on o58_codigo = o15_codigo 
+				    where e60_instit in ( $sIntituicoes ) and e91_anousu = ( $iAno + 1 )
+
+
+				                UNION ALL
+
+				            SELECT o58_codigo, o15_descr, 0 AS k13_conta, o58_instit AS c61_instit, round(e91_vlrliq - e91_vlrpag,2) AS e91_valor   
+				      FROM empresto
+				      INNER JOIN empempenho ON e91_numemp = e60_numemp
+				      INNER JOIN orcdotacao ON o58_anousu = e60_anousu AND o58_coddot = e60_coddot
+				      INNER JOIN orctiporec ON o58_codigo = o15_codigo WHERE e60_instit IN ($sIntituicoes) AND e91_anousu = ($iAno + 1) 
+
+				";
+				}
+				else {
+				$sSql = "       select * from (
+				                select c61_codigo, o15_descr, c61_reduz as k13_conta, c61_instit, 0 as e91_valor
+				                from conplano
+				                inner join conplanoreduz on c61_anousu = c60_anousu and c61_codcon = c60_codcon
+				                inner join orctiporec on c61_codigo = o15_codigo
+				                where c60_anousu = $iAno and c61_instit in ( $sIntituicoes ) and c60_identificadorfinanceiro = 'F' and substr(c60_estrut,1,1) in ('1','2')
+
+				                union all
+
+				                select o58_codigo, o15_descr, 0 as k13_conta, o58_instit as c61_instit, round(e91_vlremp - e91_vlranu - e91_vlrliq,2) as e91_valor
+				                from empresto 
+				                inner join empempenho on e91_numemp = e60_numemp 
+				                inner join orcdotacao on o58_anousu = e60_anousu and o58_coddot = e60_coddot 
+				                inner join orctiporec on o58_codigo = o15_codigo 
+				                where e60_instit in ( $sIntituicoes ) and e91_anousu = ( $iAno + 1 )
+				";
+
+
+				}
+
+				$sSql .= "
+
+				--    select c61_codigo, o15_descr, c61_reduz as k13_conta, c61_instit
+				--    from conplano
+				--    inner join conplanoreduz on c61_anousu = c60_anousu and c61_codcon = c60_codcon 
+				--    inner join orctiporec on c61_codigo = o15_codigo
+				--    where c60_anousu = $iAno and c61_instit in ( $sIntituicoes ) and substr(c60_estrut,1,3) like '631%'
+
+				    ) as x
+				    order by c61_codigo, k13_conta
+				            ";
+
+          	]]></add>
+        </operation>
+
+       <!--  <operation error="log" label="#1">
+          <search><![CDATA[if ($this->oPdf->getAvailHeight() < 35) {]]></search>
+          <add position="before"><![CDATA[
+          	// TRATA RELATÓRIO CONSOLIDADO OU NÃO PARA AS ASSINATURAS (Flávio Henrique - 13/04/2015)
+			$cntInstit         = count(explode(",",$this->getInstituicoes()));
+			$record_config = db_query("select count(*) from db_config left join db_tipoinstit on db21_codtipo = db21_tipoinstit");
+			if($record_config == false){
+			    return false;
+			  }else{
+			    $numInstit = pg_result($record_config,0);
+			}
+			if($numInstit == $cntInstit){
+			        $consolida = true;
+			}else{
+			        $consolida = false;
+			}
+          	]]></add>
+        </operation>
+
+        <operation error="log" label="#1">
+          <search><![CDATA[assinaturas($this->oPdf, $oAssinatura, 'BG', false, false)]]></search>
+          <add position="replace"><![CDATA[assinaturas($this->oPdf, &$oAssinatura, 'BG', $consolida, false,false);]]></add>
+        </operation> -->
+
+        <operation error="log" label="#1">
+          <search regex="true"><![CDATA[(\$rsResultado[^*]*\);\s*})]]></search>
+          <add position="replace"><![CDATA[
+          	if ( $oRecursoConta->k13_conta == 0 ) {
+		        $valores = $oRecursoConta->e91_valor*-1;
+		    } else {
+		        $sResultado = "select case when substr(fc_planosaldonovo,60,1)::varchar(1) = 'C' then round(substr(fc_planosaldonovo,45,14)::float8,2)::float8*-1 else round(substr(fc_planosaldonovo,45,14)::float8,2)::float8 end as saldo_final from ( select fc_planosaldonovo($iAno,$oRecursoConta->k13_conta,'$sDataInicial','$sDataFinal','true') ) as x";
+		        $rsResultado = db_query($sResultado) or die($sResultado);
+		        $valores = pg_result($rsResultado, 0, 0);
+
+		//      $valores = pg_result($rsResultado, 0, 0);
+		//      $valores = preg_split("/\s+/", $valores);
+		//      if ($valores[0] == "1") {
+		//        $nTotalRecurso += (float) str_replace(",", "", $valores[4]);
+		//      }
+
+		     }
+
+		      $nTotalRecurso += $valores;
+          	]]></add>
+        </operation> 
+
+        <operation error="log" label="#1">
+          <search><![CDATA[$this->oPeriodo->o114_mesfinal]]></search>
+          <add position="replace"><![CDATA[$this->oPeriodo->getMesFinal()]]></add>
+        </operation> 
+
+        <operation error="log" label="#1">
+          <search><![CDATA[($this->iAnoUsu >= 2016)]]></search>
+          <add position="replace"><![CDATA[($this->iAnoUsu >= db_getsession('DB_anousu')+1)]]></add>
+        </operation> 
+
+        <operation error="log" label="#1">
+          <search><![CDATA[($this->iAnoUsu >= 2017)]]></search>
+          <add position="replace"><![CDATA[($this->iAnoUsu >= db_getsession('DB_anousu')+1)]]></add>
+        </operation> 
+
+      </file>
+
+</modification>

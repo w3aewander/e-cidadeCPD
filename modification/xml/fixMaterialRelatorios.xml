@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+	<id>MaterialRelatorios20180514</id>
+	<label>Melhorias dos Relatórios do módulo Material</label>
+
+	<file path="mat2_estoque001.php">
+		<operation error="abort" label="mat2_estoque001.php?001">
+			<search limit="1">
+				<![CDATA[</table>]]>
+			</search>
+			<add position="before"><![CDATA[<tr><td align="left" title="Tipo"><strong>Relat&oacute;rio:</strong></td><td><?php $_rel=array("1"=>"PDF","2"=>"XLS"); db_select("relatorio",$_rel,true,2);?></td></tr>]]></add>
+		</operation>
+
+		<operation error="abort" label="mat2_estoque001.php?002">
+			<search limit="1">
+				<![CDATA[jan = window.open('mat2_relestoque002.php?'+query,'','width='+(screen.availWidth-5)+',height='+(screen.availHeight-40)+',scrollbars=1,location=0 ');]]>
+			</search>
+			<add position="replace"><![CDATA[
+				if(document.form1.relatorio.value == 1){
+					jan = window.open('mat2_relestoque002.php?'+query,'','width=0,height=0,scrollbars=1,location=0');
+				} else {
+					jan = window.open('mat2_relestoque002.xls.php?'+query,'','width=0,height=0');
+				}
+			]]></add>
+		</operation>
+	</file>
+</modification>
+

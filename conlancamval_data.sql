@@ -1,0 +1,150 @@
+
+-- melhoria nas mensagens onde mostra o codlan dos lancamentos com problema..
+
+DROP TRIGGER   "tg_conlancamval_inc" on conlancamval;
+DROP TRIGGER   "tg_conlancamval_alt" on conlancamval;
+DROP TRIGGER   "tg_conlancamval_del" on conlancamval;
+
+drop function fc_conlancamval_lancam_inc();
+drop function fc_conlancamval_lancam_alt();
+drop function fc_conlancamval_lancam_del();
+
+CREATE OR REPLACE FUNCTION fc_conlancamval_lancam_inc()
+RETURNS TRIGGER
+AS $$
+DECLARE 
+   
+   INSTITD 	INTEGER;
+   INSTITC 	INTEGER;
+   DATA		DATE;
+   nValorConlancam  float8;
+ 
+BEGIN
+
+    INSTITD=0;
+    INSTITC=0;
+   
+    SELECT C61_INSTIT
+    INTO INSTITD
+    FROM CONPLANOREDUZ
+    WHERE C61_ANOUSU = NEW.C69_ANOUSU AND C61_REDUZ = NEW.C69_DEBITO;
+    
+    IF INSTITD=0 THEN
+       RAISE EXCEPTION 'CONTA DEBITO (%) NAO ENCONTRADA NA CONPLANOREDUZ - CODLAN: %',NEW.C69_DEBITO, NEW.C69_CODLAN;
+    END IF;
+
+    SELECT C61_INSTIT
+    INTO INSTITC
+    FROM CONPLANOREDUZ
+    WHERE C61_ANOUSU = NEW.C69_ANOUSU AND C61_REDUZ = NEW.C69_CREDITO;
+    
+    IF INSTITC=0 THEN
+       RAISE EXCEPTION 'CONTA CREDITO (%) NAO ENCONTRADA NA CONPLANOREDUZ - CODLAN: %',NEW.C69_CREDITO, NEW.C69_CODLAN;
+    END IF;
+
+    IF INSTITD != INSTITC THEN
+       RAISE EXCEPTION 'CONTA CREDITO (%) E DEBITO (%) NAO PERTENCE A MESMA INSTITUICAO. CODLAN: %', NEW.C69_CREDITO, NEW.C69_DEBITO, NEW.C69_CODLAN;
+    END IF;
+
+    SELECT C99_DATA 
+    INTO DATA
+    FROM CONDATACONF
+    WHERE C99_ANOUSU = TO_CHAR(NEW.C69_DATA,'YYYY')::INTEGER AND
+          C99_INSTIT = INSTITD;
+      
+    IF DATA IS NOT NULL AND DATA >= NEW.C69_DATA THEN   
+      RAISE EXCEPTION 'DATA INVALIDA. LIMITE : % - CODLAN: %',DATA, NEW.C69_CODLAN;
+    END IF;
+
+    -- VALIDA DATA, PRA NAO ENTRAR ANOUSU DIFERENTE DO ANO DA DATA INFORMADA
+
+    IF TO_CHAR(NEW.C69_DATA,'YYYY')::INTEGER <> NEW.C69_ANOUSU THEN      
+       RAISE EXCEPTION 'DATA INVALIDA. NAO CONFERE COM EXERCICIO! CODLAN: % ', NEW.C69_CODLAN;
+    END IF ;
+
+    -- verifica o valor da conlancam
+     select c70_valor 
+       into nValorConlancam 
+       from conlancam 
+      where c70_codlan = new.c69_codlan;
+    
+    if round(NEW.C69_VALOR, 2) <>  nValorConlancam then
+      RAISE EXCEPTION 'VALOR INVALIDO. VALOR DIFERENTE DA CONLANCAM! CODLAN: %', NEW.C69_CODLAN;
+    END IF;
+
+    IF NEW.C69_VALOR < 0 THEN 
+       RAISE EXCEPTION 'VALOR INVALIDO. SOMENTE VALORES POSITIVOS SAO PERMITIDOS! CODLAN: %', NEW.C69_CODLAN;
+    END IF;
+
+    NEW.C69_VALOR = ROUND(NEW.C69_VALOR, 2); 
+    RETURN NEW;
+       
+END;
+$$
+LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION fc_conlancamval_lancam_alt()
+RETURNS TRIGGER
+AS 
+$$
+DECLARE 
+   
+   INSTITD 	INTEGER;
+   INSTITC 	INTEGER;
+   DATA		DATE;
+   VALOR	FLOAT8;
+   
+BEGIN
+    
+    RAISE EXCEPTION 'Nao pode haver update nesta tabela  ';
+
+    RETURN NEW;
+       
+END;
+$$
+LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION fc_conlancamval_lancam_del()
+RETURNS TRIGGER
+AS '
+DECLARE 
+   
+   INSTITD 	INTEGER;
+   INSTITC 	INTEGER;
+   DATA		DATE;
+   VALOR	FLOAT8;
+   
+BEGIN
+   
+    SELECT C61_INSTIT
+    INTO INSTITD
+    FROM CONPLANOREDUZ
+    WHERE C61_ANOUSU = OLD.C69_ANOUSU AND
+          C61_REDUZ = OLD.C69_DEBITO;
+    
+    IF NOT FOUND THEN    
+       RAISE EXCEPTION ''CONTA DEBITO (%) NAO ENCONTRADA NA CONPLANOREDUZ.'',OLD.C69_DEBITO;       
+    END IF;
+
+    SELECT C99_DATA 
+    INTO DATA
+    FROM CONDATACONF
+    WHERE C99_ANOUSU = TO_CHAR(OLD.C69_DATA,''YYYY'')::INTEGER
+      AND C99_INSTIT = INSTITD;
+      
+    IF DATA IS NOT NULL AND DATA >= OLD.C69_DATA THEN
+    
+      RAISE EXCEPTION ''DATA INVALIDA. LIMITE : % LANCAMENTO NAO PODERA SER REMOVIDO'',DATA;
+      
+    END IF;
+
+    RETURN OLD;
+       
+END;
+' LANGUAGE 'plpgsql';
+
+CREATE TRIGGER "tg_conlancamval_inc" before INSERT ON "conlancamval" FOR EACH ROW EXECUTE PROCEDURE "fc_conlancamval_lancam_inc" () ;
+CREATE TRIGGER "tg_conlancamval_alt" after UPDATE ON "conlancamval" FOR EACH ROW EXECUTE PROCEDURE "fc_conlancamval_lancam_alt" () ;
+CREATE TRIGGER "tg_conlancamval_del" BEFORE DELETE ON "conlancamval" FOR EACH ROW EXECUTE PROCEDURE "fc_conlancamval_lancam_del" () ;
+

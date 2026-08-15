@@ -1,0 +1,120 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.amparoprogressao" description="Diario ampradado progressão parcial." type="0">
+
+  <fields>
+    <field name="ed997_sequencial"
+           conteudo="int4"
+           description="Sequencial"
+           inivalue="0"
+           label="Sequencial"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sequencial"
+           reference=""
+           ispk="t"
+           hassequence="t">
+        <sequence name="plugins.amparoprogressao_ed997_sequencial_seq"></sequence>
+    </field>
+    <field name="ed997_diarioprogressao"
+           conteudo="int4"
+           description="Diario"
+           inivalue="0"
+           label="Diario"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Diario"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed997_justificativa"
+           conteudo="int4"
+           description="Justificativa"
+           inivalue="0"
+           label="Justificativa"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Justificativa"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed997_convencaoamp"
+           conteudo="int4"
+           description="Convenção"
+           inivalue="0"
+           label="Convenção"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Convenção"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed997_todoperiodo"
+           conteudo="bool"
+           description="Ampara todos períodos"
+           inivalue="f"
+           label="Ampara todos períodos"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Ampara todos períodos"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed997_aproveitach"
+           conteudo="bool"
+           description="Aproveita carga horaria"
+           inivalue="f"
+           label="Aproveita carga horaria"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Aproveita carga horaria"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+  </fields>
+
+  <primarykey>
+    <fieldpk name="ed997_sequencial"></fieldpk>
+  </primarykey>
+
+  <foreignkeys>
+    <foreignkey reference="plugins.diarioprogressao" inner='true'>
+      <fieldfk name="ed997_diarioprogressao" reference="ed993_sequencial"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="justificativa" inner='false'>
+      <fieldfk name="ed997_justificativa" reference="ed06_i_codigo"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="convencaoamp" inner='false'>
+      <fieldfk name="ed997_convencaoamp" reference="ed250_i_codigo"></fieldfk>
+    </foreignkey>
+  </foreignkeys>
+
+</table>

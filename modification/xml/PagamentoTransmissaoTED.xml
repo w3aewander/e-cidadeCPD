@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>PagamentoTransmissaoTED</id>
+  <name>Pagamento Transmissão TED</name>
+  <ecidade-version>2.3.53</ecidade-version>
+  <file path='emp4_empageconfgera001.php'>
+    <operation>
+      <search><![CDATA[$valorori < 1000]]></search>
+      <add position="replace">
+        <![CDATA[($valorori < 1000 && $banco != "104")]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[$valorori >= 1000]]></search>
+      <add position="replace">
+        <![CDATA[($valorori >= 1000 || $banco == "104")]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[/* Plugin PagamentoTransmissaoTED compensacao */]]></search>
+      <add position="after">
+        <![CDATA[$compensacao = "018"; $finalidadedoc = '00'; $tipodaconta = $pc63_tipoconta;]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[            db_setaPropriedadesLayoutTxt($db_layouttxt, 1);
+          } else {]]></search>
+      <add position="replace">
+        <![CDATA[            db_setaPropriedadesLayoutTxt($db_layouttxt, 1);
+          } else if ($banco != "341" && $banco != "033" && $banco != "008")  {]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path='emp4_empageconfgera001_ordem.php'>
+    <operation>
+      <search><![CDATA[/* Plugin PagamentoTransmissaoTED codigopagamento */]]></search>
+      <add position="after">
+        <![CDATA[$codigopagamento = ($db_banco == "104" ? "TED" : $codigopagamento);]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path='cai1_reimprimearq001.php'>
+    <operation>
+      <search><![CDATA[$valorori < 5000]]></search>
+      <add position="replace">
+        <![CDATA[($valorori < 5000 && $banco != "104")]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[$valorori >= 5000]]></search>
+      <add position="replace">
+        <![CDATA[($valorori >= 5000 || $banco == "104")]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[/* Plugin PagamentoTransmissaoTED compensacao */]]></search>
+      <add position="after">
+        <![CDATA[$compensacao = "018"; $finalidadedoc = '00'; $tipodaconta = $pc63_tipoconta;]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path='emp2_gerarq002.php'>
+    <operation>
+      <search><![CDATA[!$lPagamentoBradesco){]]></search>
+      <add position="replace">
+        <![CDATA[!$lPagamentoBradesco && $c63_banco != '104'){]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path='cai2_geratxt002.php'>
+    <operation>
+      <search><![CDATA[$e81_valor<5000){]]></search>
+      <add position="replace">
+        <![CDATA[$e81_valor<5000 && $db_banco != '104'){]]>
+      </add>
+    </operation>
+  </file>
+
+</modification>

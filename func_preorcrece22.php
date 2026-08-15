@@ -1,0 +1,148 @@
+<?php
+
+
+require_once (modification("libs/db_stdlib.php"));
+require_once (modification("libs/db_conecta.php"));
+require_once (modification("libs/db_sessoes.php"));
+require_once (modification("libs/db_usuariosonline.php"));
+require_once (modification("dbforms/db_funcoes.php"));
+require_once (modification("classes/db_orcreceita_classe.php"));
+require_once (modification("classes/db_orcfontes_classe.php"));
+db_postmemory($HTTP_POST_VARS);
+parse_str($HTTP_SERVER_VARS["QUERY_STRING"]);
+$clorcreceita = new cl_orcreceita;
+$clorcfontes = new cl_orcfontes;
+$clorcreceita->rotulo->label("o70_anousu");
+$clorcreceita->rotulo->label("o70_codrec");
+$clorcreceita->rotulo->label("o70_codfon");
+$clorcfontes->rotulo->label("o57_fonte");
+$clorcfontes->rotulo->label("o57_descr");
+$anocorrente = db_getsession("DB_anousu");
+$sWhereReceita = "1=1";
+if (isset($lReceitaLancada)) {
+
+	$sWhereReceita = " o70_reclan is false ";
+	if ($lReceitaLancada == 'true') {
+		$sWhereReceita = " o70_reclan is true ";
+	}
+}
+
+?>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="estilos.css" rel="stylesheet" type="text/css">
+<script language="JavaScript" type="text/javascript" src="scripts/scripts.js"></script>
+</head>
+<body bgcolor=#CCCCCC leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table height="100%" border="0"  align="center" cellspacing="0" bgcolor="#CCCCCC">
+  <tr>
+    <td height="63" align="center" valign="top">
+        <table width="35%" border="0" align="center" cellspacing="0">
+	     <form name="form2" method="post" action="" >
+          
+          <tr>
+            <td width="4%" align="right" nowrap title="<?=$To70_codrec?>"><?=$Lo70_codrec?></td>
+            <td width="96%" align="left" nowrap>
+	       <? db_input("o70_codrec",6,$Io70_codrec,true,"text",4,"","chave_o70_codrec"); ?>
+            </td>
+          </tr>
+
+
+          <tr>
+            <td width="4%" align="right" nowrap title="Código do Recurso"><b>Código do Recurso</b></td>
+            <td width="96%" align="left" nowrap>
+         <? db_input("o70_codigo",6,$Io70_codigo,true,"text",4,"","chave_o70_codigo"); ?>
+            </td>
+          </tr>
+          <?php  /*?>
+          <tr>
+            <td width="4%" align="right" nowrap title="<?=$To70_codfon?>"><?=$Lo70_codfon?></td>
+            <td width="96%" align="left" nowrap>
+              <? db_input("o70_codfon",6,$Io70_codfon,true,"text",4,"","chave_o70_codfon"); ?>
+            </td>
+          </tr>
+          
+          <tr>
+            <td width="4%" align="right" nowrap title="<?=$To57_fonte?>"><?=$Lo57_fonte?></td>
+            <td width="96%" align="left" nowrap>
+              <? db_input("o57_fonte",15,$Io57_fonte,true,"text",4,"","chave_o57_fonte"); ?>  %
+            </td>
+          </tr>
+          
+          <tr>
+            <td width="4%" align="right" nowrap title="<?=$To57_descr?>"><?=$Lo57_descr?></td>
+            <td width="96%" align="left" nowrap>
+              <? db_input("o57_descr",40,$Io57_descr,true,"text",4,"","chave_o57_descr"); ?>
+            </td>
+          </tr>
+          <?php */ ?>
+          <tr>
+            <td colspan="2" align="center">
+              <input name="pesquisar" type="submit" id="pesquisar2" value="Pesquisar">
+              <input name="limpar" type="reset" id="limpar" value="Limpar" >
+              <input name="Fechar" type="button" id="fechar" value="Fechar" onClick="parent.db_iframe_orcreceita.hide();">
+             </td>
+          </tr>
+        </form>
+        </table>
+      </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <?
+
+      if(!isset($pesquisa_chave)){
+        
+
+        if(isset($chave_o70_codrec) && (trim($chave_o70_codrec)!="") ){
+          $sqlp = "SELECT id, o70_anousu, o70_codrec, o50_estrutreceita, o57_descr, o70_codigo, o15_descr, o70_valor, o70_reclan, o70_concarpeculiar, c58_descr, o70_instit FROM previareceitas WHERE o70_codrec = '{$chave_o70_codrec}' AND o70_anousu = '{$anocorrente}' ORDER BY o50_estrutreceita";
+          //var_dump($sqlp); die("c");
+          db_lovrot($sqlp,15,"()","",$funcao_js);
+
+        }else if(isset($chave_o70_codigo) && (trim($chave_o70_codigo)!="")){
+          $sqlp = "SELECT id, o70_anousu, o70_codrec, o50_estrutreceita, o57_descr, o70_codigo, o15_descr, o70_valor, o70_reclan, o70_concarpeculiar, c58_descr, o70_instit FROM previareceitas WHERE o70_codigo = '{$chave_o70_codigo}' AND o70_anousu = '{$anocorrente}' ORDER BY o50_estrutreceita";
+          //var_dump($sqlp); die("c");
+          db_lovrot($sqlp,15,"()","",$funcao_js);
+        } else {          
+          $sql2 = "SELECT id, o70_anousu, o70_codrec, o50_estrutreceita, o57_descr, o70_codigo, o15_descr, o70_valor, o70_reclan, o70_concarpeculiar, c58_descr, o70_instit FROM previareceitas WHERE o70_instit = '".db_getsession("DB_instit")."' AND o70_anousu = '{$anocorrente}' ORDER BY o50_estrutreceita";
+           db_lovrot($sql2,15,"()","",$funcao_js);
+        }
+
+        
+           
+      }else{
+        if($pesquisa_chave!=null && $pesquisa_chave!=""){
+          $result = $clorcreceita->sql_record($clorcreceita->sql_query(null,null,"*",null,$dbwhere." and o70_codrec = $pesquisa_chave and {$sWhereReceita}"));
+          if($clorcreceita->numrows!=0){
+            db_fieldsmemory($result,0);
+	     // carlos - antigo  ...... echo "<script>".$funcso_js."($o57_codfon',false....
+            echo "<script>".$funcao_js."('$o57_descr',false);</script>";
+          }else{
+	         echo "<script>".$funcao_js."('Chave(".$pesquisa_chave.") não Encontrado',true);</script>";
+          }
+        }else{
+	       echo "<script>".$funcao_js."('',false);</script>";
+        }
+      }
+      ?>
+     </td>
+   </tr>
+</table>
+</body>
+</html>
+<?
+if(!isset($pesquisa_chave)){
+  ?>
+  <script>
+  </script>
+  <?
+ }
+?>
+<script type="text/javascript">
+(function() {
+  var query = frameElement.getAttribute('name').replace('IF', ''), input = document.querySelector('input[value="Fechar"]');
+  input.onclick = parent[query] ? parent[query].hide.bind(parent[query]) : input.onclick;
+})();
+</script>
+ 

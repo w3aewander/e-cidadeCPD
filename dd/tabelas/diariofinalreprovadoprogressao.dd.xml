@@ -1,0 +1,67 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.diariofinalreprovadoprogressao" description="Quando diário foi reprovado por causa de uma progressão parcial evadida." type="0">
+
+  <fields>
+    <field name="ed992_sequencial"
+           conteudo="int4"
+           description="Sequencial"
+           inivalue=""
+           label="Sequencial"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sequencial"
+           reference=""
+           ispk="t"
+           hassequence="t">
+        <sequence name="plugins.diariofinalreprovadoprogressao_ed992_sequencial_seq"></sequence>
+    </field>
+    <field name="ed992_progressaoparcialalunomatricula"
+           conteudo="int4"
+           description="Vínculo da progressão com a turma."
+           inivalue=""
+           label="Vínculo progressão"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Vínculo progressão"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed992_diariofinal"
+           conteudo="int4"
+           description="Diário final."
+           inivalue=""
+           label="Diário final"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Diário final"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+
+  </fields>
+  <primarykey>
+    <fieldpk name="ed992_sequencial"></fieldpk>
+  </primarykey>
+  <foreignkeys>
+    <foreignkey reference="progressaoparcialalunomatricula" inner='true'>
+      <fieldfk name="ed992_progressaoparcialalunomatricula" reference="ed150_sequencial"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="diariofinal" inner='true'>
+      <fieldfk name="ed992_diariofinal" reference="ed74_i_codigo"></fieldfk>
+    </foreignkey>
+  </foreignkeys>
+</table>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    
+    <name>Plugin - Cadastro de Pensao</name>
+    <ecidade-version>2.3.55</ecidade-version>
+    <id>PluginCadastroPensao</id>
+	<file path="pes1_pensao001.php">
+    
+    <operation>
+      <search><![CDATA[modification("dbforms/db_funcoes.php"));]]></search>
+      <add position="after"><![CDATA[include modification("classes/db_pensaosf_classe.php");]]></add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[new cl_pensaocontabancaria();]]></search>
+      <add position="after"><![CDATA[$clpensaosf            = new cl_pensaosf();]]></add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[$clpensao->incluir($r52_anousu,$r52_mesusu,$r52_regist,$r52_numcgm);]]></search>
+      <add position="after"><![CDATA[
+            $clpensaosf->pl36_pensao = $clpensao->r52_sequencial;
+            $clpensaosf->pl36_valor  = $pl36_valor;
+            $clpensaosf->incluir();
+            if ( $clpensao->clpensaosf == "0" ) {
+              $lErro = true;
+            }]]></add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[$clpensao->alterar($r52_anousu,$r52_mesusu,$r52_regist,$r52_numcgm);]]></search>
+      <add position="after"><![CDATA[  
+            $clpensaosf->pl36_pensao = $r52_sequencial;
+            $clpensaosf->pl36_valor  = $pl36_valor;
+            $rsPlugin = db_query("select * from plugins.pensaosf where pl36_pensao = {$r52_sequencial}");
+            if(pg_num_rows($rsPlugin) == 0){
+              $clpensaosf->incluir();
+            }else{
+              $clpensaosf->alterar();
+            }
+            if ( $clpensao->clpensaosf == "0" ) {
+              $lErro = true;
+            }]]></add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[$numcgm = $r52_numcgm;
+  }]]></search>
+      <add position="after"><![CDATA[ 
+            $clpensaosf->pl36_pensao = $r52_sequencial;
+            $clpensaosf->excluir();
+            if ( $clpensao->clpensaosf =="0" ) {
+              $lErro = true;
+            }]]></add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[cgm.z01_nome as z01_nome02,]]></search>
+      <add position="after"><![CDATA[(select pl36_valor from plugins.pensaosf where pl36_pensao = r52_sequencial) as pl36_valor, r52_sequencial,]]></add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[unset($r52_valfer,$r52_adiantamento13,$r52_percadiantamento13,$r52_observacao);]]></search>
+      <add position="before"><![CDATA[unset($pl36_valor);]]></add>
+    </operation>
+
+  </file>
+
+  <file path="forms/db_frmpensao.php">
+    
+    <operation>
+      <search><![CDATA[<tr>
+            <td title="<?=$Trh77_retencaotiporec?>">]]></search>
+      <add position="before"><![CDATA[
+         <tr>
+            <td></td>
+            <td></td>
+            <td nowrap title="<?=@$Tr52_vlrpen?>" align="right">
+             <b>Valor a Somar: </b>
+            </td>
+            <td nowrap>
+              <?
+              db_input('pl36_valor',19,$Ir52_vlrpen,true,'text',$db_opcao," tabIndex='5' ");
+              db_input('r52_sequencial',19,$Ir52_sequencial,true,'hidden',$db_opcao," tabIndex='5' ");
+              ?>
+            </td>
+          </tr>]]></add>
+    </operation>
+
+  </file>
+
+</modification>
+

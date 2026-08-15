@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>RelatorioOP</id>
+  <label>RelatorioOP</label>
+  <name>Relatorio OP</name>
+  <ecidade-version>2.3.57</ecidade-version>
+
+
+    <version>1.0</version>
+
+    <file path="/fpdf151/impmodelos/mod_imprime7.php">
+
+        <operation>
+            <search><![CDATA[$this->objpdf->sety($xlin+49);]]></search>
+            <add position="replace"><![CDATA[//$this->objpdf->sety($xlin+49);]]></add>
+        </operation>
+    </file>
+
+    
+   </modification>

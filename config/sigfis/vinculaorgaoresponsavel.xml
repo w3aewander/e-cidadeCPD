@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<orgaos>
+  <orgao codigoorgao="1" cpfresponsavel="65417704768" tipogestaocreditos="1" datainiciogestao="01/01/2013" tipoordenador="1"/>
+  <orgao codigoorgao="85" cpfresponsavel="89506227772" tipogestaocreditos="1" datainiciogestao="07/07/2017" tipoordenador="1"/>
+  <orgao codigoorgao="20" cpfresponsavel="12943037753" tipogestaocreditos="1" datainiciogestao="13/10/2008" tipoordenador="1"/>
+  <orgao codigoorgao="50" cpfresponsavel="82416419749" tipogestaocreditos="1" datainiciogestao="09/12/2013" tipoordenador="1"/>
+  <orgao codigoorgao="55" cpfresponsavel="45295727734" tipogestaocreditos="1" datainiciogestao="01/01/2021" tipoordenador="1"/>
+  <orgao codigoorgao="35" cpfresponsavel="39393313768" tipogestaocreditos="1" datainiciogestao="01/01/2013" tipoordenador="1"/>
+  <orgao codigoorgao="25" cpfresponsavel="33114730604" tipogestaocreditos="1" datainiciogestao="01/01/2009" tipoordenador="1"/>
+  <orgao codigoorgao="40" cpfresponsavel="71225269768" tipogestaocreditos="1" datainiciogestao="13/09/2009" tipoordenador="1"/>
+  <orgao codigoorgao="75" cpfresponsavel="26867745768" tipogestaocreditos="1" datainiciogestao="13/09/2016" tipoordenador="Principal"/>
+  <orgao codigoorgao="65" cpfresponsavel="79168310749" tipogestaocreditos="1" datainiciogestao="01/01/2005" tipoordenador="2º"/>
+  <orgao codigoorgao="30" cpfresponsavel="01570757704" tipogestaocreditos="1" datainiciogestao="07/06/2021" tipoordenador="Principal"/>
+  <orgao codigoorgao="2" cpfresponsavel="81885520700" tipogestaocreditos="1" datainiciogestao="02/01/2002" tipoordenador="2"/>
+  <orgao codigoorgao="60" cpfresponsavel="00629743789" tipogestaocreditos="1" datainiciogestao="02/01/2018" tipoordenador="1"/>
+  <orgao codigoorgao="90" cpfresponsavel="39383423749" tipogestaocreditos="1" datainiciogestao="22/09/2015" tipoordenador="1"/>
+  <orgao codigoorgao="99" cpfresponsavel="81885520700" tipogestaocreditos="1" datainiciogestao="02/01/2002" tipoordenador="2"/>
+  <orgao codigoorgao="96" cpfresponsavel="91808065700" tipogestaocreditos="1" datainiciogestao="02/01/2019" tipoordenador="1"/>
+  <orgao codigoorgao="80" cpfresponsavel="49842340759" tipogestaocreditos="1" datainiciogestao="01/01/2021" tipoordenador="PRINCIPAL"/>
+</orgaos>

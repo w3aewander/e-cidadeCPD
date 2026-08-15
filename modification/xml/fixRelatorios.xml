@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+	<id>fixRelatorios</id>
+	<label>fixRelatorios</label>
+
+	<file path="fpdf151/impmodelos/mod_imprime68.php">
+		<operation error="abort" label="fpdf151/impmodelos/mod_imprime68.php">
+			<search><![CDATA[$this->objpdf->Row(array ($item, $quantitemmin ." -- ".$quantitemmax, $unid, $scodpcmater.$descricaoitem, $valimp), 3, false, $distanciar, 0, 0, true);]]></search>
+			<add position="replace"><![CDATA[$this->objpdf->Row(array ($item, $quantitemmin ." -- ".$quantitemmax, $unid, $scodpcmater.$descricaoitem, $valimp), 3, false, 2, 0, 0, true);]]></add>
+		</operation>
+
+
+		<operation error="abort" label="fpdf151/impmodelos/mod_imprime68.php">
+			<search><![CDATA[$dist = 2.7;]]></search>
+			<add position="replace"><![CDATA[$dist = 3.3;]]></add>
+		</operation>
+	</file>
+
+</modification>

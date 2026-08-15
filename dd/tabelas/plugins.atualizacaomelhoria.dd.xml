@@ -1,0 +1,73 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.atualizacaomelhoria" description="Atualização de Melhoria" prefix="" label="Atualização de Melhoria" type="0">
+  <fields>
+    <field name="sequencial"
+           label="Código"
+           labelrel="Código"
+           description="Código Sequencial"
+           conteudo="int4"
+           inivalue=""
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           reference=""
+           ispk="t"
+           hassequence="t">
+      <sequence name="plugins.atualizacaomelhoria_sequencial_seq"></sequence>
+    </field>
+    <field name="melhoria"
+           label="Código Sequencial da Melhoria"
+           labelrel="Código Sequencial da Melhoria"
+           description="Código Sequencial da Melhoria"
+           conteudo="int4"
+           inivalue=""
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="usuario"
+           label="Usuário"
+           labelrel="Usuário"
+           description="Usuário"
+           conteudo="int4"
+           inivalue=""
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="data"
+           label="Data"
+           labelrel="Data"
+           description="Data"
+           conteudo="date"
+           inivalue=""
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+  </fields>
+  <primarykey>
+    <fieldpk name="sequencial"></fieldpk>
+  </primarykey>
+</table>

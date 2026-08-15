@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>Orcamento</id>
+  <label>Orcamento</label>
+  <name>Orcamento</name>
+  <ecidade-version>2.3.57</ecidade-version>
+
+
+    <version>1.0</version>
+
+    <file path="/orc1_orcprojativ011.php">
+
+        <operation>
+            <search><![CDATA[echo "   parent.iframe_g1.location.href='orc1_orcprojativ012.php?chavepesquisa={$o55_anousu}&chavepesquisa1={$clorcprojativ->o55_projativ}'; ";]]></search>
+            <add position="replace"><![CDATA[echo "   parent.iframe_g1.location.href='orc1_orcprojativVR012.php?chavepesquisa={$o55_anousu}&chavepesquisa1={$clorcprojativ->o55_projativ}'; ";]]></add>
+        </operation>
+    </file>
+    <file path="/orc1_orcprojativ002.php">
+
+        <operation>
+            <search><![CDATA[       $clcriaabas->src        = array("g1" => "orc1_orcprojativ012.php",]]></search>
+            <add position="replace"><![CDATA[       $clcriaabas->src        = array("g1" => "orc1_orcprojativVR012.php",]]></add>
+        </operation>
+    </file>
+
+    <file path="orc2_demostrativoacoesvalidadas001.php">
+                
+
+        <operation>
+            <search><![CDATA[sArquivo = "orc2_demostrativoacoesvalidadas002.php";]]></search>
+            <add position="replace"><![CDATA[sArquivo = "orc2_demostrativoacoesvalidadasVR002.php";]]></add>
+        </operation>
+    </file>
+
+
+    <file path="orc2_orcppa003.php">
+
+        <operation>
+            <search><![CDATA[jan = window.open('orc2_orcppa004.php?'+sQuery,'','width='+(screen.availWidth-5)+',height='+(screen.availHeight-40)+',scrollbars=1,location=0 ');]]></search>
+            <add position="replace"><![CDATA[jan = window.open('orc2_orcppaVR004.php?'+sQuery,'','width='+(screen.availWidth-5)+',height='+(screen.availHeight-40)+',scrollbars=1,location=0 ');]]></add>
+        </operation>
+    </file>
+    
+   </modification>

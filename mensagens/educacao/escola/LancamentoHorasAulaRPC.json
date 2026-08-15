@@ -1,0 +1,6 @@
+{
+   "erro_buscar_horas_aula"   : "Erro ao buscar as horas aulas lançadas."
+  ,"informe_turma"            : "Turma não informada."
+  ,"informe_etapa"            : "Etapa não informada."
+  ,"erro_nenhuma_regencia"    : "Nenhuma regência encontrada para a turma informada."
+}

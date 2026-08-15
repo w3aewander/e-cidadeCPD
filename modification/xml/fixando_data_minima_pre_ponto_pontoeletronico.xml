@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>fixando_data_minima_pre_ponto_pontoeletronico</id>
+
+    <file path="model/pessoal/ServidorRepository.model.php">
+        <operation error="abort" label="#1 Fixando a data minima">
+          <search><![CDATA[$sData = " and h16_dtconc >= '{$oDataMinima->getDate()}' ";]]></search>
+          <add position="replace"><![CDATA[$sData = " and h16_dtconc >= '2024-08-01' ";]]></add>
+        </operation>
+    </file>
+</modification>

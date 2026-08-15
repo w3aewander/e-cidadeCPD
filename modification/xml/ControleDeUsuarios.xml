@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+	<id>ControleDeUsuariosXml</id>
+	<label>Controle de Usuarios (novo)</label>
+
+	<file path="dbforms/db_funcoes.php">
+		<operation error="abort" label="dbforms/db_funcoes.php">
+			<search><![CDATA[function db_selectmultiple($nome, $record, $size, $db_opcao = 3, $js_script = "", $nomevar = "", $bgcolor = "", $record_select = "", $onchange = "",$compltags="") {]]></search>
+			<add position="before"><![CDATA[function db_selectmultiple_only($nome, $record, $size, $db_opcao = 3, $js_script = "", $nomevar = "", $bgcolor = "", $record_select = "", $record_select2 = "", $record_select3 = "", $onchange = "",$compltags="") {
+
+  if ($nomevar != "") {
+    $nome = $nomevar;
+  }
+  if ($db_opcao != 3 && $db_opcao != 5 && $db_opcao != 33 && $db_opcao != 22) {?>
+    <select class="DBSelectMultiplo" multiple name="<?=$nome?>[]" size="<?=$size?>" id="<?=$nome?>"
+            onchange="<?=$js_script?>" <?=$compltags?>
+      <?
+
+
+      if ($db_opcao == 3 || $db_opcao == 22) {
+        echo " readonly ";
+        if ($bgcolor == "")
+          $bgcolor = "#DEB887";
+      }
+      if ($db_opcao == 5) {
+        echo " disabled ";
+      }
+      echo $js_script;
+      ?>
+    >
+      <?
+      if(gettype($record) == "resource"){
+        for ($sqli = 0; $sqli < pg_numrows($record); $sqli ++) {
+          if ($sqli % 2 == 0) {
+            $color = "#ECF0F1";
+          } else {
+            $color = "#2C3E50";
+          }
+          $sqlv = pg_result($record, $sqli, 0);
+          $sqlv1 = pg_result($record, $sqli, 1);
+
+          $esta_selecionado = "";
+
+          if ($db_opcao != 1 && $db_opcao != 22 && is_resource($record_select2)) {
+            for ($sqls = 0; $sqls < pg_num_rows($record_select2); $sqls ++) {
+              $sqlsv2 = pg_result($record_select2, $sqls, 0);
+
+              if ($sqlsv2 == $sqlv) {
+                $esta_selecionado = " ";
+              } else {
+                $n_esta_selecionado = ' disabled class=perfil_new';
+              }
+            }
+          }
+
+          if ($db_opcao != 1 && $db_opcao != 22 && is_resource($record_select)) {
+            for ($sqls = 0; $sqls < pg_num_rows($record_select); $sqls ++) {
+              $sqlsv = pg_result($record_select, $sqls, 0);
+
+              if ($sqlsv == $sqlv) {
+                $esta_selecionado = " selected ";
+              }
+            }
+          }
+
+          if ($db_opcao != 1 && $db_opcao != 22 && is_resource($record_select3)) {
+            for ($sqls = 0; $sqls < pg_num_rows($record_select3); $sqls ++) {
+              $sqlsv3 = pg_result($record_select3, $sqls, 0);
+              if ($sqlv == $sqlsv3) {
+                $esta_selecionado = ' class=perfil_new ';
+              }
+            }
+          }
+        ?>
+        <option value="<?=$sqlv?>" <?=($esta_selecionado) ? $esta_selecionado : $n_esta_selecionado;?>><?=$sqlv1?></option>
+      <? }
+
+
+      } else if(gettype($record) == "array"){
+        $numrows_recsel = count($record);
+        reset($record);
+        for($sqli=0; $sqli<$numrows_recsel; $sqli++){
+          if ($sqli % 2 == 0) {
+            $color = "#ECF0F1";
+          } else {
+            $color = "#2C3E50";
+          }
+          $valueobj = key($record);
+          $descrobj = $record[$valueobj];
+          $esta_selecionado = "";
+          if ($db_opcao != 1 && $db_opcao != 22) {
+            reset($record_select);
+            for ($sqls = 0; $sqls < count($record_select); $sqls ++) {
+              $sqlsv = key($record_select);
+              if ($sqlsv == $valueobj){
+                $esta_selecionado = " selected ";
+              }
+              next($record_select);
+            }
+          }
+          ?>
+          <option value="<?=$valueobj?>" <?=$esta_selecionado?>><?=$descrobj?></option>
+          <?
+          next($record);
+        }
+      }
+      ?>
+    </select>
+    <?php
+      if ($db_opcao != 1 && $db_opcao != 22 && is_resource($record_select3)) {
+        for ($sqls = 0; $sqls < pg_num_rows($record_select3); $sqls ++) {
+          $sqlsv3 = pg_result($record_select3, $sqls, 0);
+          if ($sqlv <> $sqlsv3) {?>
+            <input type="hidden" name="perfil[]" value="<?=$sqlsv3?>" placeholder="">
+          <?php }
+        }
+      }
+  } else {
+    if (!is_int($record_select) && $record_select != false) {
+      if(gettype($record) == "resource"){
+        if (pg_numrows($record_select) > 0) {
+          db_selectrecord($nome, $record_select, true, ($db_opcao == 3 ? 2 : $db_opcao), "", $nomevar = "", $bgcolor = "", $todos = "", $onchange = "");
+        }
+      }else if(gettype($record) == "array"){
+        if(count($record_select) > 0){
+          db_select($nome, $record_select, true, ($db_opcao == 3 ? 2 : $db_opcao), "","", "");
+        }
+      }
+    } else {
+      db_input($nome, 5, '', true, 'text', 3, "");
+    }
+  }
+}
+
+
+]]></add>
+		</operation>
+	</file>
+</modification>

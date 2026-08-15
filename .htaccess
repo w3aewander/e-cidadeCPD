@@ -1,0 +1,47 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+
+  
+  RewriteRule ^\.well-known/acme-challenge/ - [L]
+
+  # Remove _path colocado arbitrariamente
+  RewriteCond %{THE_REQUEST} \s/+.*\?.*_path= [NC]
+
+
+  # Remove _path colocado arbitrariamente
+  RewriteCond %{THE_REQUEST} \s/+.*\?.*_path= [NC]
+  RewriteRule ^ %{REQUEST_URI}? [R=302,L]
+
+  RewriteCond %{REQUEST_URI} !=/server-status
+  RewriteCond %{REQUEST_URI} !=/php-fpm-status
+  RewriteCond %{REQUEST_URI} !=/php-fpm-ping
+  RewriteCond %{REQUEST_URI} !=/php-fpm-pong
+  RewriteRule ^(.*)$ FrontController.php?_path=$1 [QSA]
+  # Handle Authorization Header
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+  RedirectMatch 404 /\.git
+  RedirectMatch 404 /\.env
+  RedirectMatch 404 ^/.*/config/
+  RedirectMatch 404 ^.*/extension/.*/dumps/
+  RedirectMatch 404 ^.*/extension/.*/.*\.json
+  RedirectMatch 404 ^.*/extension/.*/.*\.yml
+  RedirectMatch 404 ^.*/extension/.*/.*\.yaml
+  RedirectMatch 404 ^.*/extension/.*/.*\.sh
+  RedirectMatch 404 ^.*/extension/.*/.*\.zip
+  RedirectMatch 404 ^.*/extension/.*/.*\.tar.gz
+  RedirectMatch 404 ^.*/extension/.*/.*\.py
+  RedirectMatch 404 ^.*/extension/.*/.*\.sql
+  RedirectMatch 404 ^.*/extension/.*/.*\.dist
+  RedirectMatch 404 ^.*/extension/.*/.*\.ini
+</IfModule>
+
+<filesMatch "\.(htaccess|htpasswd|ini|sh|env)$">
+ Order Allow,Deny
+ Deny from all
+</filesMatch>
+
+<filesMatch "\.yml">
+ Order Allow,Deny
+ Deny from all
+</filesMatch>

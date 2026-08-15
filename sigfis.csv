@@ -1,0 +1,5 @@
+model/contabilidade/arquivos/sigfis/SigfisArquivoItemReceita.model.php|ae2d802b69880064c8bc9fce75d2606a
+model/contabilidade/arquivos/sigfis/SigfisArquivoPrevisaoReceita.model.php|e81eb4a53b2004b6cdf52991aa82f7be
+model/contabilidade/arquivos/sigfis/SigfisArquivoReceitaArrecadada.model.php|69066be26fa02ecabd39a95f7cf63c3e
+model/contabilidade/arquivos/sigfis/SigfisArquivoAtualizaPrevisaoReceita.model.php|cf4480f5c0cd4bafcb623da30d0ccfd3
+model/contabilidade/arquivos/sigfis/SigfisArquivoEmpenho.model.php|12343807bcb3b8a545a6c5216cc39476

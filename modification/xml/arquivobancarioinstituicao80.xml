@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>arquivobancarioinstituicao80</id>
+    <file path="pes2_itau240cnab002.php">
+        <operation error="log" label="Força o CNPJ da instituicao 1 no arquivo bancário da instituicao 80">
+            <search><![CDATA[$result_arqbanco=$clrharqbanco->sql_record($clrharqbanco->sql_query($rh34_codarq));
+]]>
+            </search>
+
+            <add position="replace">
+                <![CDATA[$result_arqbanco = $clrharqbanco->sql_record($clrharqbanco->sql_query($rh34_codarq,
+                                                                      null,
+                                                                      "case 
+                                                                         when " . db_getsession('DB_instit') . " = 80 then 
+                                                                           (select cgc from db_config where codigo = 1)
+                                                                         else 
+                                                                           db_config.cgc 
+                                                                       end as cgc,
+                                                                       rh34_codarq,
+                                                                       rh34_codban,
+                                                                       rh34_agencia,
+                                                                       rh34_conta,
+                                                                       rh34_convenio,
+                                                                       rh34_dvagencia,
+                                                                       rh34_dvconta,
+                                                                       rh34_sequencial"
+));]]>
+            </add>
+        </operation>
+    </file>
+</modification>

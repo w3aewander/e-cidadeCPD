@@ -1,0 +1,173 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.aprovadoconselhoprogressao" description="Diario de progressão parcial aprovado pelo conselho." type="0">
+
+  <fields>
+    <field name="ed996_sequencial"
+           conteudo="int4"
+           description="Sequencial"
+           inivalue="0"
+           label="Sequencial"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sequencial"
+           reference=""
+           ispk="t"
+           hassequence="t">
+        <sequence name="plugins.aprovadoconselhoprogressao_ed996_sequencial_seq"></sequence>
+    </field>
+    <field name="ed996_diarioprogressao"
+           conteudo="int4"
+           description="Diario"
+           inivalue="0"
+           label="Diario"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Diario"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed996_rechumano"
+           conteudo="int4"
+           description="Profissional da Escola"
+           inivalue="0"
+           label="Profissional da Escola"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Profissional da Escola"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+
+    <field name="ed996_usuario"
+           conteudo="int4"
+           description="Usuário"
+           inivalue="0"
+           label="Usuário"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Usuário"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed996_aprovconselhotipo"
+           conteudo="int4"
+           description="Tipo"
+           inivalue="0"
+           label="Tipo"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Tipo"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed996_data"
+           conteudo="int8"
+           description="Data e Hora"
+           inivalue=""
+           label="Data e Hora"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Data e Hora"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+
+    <field name="ed996_observacao"
+           conteudo="text"
+           description="Observação"
+           inivalue=""
+           label="Observação"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Observação"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed996_alterarnotafinal"
+           conteudo="int4"
+           description="Alterar Resultado Final"
+           inivalue="0"
+           label="Alterar Resultado Final"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Alterar Resultado Final"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed996_avaliacaoconselho"
+           conteudo="varchar(10)"
+           description="Avaliacao"
+           inivalue=""
+           label="Avaliacao"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Avaliacao"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+  </fields>
+
+  <primarykey>
+    <fieldpk name="ed996_sequencial"></fieldpk>
+  </primarykey>
+
+  <foreignkeys>
+    <foreignkey reference="plugins.diarioprogressao" inner='true'>
+      <fieldfk name="ed996_diarioprogressao" reference="ed993_sequencial"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="aprovconselhotipo" inner='true'>
+      <fieldfk name="ed996_aprovconselhotipo" reference="ed122_sequencial"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="rechumano" inner='true'>
+      <fieldfk name="ed996_rechumano" reference="ed20_i_codigo"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="db_usuarios" inner='true'>
+      <fieldfk name="ed996_usuario" reference="id_usuario"></fieldfk>
+    </foreignkey>
+  </foreignkeys>
+
+</table>

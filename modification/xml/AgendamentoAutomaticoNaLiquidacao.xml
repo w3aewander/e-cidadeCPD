@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<modification>
+<id>AgendamentoAutomaticoNaLiquidacao</id>
+    <name>Agendamento Automatico apos a liquidacao do empenho</name>
+    <version>1.0</version>
+
+    <file path="forms/db_frmliquida.php">
+
+      <operation>
+        <search><![CDATA[oParam.e03_numeroprocesso = encodeURIComponent(tagString($F("e03_numeroprocesso")));]]></search>
+        <add position="after"><![CDATA[oParam.data_agendamento   = $F('dataagendamento');]]></add>
+      </operation>
+
+        <operation>
+            <search>
+                <![CDATA[<!--[Extensao OrdenadorDespesa] inclusao_ordenador-->]]></search>
+            <add position="after"><![CDATA[<tr>
+             <td>
+               <b>Data Agendamento:</b>
+             </td>
+             <td><?db_inputData('dataagendamento', '', '','', true, 'text', 1); ?></td></tr>
+
+              ]]></add>
+        </operation>
+
+    </file>
+
+    <file path="forms/db_frmliquidasemordem.php">
+
+        <operation>
+            <search><![CDATA[oParam.e03_numeroprocesso = encodeURIComponent($F('e03_numeroprocesso'));]]></search>
+            <add position="after"><![CDATA[
+            oParam.data_agendamento   = $F('dataagendamento');]]></add>
+        </operation>
+
+        <operation>
+            <search>
+                <![CDATA[<?php db_input('e03_numeroprocesso', 13, '', true, 'text', $db_opcao, null, null, null, null, 15); ?>
+                </td>
+              </tr>]]></search>
+            <add position="after"><![CDATA[<tr>
+        <td>
+            <b>Data Agendamento:</b>
+        </td>
+        <td><?db_inputData('dataagendamento', '', '','', true, 'text', 1); ?></td>]]></add>
+        </operation>
+        
+        <operation>
+            <search offset="1" limit="1">
+                <![CDATA[$('pesquisar').disabled = true;]]></search>
+            <add position="before"><![CDATA[if ($F('dataagendamento') == ''){
+
+      alert('Preencha a Data de Agendamento.');
+      $('dataagendamento').focus();
+      return false;
+    }
+
+    if ($F('e03_numeroprocesso') == ''){
+
+      alert('Preencha o Processo Administrativo.');
+      $('e03_numeroprocesso').focus();
+      return false;
+    }
+    ]]></add>
+        </operation>
+
+    </file>
+
+    <file path="emp4_liquidacao004.php">
+
+      <operation>
+        <search><![CDATA[if ($oDadosRetorno->erro == 1) {]]></search>
+        <add position="after"><![CDATA[if ($oDadosRetorno->erro != 2) {
+              
+              /**
+               * caso a data de agendamento for informada, adicionamos em uma agenda para o dia;
+               */
+              if (!empty($objJson->data_agendamento)) {
+
+                try {
+
+                  db_inicio_transacao();
+                  $oDataAgendamento      = new DBDate($objJson->data_agendamento);
+                  $oDaoEmpAgeOrdem       = new cl_empageordem();
+                  $sWhereDataAgendamento = "e42_dtpagamento = '{$oDataAgendamento->getDate()}'";
+                  $sSqlDadosAgenda       = $oDaoEmpAgeOrdem->sql_query_file(null, "*", "e42_sequencial desc", $sWhereDataAgendamento);
+                  $iCodigoAgemento       = null;
+                  $rsDadosAgendamento    = $oDaoEmpAgeOrdem->sql_record($sSqlDadosAgenda);
+                  if ($oDaoEmpAgeOrdem->numrows > 0) {
+                    $iCodigoAgemento = db_utils::fieldsMemory($rsDadosAgendamento, 0)->e42_sequencial;
+                  }
+                  $oAgendaPagamento = new agendaPagamento();
+                  $aOrdensGeradas   = explode(",",  $oDadosRetorno->sOrdensGeradas);
+                  $aMovimentos      = array();
+                  foreach ($aOrdensGeradas as $iOrdemPagamento) {
+
+                    $oDaoEmpOrd         = new cl_empord();
+                    $sSqlDadosMovimento = $oDaoEmpOrd->sql_query(null, $iOrdemPagamento);
+                    $rsDadosOrdem       = db_query($sSqlDadosMovimento);
+                    if (pg_num_rows($rsDadosOrdem) == 0) {
+                      throw new Exception('Movimento nao encontrado no sistema');
+                    }
+                    $oDadosMovimento          = db_utils::fieldsMemory($rsDadosOrdem, 0);
+                    $oDadosPagamento          = new stdClass();
+                    $oDadosPagamento->iCodMov = $oDadosMovimento->e81_codmov;
+                    $oDadosPagamento->nValor  = $oDadosMovimento->e81_valor;
+                    $aMovimentos[]            = $oDadosPagamento;
+                  }
+                  $oAgendaPagamento->autorizarPagamento($objJson->data_agendamento, $aMovimentos, 1, $iCodigoAgemento);
+                  db_fim_transacao(false);
+                } catch (Exception $oErro) {
+
+                  db_fim_transacao(true);
+                  $retorno = array("lErro" => true, "sMensagem" => urlencode($oErro->getMessage()));
+                  echo $json->encode($retorno);
+                  exit;
+                }
+              }
+            }]]></add>
+     </operation>
+
+        <operation>
+            <search><![CDATA[$sProcessoAdministrativo = addslashes(stripslashes(utf8_decode($objJson->e03_numeroprocesso)));]]></search>
+            <add position="before"><![CDATA[
+                $oDadosRetorno           = $json->decode(str_replace("\\","", $oRetorno ));
+                if ($oDadosRetorno->erro != 2) {
+          /**
+           * caso a data de agendamento for informada, adicionamos em uma agenda para o dia;
+           */
+          if (!empty($objJson->data_agendamento)) {
+
+            try {
+
+              db_inicio_transacao();
+              $oDataAgendamento      = new DBDate($objJson->data_agendamento);
+              $oDaoEmpAgeOrdem       = new cl_empageordem();
+              $sWhereDataAgendamento = "e42_dtpagamento = '{$oDataAgendamento->getDate()}'";
+              $sSqlDadosAgenda       = $oDaoEmpAgeOrdem->sql_query_file(null, "*", "e42_sequencial desc", $sWhereDataAgendamento);
+              $iCodigoAgemento       = null;
+              $rsDadosAgendamento    = $oDaoEmpAgeOrdem->sql_record($sSqlDadosAgenda);
+              if ($oDaoEmpAgeOrdem->numrows > 0) {
+                $iCodigoAgemento = db_utils::fieldsMemory($rsDadosAgendamento, 0)->e42_sequencial;
+              }
+              $oAgendaPagamento         = new agendaPagamento();
+              $oDadosPagamento          = new stdClass();
+              $oDadosPagamento->iCodMov = $oDadosRetorno->iCodMov;
+              $oDadosPagamento->nValor  = $objJson->valorTotal;
+              $oAgendaPagamento->autorizarPagamento($objJson->data_agendamento, array($oDadosPagamento), 1, $iCodigoAgemento);
+              db_fim_transacao(false);
+            } catch (Exception $oErro) {
+
+              db_fim_transacao(true);
+              $retorno = array("erro" => 2, "mensagem" => urlencode($oErro->getMessage()), "e50_codord" => null);
+              echo $json->encode($retorno);
+            }
+          }
+        }]]></add>
+        </operation>
+    </file>
+</modification>

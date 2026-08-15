@@ -1,0 +1,580 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>DiarioProgressaoParcial</id>
+  <name>DiarioProgressaoParcial</name>
+  <label>Diário da Progressão Parcial</label>
+
+  <file path="model/educacao/avaliacao/FormaObtencao.model.php">
+    <operation>
+      <search><![CDATA[/* PLUGIN DIARIO_PROGRESSAO - chamada getElementosParaCalculoProgressaoParcial- NÃO APAGAR ESTE COMENTÁRIO*/]]></search>
+      <add position="after">
+        <![CDATA[
+    if ($oDiarioAvaliacaoDisciplina instanceof DiarioProgressaoParcial) {
+      return $this->getElementosParaCalculoProgressaoParcial( $aAproveitamentos, $iAno );
+    }
+        ]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[/* PLUGIN DIARIO_PROGRESSAO - Método getElementosParaCalculoProgressaoParcial- NÃO APAGAR ESTE COMENTÁRIO*/]]></search>
+      <add position="after">
+        <![CDATA[
+
+  protected function getElementosParaCalculoProgressaoParcial( $aAproveitamentos, $iAno ) {
+
+    $aNotasPeriodo              = array();
+    $oPeriodoRecuperacao        = null;
+    $oDiarioProgressaoParcial = $aAproveitamentos[0]->getDiarioAvaliacaoDisciplina();
+
+    if( !is_array( DBRegistry::get( $this->getResultadoAvaliacao()->getCodigo() ) ) ) {
+      DBRegistry::add( $this->getResultadoAvaliacao()->getCodigo(), $this->getResultadoAvaliacao()->getElementosComposicaoResultado() );
+    }
+
+    $aElementos = DBRegistry::get( $this->getResultadoAvaliacao()->getCodigo() );
+
+    /**
+     * Verificamos qual o Elemento de avaliacao esta sendo utilizado na forma de obtencao
+     */
+    foreach ($aElementos as $oElementoAvaliacao) {
+
+      $oPeriodoAvaliacao = $oElementoAvaliacao->getElementoAvaliacao();
+      if (    $oPeriodoAvaliacao->isResultado()
+           && $oElementoAvaliacao->getOrdem() < $this->getResultadoAvaliacao()->getOrdemSequencia()) {
+
+        $oAproveitamento = new AvaliacaoAproveitamentoProgressao();
+        $oAproveitamento->setElementoAvaliacao($oPeriodoAvaliacao);
+        $oAproveitamento->setDiarioProgressaoParcial($oDiarioProgressaoParcial);
+
+        $oValor = $oPeriodoAvaliacao->getResultado($aAproveitamentos, $this->isCalculoNotaParcial(), $iAno );
+
+        if ( $oValor != "" ) {
+
+          if ( $oPeriodoAvaliacao instanceof ResultadoAvaliacao ) {
+
+            $oEscola   = $oDiarioProgressaoParcial->buscaVinculoRegencia()->getRegencia()->getTurma()->getEscola();
+            $mNotaReal = DiarioProgressaoParcial::calcularResultadoReal( $oPeriodoAvaliacao, $oEscola->getCodigo(), $aAproveitamentos, $iAno);
+            if ( !is_null( $mNotaReal ) ) {
+              $oValor->setAproveitamentoReal( $mNotaReal );
+            }
+          }
+
+          $oAproveitamento->setValorAproveitamento($oValor);
+          $aAproveitamentos[] = $oAproveitamento;
+        }
+      }
+
+
+      if (!$oPeriodoAvaliacao->isResultado() && $oPeriodoAvaliacao->temJulgamentoMenorNota()) {
+        $oPeriodoRecuperacao = $oPeriodoAvaliacao;
+      }
+
+      /**
+       * Iteramos sobre todos aproveitamentos
+       */
+      foreach ($aAproveitamentos as $oAproveitamento) {
+
+        if ($oAproveitamento->getOrdemSequencia() == $oElementoAvaliacao->getElementoAvaliacao()->getOrdemSequencia()) {
+
+          /**
+           * Validamos se estamos calculando um ResultadoAvaliacao
+           * Se sim, devemos calcular a nota da avaliacao dos resultados anteriores
+           */
+          $aNotasPeriodo[$oAproveitamento->getOrdemSequencia()] = $oAproveitamento;
+        }
+      }
+    }
+
+    /**
+     * Validamos se existe a troca de Nota
+     */
+    if (!empty($oPeriodoRecuperacao)) {
+      $aNotasPeriodo = $this->aplicarJulgamentoMenorNotaDoPeriodo($oPeriodoRecuperacao, $aNotasPeriodo);
+    }
+    return $aNotasPeriodo;
+  }
+        ]]>
+      </add>
+    </operation>
+  </file>
+
+
+  <file path="rec4_encerramentoefetividade.RPC.php">
+
+    <operation error="log" label=" 1 - adicionar processar Efetividade">
+      <search><![CDATA[
+        if (!$rsProcessado) {
+          throw new Exception('Erro ao atualizar dados de configuracoesdatasefetividades');
+        }]]>
+      </search>
+      <add position="after"><![CDATA[
+        HistoricoEfetividadeEscola::processar($oParametros->iExercicio, $iCompetencia);]]>
+      </add>
+    </operation>
+
+    <operation error="log" label=" 2 - adicionar desprocessar Efetividade">
+      <search>
+        <![CDATA[      $rsProcessado = db_query("update configuracoesdatasefetividade set processado = 'f' where {$sWhere}");
+      if (!$rsProcessado) {
+        throw new DBException("Erro ao reabrir competência.\n". pg_last_error());
+      }]]>
+      </search>
+      <add position='after'><![CDATA[
+      foreach ($oParametros->aCompetencias as $sCompetencia) {
+        HistoricoEfetividadeEscola::desprocessar($oParametros->iExercicio, $sCompetencia);
+      }]]>
+      </add>
+    </operation>
+  </file>
+
+
+  <file path="edu4_lancamentoavaliacaoalunoprogressao001.php">
+    <operation>
+      <search><![CDATA[<!-- PLUGIN DIARIOPROGRESSAOPARCIAL - A linha abaixo é utilizada, NÃO APAGAR ou ALTERAR -->]]></search>
+      <add position="after">
+        <![CDATA[
+          <script type="text/javascript" src='scripts/classes/educacao/escola/LancamentoHorasAula.classe.js' ></script>
+  <script type="text/javascript" src='scripts/classes/educacao/escola/LancamentoDiarioProgressaoParcialAluno.classe.js' ></script>
+  <script type="text/javascript" src='scripts/widgets/datagrid/plugins/DBHighlight.plugin.js' ></script>
+  <script src='scripts/widgets/datagrid/plugins/DBHint.plugin.js'></script>
+        ]]>
+      </add>
+    </operation>
+  </file>
+  <file path="scripts/classes/DBViewFiltroLancamentoAvaliacao.classe.js">
+
+    <operation>
+      <search><![CDATA[/* PLUGIN DIARIOPROGRESSAOPARCIAL - Botão Aulas Dadas*/]]></search>
+      <add position="replace">
+        <![CDATA[
+        sConteudo   += '    <div class="container">\n';
+        sConteudo   += '      <input id="btnAulasDadas" type="button" value="Aulas Dadas" onclick="lancamentoAulasDadas()" /></div>\n';
+        sConteudo   += '    </div>\n';
+        ]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[/* PLUGIN DIARIOPROGRESSAOPARCIAL - A linha abaixo é utilizada, NÃO APAGAR ou ALTERAR*/]]></search>
+      <add position="after">
+        <![CDATA[$('btnAulasDadas').setAttribute( 'disabled', 'disabled' );]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[/* PLUGIN DIARIOPROGRESSAOPARCIAL - Função de chamada da View LancamentoHorasAula */]]></search>
+      <add position="replace">
+        <![CDATA[
+        lancamentoAulasDadas = function() {
+
+          if( empty( oInstancia.iCodigoTurma ) ) {
+
+            alert( 'Selecione uma turma para lançar as aulas.' );
+            return false;
+          }
+
+          var oLancamentoHorasAula = new LancamentoHorasAula( oInstancia.iCodigoTurma, oInstancia.iEtapaSelecionada );
+              oLancamentoHorasAula.show();
+        }
+        ]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[new DBViewLancamentoProgressaoParcialAluno]]></search>
+      <add position="replace">
+        <![CDATA[new LancamentoDiarioProgressaoParcialAluno]]>
+      </add>
+    </operation>
+
+  </file>
+
+  <file path="edu4_vincularalunoturma.RPC.php">
+    <operation error="log" label=" 1 - adciona remoção do diário do aluno">
+      <search><![CDATA[$oProgressaoAlunoVinculo->removerVinculo();]]></search>
+      <add position="before">
+        <![CDATA[DiarioProgressaoParcial::excluirDiario($oProgressaoAlunoVinculo);
+         ]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="edu2_boletim001.php">
+    <operation error="log" label=" 1 - Altera programa que gera o boletim, modelo 2 por página.">
+      <search>
+        <![CDATA[edu2_boletim003.php]]>
+      </search>
+      <add position="replace">
+        <![CDATA[edu2_boletimdiarioprogressaoparcial002.php]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="edu4_encerramentoavaliacao.RPC.php">
+    <operation error="log" label=" 1 - Adiciona validação, se aluno possui progressão e evadiu na mesma, altera o RF.">
+      <search>
+        <![CDATA[if ($oMatricula->getDiarioDeClasse()->temRecuperacao() ) {
+            $oDadosAluno->sResultadoFinal = urlencode("EM RECUPERAÇÃO");
+          }]]>
+      </search>
+      <add position="before">
+        <![CDATA[
+
+          $aProgressoesEvadidas = $oMatricula->progressaoParcialEvadidaNoAnoCursado();
+          if ( count($aProgressoesEvadidas) > 0 ) {
+            $oDadosAluno->sResultadoFinal = urlencode("REPROVADO (Evadiu na Progressão Parcial)");
+          }
+        ]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[/* PLUGIN DIARIO PROGRESSAO - isEvadido - NÃO APAGAR */]]></search>
+      <add position="after">
+        <![CDATA[
+        try {
+          db_inicio_transacao();
+          $oDiarioProgressao = new DiarioProgressaoParcial( $oAlunoProgressao );
+          $oDadosAlunoProgressao->lEvadido = $oDiarioProgressao->isEvadido();
+          db_fim_transacao();
+
+        } catch( Exception $oErro  ) {
+
+          db_fim_transacao(true);
+          $oRetorno->iStatus  = 2;
+          $oRetorno->sMessage = $oErro->getMessage();
+        }]]>
+      </add>
+    </operation>
+
+  </file>
+
+  <file path="model/educacao/Matricula.model.php">
+    <operation error="log" label=" 1 - Adiciona os metodos alunoPossuiProgressaoParcialNoAnoCursado e progressaoParcialEvadidaNoAnoCursado.">
+      <search>
+        <![CDATA[
+  /**
+   * PLUGIN DiarioProgressaoParcial adiciona metodos abaixo
+   */]]>
+      </search>
+      <add position="after">
+        <![CDATA[
+  /**
+   * Valida se o aluno possui progressão parcial cursada no ano em que o aluno esta cursando
+   * @return boolean
+   */
+  public function alunoPossuiProgressaoParcialNoAnoCursado() {
+
+    $iAno        = $this->getTurma()->getCalendario()->getAnoExecucao();
+    $aProgressao = $this->getAluno()->getProgressaoParcial();
+
+    foreach ($aProgressao as $oProgressao) {
+
+      foreach ($oProgressao->getVinculosProgressao() as $oProgressaoParcialVinculoDisciplina ) {
+
+        if ( $oProgressaoParcialVinculoDisciplina->getAno() == $iAno  ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Valida se o aluno possui progressão parcial cursada no ano em que o aluno esta cursando
+   * @return boolean
+   */
+  public function progressaoParcialEvadidaNoAnoCursado() {
+
+    $iAno        = $this->getTurma()->getCalendario()->getAnoExecucao();
+    $aProgressao = $this->getAluno()->getProgressaoParcial();
+
+    $aProgressoesEvadidas = array();
+    foreach ($aProgressao as $oProgressao) {
+
+      foreach ($oProgressao->getVinculosProgressao() as $oProgressaoParcialVinculoDisciplina ) {
+
+        if ( $oProgressaoParcialVinculoDisciplina->getAno() != $iAno  ) {
+          continue;
+        }
+
+        $oDiarioProgressao = new DiarioProgressaoParcial($oProgressao);
+        if ( $oProgressaoParcialVinculoDisciplina->isEncerrado() && $oDiarioProgressao->isEvadido() ) {
+          $aProgressoesEvadidas[] = $oDiarioProgressao;
+        }
+
+      }
+    }
+
+    return $aProgressoesEvadidas;
+  }
+        ]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="model/educacao/avaliacao/EncerramentoAvaliacao.model.php">
+    <operation error="log" label=" 1 - chamada para reprovar aluno evadido em progressão parcial.">
+      <search>
+        <![CDATA[protected function encerrarMatriculaTurma($oTurma, $oEtapa, $oMatricula) {
+
+    $oDiario = $oMatricula->getDiarioDeClasse();]]>
+      </search>
+      <add position="after">
+        <![CDATA[
+        $oDiario->reprovarAlunoPorEvasaoEmProgressaoParcial();
+        ]]>
+      </add>
+    </operation>
+
+    <operation error="log" label=" 1 - ao cancelar encerramento da turma chama metodo removerVinculoDiarioFinalComProgressaoEvadida.">
+      <search>
+        <![CDATA[protected function cancelarEncerramentoMatricula($oEtapa, $oTurma, $oMatricula) {
+
+    $sNomeAluno  = "{$oMatricula->getAluno()->getCodigoAluno()} - ";
+    $sNomeAluno .= "{$oMatricula->getAluno()->getNome()}.";
+
+    $oDiario     = $oMatricula->getDiarioDeClasse();]]>
+      </search>
+      <add position="after">
+        <![CDATA[
+        $oDiario->removerVinculoDiarioFinalComProgressaoEvadida();
+        ]]>
+      </add>
+    </operation>
+
+  </file>
+
+  <file path="model/educacao/avaliacao/DiarioClasse.model.php">
+    <operation error="log" label=" 1 - adiciona funções">
+      <search>
+        <![CDATA[/**
+   * PLUGIN DiarioProgressaoParcial adiciona a seguinte lógica
+   * Quando aluno evadido em uma progressão parcial, este deve reprovar na matrícula atual.
+   * Fazemos isso no encerramento da turma, validando se há progressões evadidas. Havendo, é alterado o resultado final
+   * do aluno para 'R' (diariofinal) e incluindo o código do diariofinal na tabela plugins.diariofinalreprovadoprogressao.
+   *
+   * Ao cancelar o encerramento da turma, devemos apagar plugins.diariofinalreprovadoprogressao
+   */]]>
+      </search>
+      <add position="after">
+        <![CDATA[
+  /**
+   * Remove o diariofinal de plugins.diariofinalreprovadoprogressao
+   * Deve-se ser chamado ao cancelar o encerramento turma
+   *
+   * @throws DBException
+   * @return booelan
+   */
+  public function removerVinculoDiarioFinalComProgressaoEvadida() {
+
+    if (!db_utils::inTransaction()) {
+      throw new DBException("Sem Transação com o banco de dados ativa.");
+    }
+
+    if ( !$this->oMatricula->alunoPossuiProgressaoParcialNoAnoCursado() ) {
+      return true;
+    }
+
+    foreach ($this->getDisciplinas() as $oDisciplina) {
+
+      $oResultadoFinal = $oDisciplina->getResultadoFinal();
+
+      $sWhere = " ed992_diariofinal = " .$oResultadoFinal->getCodigoResultadoFinal();
+      $oDao   = new cl_diariofinalreprovadoprogressao();
+      $oDao->excluir(null, $sWhere);
+      if ( $oDao->erro_status == 0 ) {
+        throw new DBException("Houve um problema ao cancelar o encerramento do aluno.");
+      }
+    }
+
+    return true;
+  }
+
+
+  /**
+   * Reprova o aluno sempre que o mesmo evadiu em uma progressão parcial
+   */
+  public function reprovarAlunoPorEvasaoEmProgressaoParcial() {
+
+    if (!db_utils::inTransaction()) {
+      throw new DBException("Sem Transação com o banco de dados ativa.");
+    }
+
+    if ( !$this->oMatricula->alunoPossuiProgressaoParcialNoAnoCursado() ) {
+      return true;
+    }
+
+    $this->removerVinculoDiarioFinalComProgressaoEvadida();
+    $aProgressoesEvadidas = $this->oMatricula->progressaoParcialEvadidaNoAnoCursado();
+
+    if ( count($aProgressoesEvadidas) == 0 ) {
+      return true;
+    }
+
+    foreach ($this->getDisciplinas() as $oDisciplina) {
+
+      $oResultadoFinal = $oDisciplina->getResultadoFinal();
+      $oResultadoFinal->setResultadoFinal('R');
+
+      $oDaoDiarioFinal                        = new cl_diariofinal();
+      $oDaoDiarioFinal->ed74_c_resultadofinal = 'R';
+      $oDaoDiarioFinal->ed74_i_codigo         = $oResultadoFinal->getCodigoResultadoFinal();
+      $oDaoDiarioFinal->alterar($oResultadoFinal->getCodigoResultadoFinal());
+
+      if ( $oDaoDiarioFinal->erro_status == 0 ) {
+
+        $sMsg = "ALuno possui progressão parcial evadida e houve um problema ao alterar o resultado final do alunuo.";
+        throw new DBException($sMsg);
+      }
+
+      foreach ($aProgressoesEvadidas as $oDiarioProgressao) {
+
+        $oVinculoProgressao = $oDiarioProgressao->buscaVinculoRegencia();
+
+        $oDao                                        = new cl_diariofinalreprovadoprogressao();
+        $oDao->ed992_diariofinal                     = $oResultadoFinal->getCodigoResultadoFinal();
+        $oDao->ed992_progressaoparcialalunomatricula = $oVinculoProgressao->getMatricula();
+
+        $oDao->incluir(null);
+        if ( $oDao->erro_status == 0 ) {
+          throw new DBException("Houve um problema ao cancelar o encerramento do aluno.");
+        }
+      }
+    }
+
+    return true;
+  }
+        ]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="edu2_ataresultadosfinaisprogressao001.php">
+    <operation>
+      <search><![CDATA[<!--PLUGIN DIARIOPROGRESSAOPARCIAL - Combo tipo de frequência - NÃO APAGAR ou ALTERAR ESTA LINHA-->]]></search>
+      <add position="replace">
+        <![CDATA[
+          <tr>
+            <td>
+              <label for="cboFrequencia">Frequência:</label>
+            </td>
+            <td>
+              <select id="cboFrequencia">
+                <option value="T">Número de Faltas</option>
+                <option value="P">Porcentagem da Frequência</option>
+              </select>
+            </td>
+          </tr>
+        ]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[window.open( 'edu2_ataresultadosfinaisprogressao002.php']]></search>
+      <add position="replace">
+        <![CDATA[window.open( 'edu2_ataresultadosfinaisprogressaovoltaredonda002.php']]>
+      </add>
+    </operation>
+
+  </file>
+
+  <file path="scripts/classes/DBViewEncerramentoAvaliacoesFiltro.classe.js">
+    <operation>
+      <search><![CDATA[/*PLUGIN DIARIO PROGRESSAO - Mensagem evadido - NÃO APAGAR*/]]></search>
+      <add position="after">
+        <![CDATA[
+
+    var aAlunosEvadidos = [];
+
+    for (var oAluno of aAlunos) {
+
+      if ( oAluno.lEvadido == 'true' && !aAlunosEvadidos.in_array(oAluno.sNome) ) {
+        aAlunosEvadidos.push( oAluno.sNome );
+      }
+    }
+
+    if ( aAlunosEvadidos.length > 0 ) {
+
+      sMensagem = 'Os seguintes alunos estão evadidos e serão reprovados no ano letivo atual: ';
+      for (var sNome of aAlunosEvadidos) {
+        sMensagem += "\n - " + sNome;
+      }
+
+      sMensagem += '\n\nConfirmar o encerramento das Progressões selecionadas?';
+    }
+
+        ]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[/*PLUGIN DIARIO PROGRESSAO - DEFINIDO lEvadido - NÃO APAGAR*/]]></search>
+      <add position="after">
+        <![CDATA[
+      oAluno.sNome    = oAlunoLinha.aCells[3].getValue();
+      oAluno.lEvadido = $(oAlunoLinha.sId).readAttribute('evadido');
+        ]]>
+      </add>
+    </operation>
+
+    <operation>
+      <search><![CDATA[/*PLUGIN DIARIO PROGRESSAO - Definido lEvadido na linha do aluno - NÃO APAGAR*/]]></search>
+      <add position="after">
+        <![CDATA[
+      $(me.oDataGridAlunos.aRows[iSeq].sId).setAttribute('evadido', oAluno.lEvadido);
+
+        ]]>
+      </add>
+    </operation>
+  </file>
+  <file path="model/educacao/relatorio/RelatorioHistoricoEscolar.model.php">
+    <operation>
+      <search><![CDATA[/*PLUGIN DIARIO PROGRESSAO - INICIALIZANDO ARRAY COM AS OBSERVAÇÕES - NÃO APAGAR*/]]></search>
+      <add position="after">
+        <![CDATA[
+  protected $aObservacoesEvasaoProgressao = array();
+        ]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[/*PLUGIN DIARIO PROGRESSAO - OBSERVACAO HISTORICO ALUNO EVADIDO - NÃO APAGAR*/]]></search>
+      <add position="after">
+        <![CDATA[
+              if ( $oMatricula->alunoPossuiProgressaoParcialNoAnoCursado() ) {
+
+                $sObservacao  = "{$oDadoEtapa->sEtapa} ($oDadoEtapa->iAno)";
+                $sObservacao .= " - Aluno reprovado no ano letivo pois evadiu na(s) seguinte(s) progressão(ões): ";
+
+                db_inicio_transacao();
+                $aProgressoesEvadidas = $oMatricula->progressaoParcialEvadidaNoAnoCursado();
+                db_fim_transacao();
+
+                $aDisciplinas = array();
+
+                foreach ($aProgressoesEvadidas as $oProgressaoEvadida) {
+                  $aDisciplinas[] = $oProgressaoEvadida->getRegencia()->getDisciplina()->getNomeDisciplina();
+                }
+
+                if (count($aDisciplinas) > 0 ) {
+                  $this->aObservacoesEvasaoProgressao[] = $sObservacao . implode(', ', $aDisciplinas);
+                }
+              }
+        ]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="model/educacao/relatorio/RelatorioHistoricoEscolarRetrato.model.php">
+    <operation>
+      <search><![CDATA[/*PLUGIN DIARIO PROGRESSAO - ADICIONADO OBSERVAÇÕES DA EVASÃO DA PROGRESSÃO - NÃO APAGAR*/]]></search>
+      <add position="after">
+        <![CDATA[
+    if ( $this->sTipoRegistro  != 'A' ) {
+      $sObservacao .= implode("\n", $this->aObservacoesEvasaoProgressao);
+    }
+        ]]>
+      </add>
+    </operation>
+  </file>
+</modification>

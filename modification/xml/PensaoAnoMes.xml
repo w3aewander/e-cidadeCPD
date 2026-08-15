@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>AnoMesPensao</id>
+  <file path="pes2_cef240cnabgeracao002.php" >
+
+    <operation error="error" label="Erro ao adicionar campo valor do pluginsf 1">
+      <search><![CDATA[if($qfolha == 1){
+      $campovalor = " r52_valor+r52_valfer ";
+      $rh34_wherepensa .= " and (r52_valor > 0 or r52_valfer > 0 ) ";]]></search>
+      <add position="replace"><![CDATA[if($qfolha == 1){
+      $campovalor = " r52_valor+r52_valfer+coalesce(pl36_valor,0) ";
+      $rh34_wherepensa .= " and (r52_valor+coalesce(pl36_valor,0) > 0 or r52_valfer > 0 ) ";]]></add>
+    </operation>
+
+    <operation error="error" label="Erro ao adicionar campo valor do pluginsf 2">
+      <search><![CDATA[}else if($qfolha == 5){
+      $campovalor = " r52_valor  ";
+      $rh34_wherepensa .= " and r52_valor > 0 ";]]></search>
+      <add position="replace"><![CDATA[}else if($qfolha == 5){
+      $campovalor       = " r52_valor+coalesce(pl36_valor,0) ";
+      $rh34_wherepensa .= " and r52_valor+coalesce(pl36_valor,0) > 0 ";]]></add>
+    </operation>
+
+  </file>
+
+  <file path="pes2_itau240cnab002.php" >
+
+    <operation error="error" label="Erro ao adicionar campo valor do pluginsf 4">
+      <search><![CDATA[  if($qfolha == 1){
+
+      $campovalor       = " r52_valor+r52_valfer ";
+      $rh34_wherepensa .= " and (r52_valor > 0 or r52_valfer > 0 ) ";]]></search>
+      <add position="replace"><![CDATA[if($qfolha == 1){
+      $campovalor = " r52_valor+r52_valfer+coalesce(pl36_valor,0) ";
+      $rh34_wherepensa .= " and (r52_valor+coalesce(pl36_valor,0) > 0 or r52_valfer > 0 ) ";]]></add>
+    </operation>
+
+    <operation error="error" label="Erro ao adicionar campo valor do pluginsf 4">
+      <search><![CDATA[}else if($qfolha == 5){
+      
+      $campovalor       = " r52_valor  ";
+      $rh34_wherepensa .= " and r52_valor > 0 ";]]></search>
+      <add position="replace"><![CDATA[}else if($qfolha == 5){
+      $campovalor       = " r52_valor+coalesce(pl36_valor,0) ";
+      $rh34_wherepensa .= " and r52_valor+coalesce(pl36_valor,0) > 0 ";]]></add>
+    </operation>
+
+  </file>
+
+  <file path="classes/db_pensao_classe.php" >
+
+    <operation error="error" label="Erro ao adicionar campo valor do pluginsf 5">
+      <search><![CDATA[$sql .= " from pensao                                                                                             \n";
+    $sql .= "      inner join rhpessoalmov on rhpessoalmov.rh02_anousu  = pensao.r52_anousu                           \n";]]></search>
+      <add position="replace"><![CDATA[$sql .= " from pensao                                                                                             \n";
+    $sql .= "      left join plugins.pensaosf on pl36_pensao = r52_sequencial                                         \n";
+    $sql .= "      inner join rhpessoalmov on rhpessoalmov.rh02_anousu  = pensao.r52_anousu                           \n";]]></add>
+    </operation>
+
+  </file>
+
+</modification>

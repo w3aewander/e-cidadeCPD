@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>ComprasForncedores</id>
+  <label>ComprasForncedores</label>
+  <name>Compras Forncedores</name>
+  <ecidade-version>2.3.57</ecidade-version>
+
+
+    <version>1.0</version>
+
+    <file path="/classes/db_pcorcamforne_classe.php">
+
+        <operation>
+            <search><![CDATA[,pc21_taxaestimadaglobal]]></search>
+            <add position="replace"><![CDATA[--,pc21_taxaestimadaglobal]]></add>
+        </operation>
+            <operation>
+            <search><![CDATA[,$this->pc21_taxaestimadaglobal]]></search>
+            <add position="replace"><![CDATA[ ]]></add>
+        </operation>
+    </file>
+
+    <file path="com1_orcamlancval001.php">
+
+        <operation>
+            <search><![CDATA[$clpcorcamval->pc23_taxaestimada      = isset($taxaestimada[1]) ? $taxaestimada[1] : null;]]></search>
+            <add position="replace"><![CDATA[//$clpcorcamval->pc23_taxaestimada      = isset($taxaestimada[1]) ? $taxaestimada[1] : null;]]></add>
+        </operation>
+    </file>
+
+
+    <file path="/classes/db_pcorcamval_classe.php">
+
+        <operation>
+            <search><![CDATA[,pc23_taxaestimada ]]></search>
+            <add position="replace"><![CDATA[--,pc23_taxaestimada ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[,pc23_taxahomologada]]></search>
+            <add position="replace"><![CDATA[--,pc23_taxahomologada]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[,$this->pc23_taxaestimada]]></search>
+            <add position="replace"><![CDATA[  ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[,$this->pc23_taxahomologada ]]></search>
+            <add position="replace"><![CDATA[  ]]></add>
+        </operation>
+    </file>
+
+
+
+    
+   </modification>

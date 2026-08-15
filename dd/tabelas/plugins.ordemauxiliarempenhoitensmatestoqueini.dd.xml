@@ -1,0 +1,83 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.ordemauxiliarempenhoitensmatestoqueini" description="Itens processados no estoque" prefix="" label="Itens processados no estoque" type="0">
+    <fields>
+        <field name="sequencial"
+               label="Código"
+               labelrel="Código"
+               description="Código"
+               conteudo="int4"
+               inivalue="0"
+               size="10"
+               null="f"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="t"
+               hassequence="t">
+            <sequence name="plugins.ordemauxiliarempenhoitensmatestoqueini_sequencial_seq"></sequence>
+        </field>
+        <field name="ordemauxiliarempenhoitens"
+               label="Item da Ordem"
+               labelrel="Item da Ordem"
+               description="Item da Ordem"
+               conteudo="int4"
+               inivalue=""
+               size="10"
+               null="f"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+
+        </field>
+        <field name="matestoqueini"
+               label="Movimentação no Estoque"
+               labelrel="Movimentação no Estoque"
+               description="Movimentação no Estoque"
+               conteudo="int4"
+               inivalue=""
+               size="10"
+               null="f"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+
+        </field>
+        <field name="tipo"
+               label="Tipo"
+               labelrel="TiPo"
+               description="Tipo da movimentacao 1 = Entrada 2 - Saida"
+               conteudo="int4"
+               inivalue=""
+               size="10"
+               null="f"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+
+        </field>
+    </fields>
+    <primarykey>
+        <fieldpk  name="sequencial"/>
+    </primarykey>
+    <foreignkeys>
+        <foreignkey reference="ordemauxiliarempenhoitens" inner='true'>
+            <fieldfk name="ordemauxiliarempenhoitens" reference="sequencial"/>
+        </foreignkey>
+    </foreignkeys>
+
+
+</table>

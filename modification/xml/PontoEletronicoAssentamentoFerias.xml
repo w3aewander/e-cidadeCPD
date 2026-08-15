@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>PontoEletronicoAssentamentoFerias</id>
+    <file path="pes4_cadferia005.php">
+        <operation error="log" label="Adicionando bloco para lançar o assentamento de férias após inclusão da cadferia">
+            <search><![CDATA[  //*** NÃO REMOVER *** - Bloco para inserção do modification do plugin PontoEletronicoAssentamentoFerias]]></search>
+            <add position="after">
+                <![CDATA[
+  /**
+   * Plugin PontoEletronicoAssentamentoFerias - Início
+   */
+
+    if(db_getsession('DB_instit') == 1 || db_getsession('DB_instit') == 20 ||
+        db_getsession('DB_instit') == 25 || db_getsession('DB_instit') == 30 || 
+            db_getsession('DB_instit') == 35 || db_getsession('DB_instit') == 40 ||
+                db_getsession('DB_instit') == 45 || db_getsession('DB_instit') == 55 || 
+                    db_getsession('DB_instit') == 65 || db_getsession('DB_instit') == 75 || 
+                        db_getsession('DB_instit') == 80) {
+
+      $h80_db_cadattdinamicovalorgrupo = $_POST["h80_db_cadattdinamicovalorgrupo"];
+
+      if (!empty($h80_db_cadattdinamicovalorgrupo)) {
+            $plugin = new Plugin(null, 'pontoeletronicoassentamentoferias');
+            $configuracao = PluginService::getPluginConfig($plugin);
+            $tipoAssentamento = TipoAssentamentoRepository::getInstance()->getInstanciaPorTipo(current($configuracao));
+
+            if(count($configuracao) == 0) {
+                throw new BusinessException('Tipo de Asssentamento não configurado no plugin PontoEletronicoAssentamentoFerias.');
+            }
+
+            $periodoAquisitivoInicio = new DBDate($_POST["r30_perai"]);
+            $periodoAquisitivoFim = new DBDate($_POST["r30_peraf"]);
+
+            $periodoGozoInicio = new DBDate($r30_peri);
+            $periodoGozoFim = new DBDate($r30_perf);
+
+            $historicoPeriodoAquisitivo  = "referente ao período aquisitivo de {$periodoAquisitivoInicio->getDate(DBDate::DATA_PTBR)}";
+            $historicoPeriodoAquisitivo .= " à {$periodoAquisitivoFim->getDate(DBDate::DATA_PTBR)}";
+
+            $oAssentamento = new Assentamento();
+            $oAssentamento->setMatricula($pessoal[0]["r01_regist"]);
+            $oAssentamento->setTipoAssentamento($tipoAssentamento->getSequencial());
+            $oAssentamento->setHistorico("Gozo de Férias {$historicoPeriodoAquisitivo}");
+            $oAssentamento->setPercentual("0");
+            $oAssentamento->setLoginUsuario(db_getsession("DB_id_usuario"));
+            $oAssentamento->setDataLancamento(date("Y-m-d", db_getsession("DB_datausu")));
+            $oAssentamento->setConvertido("false");
+            $oAssentamento->setDias(isset($r30_ndias) ? $r30_ndias : $ndiassaldo);
+            $oAssentamento->setDataConcessao($periodoGozoInicio);
+            $oAssentamento->setDataTermino($periodoGozoFim);
+            $oAssentamento->setDias(DBDate::getIntervaloEntreDatas($periodoGozoInicio, $periodoGozoFim)->d + 1);
+
+            AssentamentoRepository::persist($oAssentamento);
+
+            /**
+            * Incluindo a marcação das 3 justificativas
+            */
+            $periodosJustificativa = array(1,2,3);
+            foreach ($periodosJustificativa as $periodo) {
+
+                $oDaoAssentamentoJustificativa = new cl_assentamentojustificativaperiodo;
+                $oDaoAssentamentoJustificativa->rh206_codigo  = $oAssentamento->getCodigo();
+                $oDaoAssentamentoJustificativa->rh206_periodo = $periodo;
+
+                $oDaoAssentamentoJustificativa->incluir();
+
+                if($oDaoAssentamentoJustificativa->erro_status == '0') {
+                    throw new DBException($oDaoAssentamentoJustificativa->erro_msg);
+                }
+            }
+
+            $oDaoAssentaAttr = new cl_assentadb_cadattdinamicovalorgrupo();
+            $oDaoAssentaAttr->h80_assenta = $oAssentamento->getCodigo();
+            $oDaoAssentaAttr->h80_db_cadattdinamicovalorgrupo = $h80_db_cadattdinamicovalorgrupo;
+            $oDaoAssentaAttr->incluir($oAssentamento->getCodigo(), $h80_db_cadattdinamicovalorgrupo);
+
+            if ($oDaoAssentaAttr->erro_status == "0") {
+                throw new Exception($oDaoAssentaAttr->erro_msg);
+            }
+
+            $oDaoAssentamentoFuncional = new cl_assentamentofuncional();
+            $oDaoAssentamentoFuncional->rh193_assentamento_funcional = $oAssentamento->getCodigo();
+            $oDaoAssentamentoFuncional->rh193_assentamento_efetividade = 'null';
+            $oDaoAssentamentoFuncional->incluir(null);
+            
+            if ($oDaoAssentamentoFuncional->erro_status == '0') {
+                throw new BusinessException($oDaoAssentamentoFuncional->erro_msg);
+            }
+
+          \ECidade\RecursosHumanos\ESocial\Repository\Assentamento::salvarFormulario($oAssentamento, new DBDate(date('Y-m-d', db_getsession('DB_datausu'))));
+      }
+  }
+
+  /**
+   * Plugin PontoEletronicoAssentamentoFerias - Fim
+   */
+
+]]>
+            </add>
+        </operation>
+    </file>
+
+    <file path="pes4_cadferia003.php">
+        <operation error="log" label="1 - Adicionando namespace do Periodo">
+            <search><![CDATA[require_once modification("libs/db_stdlib.php");]]></search>
+            <add position="before">
+                <![CDATA[
+
+/**
+ * Plugin PontoEletronicoAssentamentoFerias - Início 1
+ */
+
+use ECidade\RecursosHumanos\RH\Efetividade\Repository\Periodo as PeriodoRepository;
+
+/**
+ * Plugin PontoEletronicoAssentamentoFerias - Fim 1
+ */
+
+]]>
+            </add>
+        </operation>
+
+        <operation error="log" label="2 - Guardando o período de gozo das férias">
+            <search><![CDATA[      db_selectmax("cadferia", "select * from cadferia ".bb_condicaosubpes("r30_").$condicaoaux." order by r30_perai desc");]]></search>
+            <add position="after">
+                <![CDATA[
+
+      /**
+       * Plugin PontoEletronicoAssentamentoFerias - Início 2
+       */
+
+      $periodoGozoInicio = new DBDate($cadferia[0]["r30_per1i"]);
+      $periodoGozoFim = new DBDate($cadferia[0]["r30_per1f"]);
+
+      /**
+       * Plugin PontoEletronicoAssentamentoFerias - Fim 2
+       */
+
+]]>
+            </add>
+        </operation>
+
+        <operation error="log" label="3 - Buscando o assentamento lançado, para exclusão">
+            <search><![CDATA[      db_fim_transacao();]]></search>
+            <add position="before">
+                <![CDATA[
+
+        /**
+        *Plugin PontoEletronicoAssentamentoFerias - Início 3
+        */
+
+        if(db_getsession('DB_instit') == 1 || db_getsession('DB_instit') == 20 ||
+            db_getsession('DB_instit') == 25 || db_getsession('DB_instit') == 30 || 
+                db_getsession('DB_instit') == 35 || db_getsession('DB_instit') == 40 ||
+                    db_getsession('DB_instit') == 45 || db_getsession('DB_instit') == 55 || 
+                        db_getsession('DB_instit') == 65 || db_getsession('DB_instit') == 75 || 
+                            db_getsession('DB_instit') == 80) {
+
+            $periodoEfetividade = PeriodoRepository::getInstanciaPorExercicioCompetencia($periodoGozoInicio->getAno(),$periodoGozoInicio->getMes());
+
+            $assentamentoFerias = AssentamentoRepository::getAssentamentosServidorPorTipoENatureza($oServidor, 'A', $periodoGozoInicio);
+
+            $plugin = new Plugin(null, 'pontoeletronicoassentamentoferias');
+            $configuracao = PluginService::getPluginConfig($plugin);
+            $tipoAssentamento = TipoAssentamentoRepository::getInstance()->getInstanciaPorTipo(current($configuracao));
+
+            foreach($assentamentoFerias as $assentamento) {
+                if($assentamento->getInstanciaTipoAssentamento()->getCodigo() == $tipoAssentamento->getCodigo()) {
+
+                    if($assentamento->getDataConcessao()->getTimeStamp() == $periodoGozoInicio->getTimeStamp()
+                        && $assentamento->getDataTermino()->getTimeStamp() == $periodoGozoFim->getTimeStamp()) {
+
+                        $sExclusaoAssentaAssentadbCadattDinamicoValorGrupo  = "delete                                                    ";
+                        $sExclusaoAssentaAssentadbCadattDinamicoValorGrupo .= "     from assentadb_cadattdinamicovalorgrupo              ";
+                        $sExclusaoAssentaAssentadbCadattDinamicoValorGrupo .= "         where h80_assenta = {$assentamento->getCodigo()} ";
+
+                        $sExclusaoAssentamentoJustificativaPeriodo  = "delete                                                     ";
+                        $sExclusaoAssentamentoJustificativaPeriodo .= "     from assentamentojustificativaperiodo                 ";
+                        $sExclusaoAssentamentoJustificativaPeriodo .= "         where rh206_codigo = {$assentamento->getCodigo()} ";
+
+                        $sExclusaoAssentamentoFuncional  = "delete                                                                   ";
+                        $sExclusaoAssentamentoFuncional .= "   from assentamentofuncional                                            ";
+                        $sExclusaoAssentamentoFuncional .= "       where rh193_assentamento_funcional = {$assentamento->getCodigo()} ";
+
+                        $sql = "SELECT eso13_afastamentoservidoresocial
+                                    FROM afastamentoservidoresocial
+                                    INNER JOIN avaliacaogruporespostaafastamentoesocial ON eso13_afastamentoservidoresocial = eso12_sequencial
+                                    WHERE eso12_assenta = {$assentamento->getCodigo()} ";
+
+                        $result = db_query($sql);
+                        $resposta = db_utils::fieldsMemory($result,0)->eso13_afastamentoservidoresocial;
+
+                        $sExclusaoAvaliacaoGrupoRespostaAfastamentoEsocial  = "delete                                                  ";
+                        $sExclusaoAvaliacaoGrupoRespostaAfastamentoEsocial .= " from avaliacaogruporespostaafastamentoesocial          ";
+                        $sExclusaoAvaliacaoGrupoRespostaAfastamentoEsocial .= "     where eso13_afastamentoservidoresocial = $resposta ";
+
+                        $sExclusaoAfastamentoServidorEsocial  = "delete                                                    ";
+                        $sExclusaoAfastamentoServidorEsocial .= "   from afastamentoservidoresocial                        ";
+                        $sExclusaoAfastamentoServidorEsocial .= "       where eso12_assenta = {$assentamento->getCodigo()} ";
+
+                        $sExclusaoAssenta  = "delete                                                ";
+                        $sExclusaoAssenta .= "   from assenta                                       ";
+                        $sExclusaoAssenta .= "       where h16_codigo = {$assentamento->getCodigo()} ";
+
+                        if ( !db_query($sExclusaoAssentaAssentadbCadattDinamicoValorGrupo)
+                                || !db_query($sExclusaoAssentamentoJustificativaPeriodo)
+                                    || !db_query($sExclusaoAssentamentoFuncional)
+                                        || (!empty($resposta) && !db_query($sExclusaoAvaliacaoGrupoRespostaAfastamentoEsocial))
+                                            || !db_query($sExclusaoAfastamentoServidorEsocial)
+                                                || !db_query($sExclusaoAssenta)) {
+
+                            throw new DBException("Erro ao excluir o assentamento" );
+                        }
+                    }
+                }
+            }
+        }
+    /**
+    * Plugin PontoEletronicoAssentamentoFerias - Fim 3
+    */
+]]>
+            </add>
+        </operation>
+    </file>
+
+    <file path="pes4_cadferialote003.php">
+        <operation error="log" label="1 - Adicionando namespace do Periodo">
+            <search><![CDATA[require(modification("libs/db_stdlib.php"));]]></search>
+            <add position="before">
+                <![CDATA[
+
+/**
+ * Plugin PontoEletronicoAssentamentoFerias - Início 1
+ */
+
+use ECidade\RecursosHumanos\RH\Efetividade\Repository\Periodo as PeriodoRepository;
+
+/**
+ * Plugin PontoEletronicoAssentamentoFerias - Fim 1
+ */
+
+]]>
+            </add>
+        </operation>
+
+        <operation error="log" label="2 - Guardando o período de gozo das férias">
+            <search><![CDATA[      db_selectmax("cadferia", "select * from cadferia ".bb_condicaosubpes("r30_").$condicaoaux." order by r30_perai desc");]]></search>
+            <add position="after">
+                <![CDATA[
+
+      /**
+       * Plugin PontoEletronicoAssentamentoFerias - Início 2
+       */
+
+      $periodoGozoInicio = new DBDate($cadferia[0]["r30_per1i"]);
+      $periodoGozoFim = new DBDate($cadferia[0]["r30_per1f"]);
+
+      /**
+       * Plugin PontoEletronicoAssentamentoFerias - Fim 2
+       */
+
+]]>
+            </add>
+        </operation>
+
+        <operation error="log" label="3 - Buscando o assentamento lançado, para exclusão">
+            <search><![CDATA[    db_fim_transacao();]]></search>
+            <add position="before">
+                <![CDATA[
+
+      /**
+       * Plugin PontoEletronicoAssentamentoFerias - Início 3
+       */
+
+        if(db_getsession('DB_instit') == 1 || db_getsession('DB_instit') == 20 ||
+            db_getsession('DB_instit') == 25 || db_getsession('DB_instit') == 30 || 
+                db_getsession('DB_instit') == 35 || db_getsession('DB_instit') == 40 ||
+                    db_getsession('DB_instit') == 45 || db_getsession('DB_instit') == 55 || 
+                        db_getsession('DB_instit') == 65 || db_getsession('DB_instit') == 75 || 
+                            db_getsession('DB_instit') == 80) {
+
+          $periodoEfetividade = PeriodoRepository::getInstanciaPorExercicioCompetencia($periodoGozoInicio->getAno(), $periodoGozoInicio->getMes());
+          $servidor = ServidorRepository::getInstanciaByCodigo($r30_regist);
+
+          if(!$periodoEfetividade->isProcessado()) {
+            $assentamentoFerias = AssentamentoRepository::getAssentamentosServidorPorTipoENatureza(
+                    $servidor, 'A', $periodoGozoInicio
+            );
+
+            $plugin = new Plugin(null, 'pontoeletronicoassentamentoferias');
+            $configuracao = PluginService::getPluginConfig($plugin);
+            $tipoAssentamento = TipoAssentamentoRepository::getInstance()->getInstanciaPorTipo(current($configuracao));
+
+            foreach($assentamentoFerias as $assentamento) {
+              if($assentamento->getInstanciaTipoAssentamento()->getCodigo() == $tipoAssentamento->getCodigo()) {
+                if(    $assentamento->getDataConcessao()->getTimeStamp() == $periodoGozoInicio->getTimeStamp()
+                    && $assentamento->getDataTermino()->getTimeStamp() == $periodoGozoFim->getTimeStamp()
+                ) {
+                  $sqlAtualizaPonto  = "update pontoeletronicoarquivodata";
+                  $sqlAtualizaPonto .= "   set rh197_afastamento = null";
+                  $sqlAtualizaPonto .= " where rh197_matricula = {$servidor->getMatricula()}";
+                  $sqlAtualizaPonto .= "   and rh197_afastamento = {$assentamento->getCodigo()}";
+
+                  $rsAtualizaPonto = db_query($sqlAtualizaPonto);
+
+                  if(!$rsAtualizaPonto) {
+                    throw new DBException('Erro ao atualizar as marcações do servidor no período das férias.');
+                  }
+
+                  AssentamentoRepository::excluiAssentamentoEfetividade($assentamento);
+                }
+              }
+            }
+          }
+      }
+
+      /**
+       * Plugin PontoEletronicoAssentamentoFerias - Fim 3
+       */
+
+]]>
+            </add>
+        </operation>
+    </file>
+    <file path="pes4_cadferia004.php">
+        <operation error="abort" label="Adicionado bloco para exibir formulario de cadastro dinamico do assentamento para envio do eSocial">
+            <search regex="true" flag="m"><![CDATA[";\s+}\s+\?>]]></search>
+            <add position="replace"><![CDATA[
+              ";
+              }
+              //Plugin PontoEletronicoAssentamentoFerias - Inicio
+                if(db_getsession('DB_instit') == 1 || db_getsession('DB_instit') == 20 ||
+                    db_getsession('DB_instit') == 25 || db_getsession('DB_instit') == 30 || 
+                        db_getsession('DB_instit') == 35 || db_getsession('DB_instit') == 40 ||
+                            db_getsession('DB_instit') == 45 || db_getsession('DB_instit') == 55 || 
+                                db_getsession('DB_instit') == 65 || db_getsession('DB_instit') == 75 || 
+                                    db_getsession('DB_instit') == 80) {
+
+                  $plugin = new Plugin(null, 'pontoeletronicoassentamentoferias');
+                  $configuracao = PluginService::getPluginConfig($plugin);
+                  $tipoAssentamento = TipoAssentamentoRepository::getInstance()->getInstanciaPorTipo(current($configuracao));
+
+                  if(count($configuracao) == 0) {
+                      throw new BusinessException('Tipo de Asssentamento não configurado no plugin PontoEletronicoAssentamentoFerias.');
+                  }
+                  echo "
+                      <script>
+                          var codigoAssentamento = '{$tipoAssentamento->getCodigo()}';
+                      </script>";
+                  ?>
+                  <script language="JavaScript" type="text/javascript" src="scripts/AjaxRequest.js"></script>
+                  <script language="JavaScript" type="text/javascript" src="scripts/classes/DBViewCadastroAtributoDinamico.js"></script>
+                  <script language="JavaScript" type="text/javascript" src="scripts/classes/DBViewLancamentoAtributoDinamico.js"></script>
+                  <script>
+                  function renderizarFormulario()
+                  {
+                      var oAjaxRequest = new AjaxRequest(
+                          'rec1_assentamentoatributosdinamicos.RPC.php',
+                          {
+                              sAcao : 'getDados',
+                              sTipoAssentamento: codigoAssentamento
+                          },
+                          js_retornoAtributos
+                      );
+
+                      oAjaxRequest.setMessage('Definindo Valores Dinâmicos...');
+                      oAjaxRequest.asynchronous(false);
+                      oAjaxRequest.execute();
+
+                  }
+
+                  function js_retornoAtributos(oAjaxResponse) {
+                      if (!oAjaxResponse.iCodigoGrupo) {
+                          if (!oAjaxResponse.iCodigoFormulario) {
+                              $('campos_adicionais').innerHTML = '';
+                              $('h80_db_cadattdinamicovalorgrupo').value = '';
+                              oAtributoDinamico = null;
+                              return;
+                          }
+                      }
+
+                      oAtributoDinamico = new DBViewLancamentoAtributoDinamico();
+                      oAtributoDinamico.setParentForm('form1');
+                      oAtributoDinamico.setAlignForm('center');
+                      oAtributoDinamico.setLabelFieldset('Dados eSocial');
+                      oAtributoDinamico.setParentNode($('campos_adicionais'));
+                      oAtributoDinamico.sCallbackAfterRenderForm = function () {
+                          ajustaDataAtributoDinamico();
+                      }
+                      if (oAjaxResponse.iCodigoFormulario) {
+                          oAtributoDinamico.newAttribute(oAjaxResponse.iCodigoFormulario);
+                      }
+                  }
+
+                  function salvar(iCodigo)
+                  {
+                      $('h80_db_cadattdinamicovalorgrupo').value = iCodigo;
+                  }
+                  renderizarFormulario();
+                  function ajustaDataAtributoDinamico() {
+                      var dataInicio = document.getElementById('4301');
+                      var dataFim = document.getElementById('4302');
+                      var trInicio = dataInicio.parentNode.parentNode;
+                      var trFim = dataFim.parentNode.parentNode;
+                      trInicio.style.display= 'none';
+                      trFim.style.display= 'none';
+
+                  }
+              </script>
+              <?php
+              }
+              //FIM PLUGIN
+              ?>]]>         
+            </add>
+        </operation>
+    </file>
+    <file path="forms/db_frmcadferia001.php">
+        <operation error="abort" label="Adicionando input  no formulario de ferias">
+            <search regex="true" flag="m"><![CDATA[<\/tr>\s+<\/table>\s+<\/center>]]></search>
+            <add position="replace"><![CDATA[
+            </tr>
+              <?php
+                if(db_getsession('DB_instit') == 1 || db_getsession('DB_instit') == 20 ||
+                    db_getsession('DB_instit') == 25 || db_getsession('DB_instit') == 30 || 
+                        db_getsession('DB_instit') == 35 || db_getsession('DB_instit') == 40 ||
+                            db_getsession('DB_instit') == 45 || db_getsession('DB_instit') == 55 || 
+                                db_getsession('DB_instit') == 65 || db_getsession('DB_instit') == 75 || 
+                                    db_getsession('DB_instit') == 80) {
+
+                $plugin = new Plugin(null, 'pontoeletronicoassentamentoferias');
+                $configuracao = PluginService::getPluginConfig($plugin);
+                $tipoAssentamento = TipoAssentamentoRepository::getInstance()->getInstanciaPorTipo(current($configuracao));
+
+                if (count($configuracao) > 0) {
+                  $classenta  = new cl_assenta;
+                  $classenta->rotulo->label();
+                  db_input('h80_db_cadattdinamicovalorgrupo', 10, $Ih16_codigo, true, 'hidden', 3, "");
+
+                }
+              }
+              ?>
+            </table>
+            </center>
+            ]]>
+            </add>
+        </operation>
+        <operation error="abort" label="Adicionando bloco no formulario de ferias">
+            <search regex="true" flag="m"><![CDATA[\s+<\/form>]]></search>
+            <add position="replace"><![CDATA[
+            </form>
+              <?php
+                if(db_getsession('DB_instit') == 1 || db_getsession('DB_instit') == 20 ||
+                    db_getsession('DB_instit') == 25 || db_getsession('DB_instit') == 30 || 
+                        db_getsession('DB_instit') == 35 || db_getsession('DB_instit') == 40 ||
+                            db_getsession('DB_instit') == 45 || db_getsession('DB_instit') == 55 || 
+                                db_getsession('DB_instit') == 65 || db_getsession('DB_instit') == 75 || 
+                                    db_getsession('DB_instit') == 80) {
+                                    
+                $plugin = new Plugin(null, 'pontoeletronicoassentamentoferias');
+                $configuracao = PluginService::getPluginConfig($plugin);
+                $tipoAssentamento = TipoAssentamentoRepository::getInstance()->getInstanciaPorTipo(current($configuracao));
+
+                if (count($configuracao) > 0) {
+                    echo '<div  style="width: 580px" id="campos_adicionais"></div>';
+                }
+              }
+              ?>
+            ]]>
+            </add>
+        </operation>
+        <operation error="abort" label="Adicionando javascript para salvar o formulario de ferias">
+            <search regex="true" flag="m"><![CDATA[\s+}\s+function\h+js_faltas\(opcao,\h+perai,\h+peraf,\h+antes,\h+nfalt,\h+navos, debug\)\h+{]]></search>
+            <add position="replace"><![CDATA[
+                oAtributoDinamico.setSaveCallBackFunction(salvar);
+    $('98').value = $('r30_perai').value;
+    $('99').value = $('r30_peraf').value;
+    oAtributoDinamico.save();
+}
+function js_faltas(opcao, perai, peraf, antes, nfalt, navos, debug) {
+            ]]>
+            </add>
+        </operation>
+    </file>
+    <file path="model/pessoal/AssentamentoRepository.model.php">
+        <operation error="abort" label="Setando variavel $lFuncional para true">
+            <search><![CDATA[ public static function getAssentamentosServidorPorTipoENatureza(
+        Servidor $servidor,
+        $tipoAssentamento = 'S',
+        DBDate $data,
+        $natureza = null,
+        $lFuncional = false,
+        $codigoAssentamento = null
+    ) {]]></search>
+            <add position="replace"><![CDATA[public static function getAssentamentosServidorPorTipoENatureza(
+        Servidor $servidor,
+        $tipoAssentamento = 'S',
+        DBDate $data,
+        $natureza = null,
+        $lFuncional = true,
+        $codigoAssentamento = null
+    ) {]]>
+            </add>
+        </operation>
+    </file>
+</modification>

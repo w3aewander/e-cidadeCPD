@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>filtro-matriculas-educacao</id>
+
+      <file path="func_rhpessoaleducacao.php">
+
+        <operation error="log" label="#1">
+          <search>
+            <![CDATA[$ano = db_anofolha();]]>
+          </search>
+          <add position="replace">
+            <![CDATA[
+                if (db_getsession("DB_instit") != '96'){                
+                    $ano = db_anofolha();
+                } else {
+                    $ano = "fc_anofolha(1)";
+                }
+            ]]>
+          </add>
+        </operation>
+        
+        <operation error="log" label="#2">
+          <search>
+            <![CDATA[$mes = db_mesfolha();]]>
+          </search>
+          <add position="replace">
+            <![CDATA[
+                if (db_getsession("DB_instit") != '96'){                
+                    $mes = db_mesfolha();
+                } else {
+                    $mes = "fc_mesfolha(1)";
+                }
+            ]]>
+          </add>
+        </operation>
+
+        <operation error="log" label="#3">
+          <search>
+            <![CDATA[and rh02_instit  = $instit]]>
+          </search>
+          <add position="replace">
+            <![CDATA[".(db_getsession("DB_instit") != '96' ? "and rh02_instit  = $instit": "")."]]>
+          </add>
+        </operation>
+
+      </file>
+
+      <file path="pes1_manutencaosiope.php">
+
+        <operation error="log" label="#1">
+          <search>
+            <![CDATA[$rh02_anousu = DBPessoal::getAnoFolha();]]>
+          </search>
+          <add position="replace">
+            <![CDATA[
+                if (db_getsession("DB_instit") != '96'){                
+                    $rh02_anousu = DBPessoal::getAnoFolha();
+                } else {
+                    $sqlAno = "select fc_anofolha(1) as ano";
+                    $rsAno = db_query($sqlAno);
+                    db_fieldsmemory($rsAno, 0);
+                    $rh02_anousu = $ano;
+                }
+            ]]>
+          </add>
+        </operation>
+
+        <operation error="log" label="#2">
+          <search>
+            <![CDATA[$rh02_mesusu = DBPessoal::getMesFolha();]]>
+          </search>
+          <add position="replace">
+            <![CDATA[
+                if (db_getsession("DB_instit") != '96'){                
+                    $rh02_mesusu = DBPessoal::getMesFolha();
+                } else {
+                    $sqlMes = "select fc_mesfolha(1) as mes";
+                    $rsMes = db_query($sqlMes);
+                    db_fieldsmemory($rsMes, 0);
+                    $rh02_mesusu = $mes;
+                }
+            ]]>
+          </add>
+        </operation>
+      </file>
+
+
+      <file path="forms/db_frmmanutencaosiope.php">
+        <operation error="log" label="#1">
+          <search>
+            <![CDATA[js_preenchepesquisa|rh01_regist]]>
+          </search>
+          <add position="replace">
+            <![CDATA[js_preenchepesquisa|rh01_regist&lTodos=true]]>
+          </add>
+        </operation>
+      </file>
+
+      <file path="classes/db_rhpessoal_classe.php">
+        <operation error="log" label="#1">
+          <search>
+            <![CDATA[. db_mesfolha() . ]]>
+          </search>
+          <add position="replace">
+            <![CDATA[. (db_getsession("DB_instit") != '96' ? db_mesfolha() : 'fc_mesfolha(1)' ). ]]>
+          </add>
+        </operation>
+         <operation error="log" label="#2">
+          <search>
+            <![CDATA[. db_anofolha() . ]]>
+          </search>
+          <add position="replace">
+            <![CDATA[. (db_getsession("DB_instit") != '96' ? db_anofolha() : 'fc_anofolha(1)' ). ]]>
+          </add>
+        </operation>
+        <operation error="log" label="#3">
+          <search>
+            <![CDATA[. db_getsession("DB_instit") .]]>
+          </search>
+          <add position="replace">
+            <![CDATA[. (db_getsession("DB_instit") != '96' ?  db_getsession("DB_instit")  : '1' ). ]]>
+          </add>
+        </operation> 
+      </file>
+</modification>

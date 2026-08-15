@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+	<id>PaginaInicial2018012018</id>
+	<label>Melhorias ref. Página Inicial</label>
+
+	<file path="modulos.php">
+		<operation error="abort" label="Inserir func. select2 em todos select">
+			<search>
+				<![CDATA[<link href="estilos.css" rel="stylesheet" type="text/css">]]>
+			</search>
+			<add position="before"><![CDATA[<script src="scripts/jquery-2.1.1.min.js"></script><script src="scripts/select2.js"></script>
+				<link href="estilos/select2.css" rel="stylesheet" /><script>jQuery(document).ready(function($) {$('select').select2();});</script>]]></add>
+		</operation>
+	</file>
+</modification>

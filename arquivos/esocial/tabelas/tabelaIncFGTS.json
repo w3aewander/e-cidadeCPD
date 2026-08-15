@@ -1,0 +1,30 @@
+[
+    {
+       "value": "00",
+       "label": "00 - Não é Base de Cálculo do FGTS"
+    },
+    {
+       "value": "11",
+       "label": "11 - Base de Cálculo do FGTS"
+    },
+    {
+       "value": "12",
+       "label": "12 - Base de Cálculo do FGTS 13° salário"
+    },
+    {
+       "value": "21",
+       "label": "21 - Base de Cálculo do FGTS Rescisório (aviso prévio)"
+    },
+    {
+       "value": "92",
+       "label": "92 - Incidência suspensa em decorrência de decisão judicial - FGTS 13º salário"
+    },
+    {
+       "value": "93",
+       "label": "93 - Incidência suspensa em decorrência de decisão judicial - FGTS aviso prévio indenizado"
+    },
+    {
+       "value": "91",
+       "label": "91 - Incidência suspensa em decorrência de decisão judicial - FGTS mensal"
+    }
+ ]

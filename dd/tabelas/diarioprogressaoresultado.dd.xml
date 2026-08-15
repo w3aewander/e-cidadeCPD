@@ -1,0 +1,197 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.diarioprogressaoresultado" description="Resultados da progressão parcial." type="0">
+
+  <fields>
+    <field name="ed998_sequencial"
+           conteudo="int4"
+           description="Sequencial"
+           inivalue="0"
+           label="Sequencial"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sequencial"
+           reference=""
+           ispk="t"
+           hassequence="t">
+        <sequence name="plugins.diarioprogressaoresultado_ed998_sequencial_seq"></sequence>
+    </field>
+    <field name="ed998_diarioprogressao"
+           conteudo="int4"
+           description="Diario"
+           inivalue=""
+           label="Diario"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Diario"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_procresultado"
+           conteudo="int4"
+           description="Resultado do Procedimento"
+           inivalue=""
+           label="Resultado do Procedimento"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Resultado do Procedimento"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_nota"
+           conteudo="float8"
+           description="Nota"
+           inivalue=""
+           label="Nota"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="4"
+           tipoobj="text"
+           labelrel="Nota"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_conceito"
+           conteudo="varchar(3)"
+           description="Conceito"
+           inivalue=""
+           label="Conceito"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Conceito"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_parecer"
+           conteudo="text"
+           description="Parecer"
+           inivalue=""
+           label="Parecer"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Parecer"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_parecerpadronizado"
+           conteudo="text"
+           description="Parecer Padronizado"
+           inivalue=""
+           label="Parecer Padronizado"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Parecer Padronizado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_atingiominimo"
+           conteudo="bool"
+           description="Atingio mínimo para aprovação"
+           inivalue="f"
+           label="Atingio mínimo para aprovação"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Atingio mínimo para aprovação"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_amparado"
+           conteudo="bool"
+           description="Amparado"
+           inivalue="f"
+           label="Amparado"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Amparado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_amparado"
+           conteudo="bool"
+           description="Amparado"
+           inivalue="f"
+           label="Amparado"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Amparado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed998_valorreal"
+           conteudo="float8"
+           description="Nota Real"
+           inivalue=""
+           label="Nota Real"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="4"
+           tipoobj="text"
+           labelrel="Nota Real"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+
+  </fields>
+  <primarykey>
+    <fieldpk name="ed998_sequencial"></fieldpk>
+  </primarykey>
+
+  <foreignkeys>
+    <foreignkey reference="plugins.diarioprogressao" inner='true'>
+      <fieldfk name="ed998_diarioprogressao" reference="ed993_sequencial"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="procresultado" inner='true'>
+      <fieldfk name="ed998_procresultado" reference="ed43_i_codigo"></fieldfk>
+    </foreignkey>
+  </foreignkeys>
+
+</table>

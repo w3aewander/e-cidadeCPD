@@ -1,0 +1,80 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.diarioprogressao" description="Diário da progressão parcial." type="0">
+
+  <fields>
+    <field name="ed993_sequencial"
+           conteudo="int4"
+           description="Sequencial"
+           inivalue="0"
+           label="Sequencial"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sequencial"
+           reference=""
+           ispk="t"
+           hassequence="t">
+        <sequence name="plugins.diarioprogressao_ed993_sequencial_seq"></sequence>
+    </field>
+    <field name="ed993_progressaoparcialalunoturmaregencia"
+           conteudo="int4"
+           description="Vínculo Regência"
+           inivalue="0"
+           label="Vínculo Regência"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Vínculo Regência"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed993_evadido"
+           conteudo="bool"
+           description="Evadido"
+           inivalue="f"
+           label="Evadido"
+           size="1"
+           null="f"
+           uppercase="t"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Evadido"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed993_amparado"
+           conteudo="bool"
+           description="Amparado"
+           inivalue="f"
+           label="Amparado"
+           size="1"
+           null="f"
+           uppercase="t"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Amparado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+
+  </fields>
+  <primarykey>
+    <fieldpk name="ed993_sequencial"></fieldpk>
+  </primarykey>
+  <foreignkeys>
+    <foreignkey reference="progressaoparcialalunoturmaregencia" inner='true'>
+      <fieldfk name="ed993_progressaoparcialalunoturmaregencia" reference="ed115_sequencial"></fieldfk>
+    </foreignkey>
+  </foreignkeys>
+</table>

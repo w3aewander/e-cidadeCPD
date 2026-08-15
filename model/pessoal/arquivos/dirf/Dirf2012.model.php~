@@ -1,0 +1,189 @@
+<?php
+/*
+ *     E-cidade Software Publico para Gestao Municipal                
+ *  Copyright (C) 2014  DBSeller Servicos de Informatica             
+ *                            www.dbseller.com.br                     
+ *                         e-cidade@dbseller.com.br                   
+ *                                                                    
+ *  Este programa e software livre; voce pode redistribui-lo e/ou     
+ *  modifica-lo sob os termos da Licenca Publica Geral GNU, conforme  
+ *  publicada pela Free Software Foundation; tanto a versao 2 da      
+ *  Licenca como (a seu criterio) qualquer versao mais nova.          
+ *                                                                    
+ *  Este programa e distribuido na expectativa de ser util, mas SEM   
+ *  QUALQUER GARANTIA; sem mesmo a garantia implicita de              
+ *  COMERCIALIZACAO ou de ADEQUACAO A QUALQUER PROPOSITO EM           
+ *  PARTICULAR. Consulte a Licenca Publica Geral GNU para obter mais  
+ *  detalhes.                                                         
+ *                                                                    
+ *  Voce deve ter recebido uma copia da Licenca Publica Geral GNU     
+ *  junto com este programa; se nao, escreva para a Free Software     
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA          
+ *  02111-1307, USA.                                                  
+ *  
+ *  Copia da licenca no diretorio licenca/licenca_en.txt 
+ *                                licenca/licenca_pt.txt 
+ */
+
+/**
+ * Model para processamento da DIRF
+ *
+ * @package Pessoal
+ * @subpackage Dirf
+ */
+class Dirf2012 extends Dirf {
+
+
+  /**
+   * Array com as ordens de pagamentos inconsistentes
+   * @var array
+   * @access private
+   */
+  private $aOrdensInconsistentes = array();
+
+  /**
+   * Construtor da classe
+   *
+   * @param integer $iAno
+   * @param string $sCnpj
+   * @return void
+   */
+  public function __construct($iAno,  $sCnpj) {
+
+    parent::__construct($iAno, $sCnpj);
+
+    $this->setCodigoLayout(198);
+
+  }
+
+  /**
+   * Adiciona uma ordem de pagamento como inconsistente
+   *
+   * @param stdClass $oOrdemPagamento - Objeto com os dados da ordem de pagamento
+   * @access private
+   * @return void
+   */
+  private function addInconsistenciasOrdemDePagamento($oOrdemPagamento) {
+
+    $oInconsistente                  = new stdClass();
+    $oInconsistente->iOrdemPagamento = $oOrdemPagamento->c80_codord;
+    $oInconsistente->nValorPago      = $oOrdemPagamento->valor_pago;
+    $oInconsistente->nValorEstornado = $oOrdemPagamento->valor_estornado;
+
+    $this->aOrdensInconsistentes[]   = $oInconsistente;
+  }
+
+  /**
+   * Gera arquivo de inconsistências
+   * Chama o método da classe Dirf para os cgm's que não estão cadastrados certo
+   * Após gera um arquivo com as ordens de pagamento inconsistentes
+   *
+   * @access public
+   * @return void
+   */
+  public function geraArquivoInconsistencias() {
+
+    /**
+     * Array com arquivos de inconsistencias gerados
+     */
+    $aArquivos   = array();
+    $aArquivos[] = parent::geraArquivoInconsistencias();
+
+    global $head2;
+
+    $sNomeArquivo = "tmp/inconsistencias_dirf_op".date('Ymdi').".pdf";
+
+    $oPdf = new PDF();
+    $oPdf->Open();
+    $oPdf->AliasNbPages();
+    $oPdf->SetFillColor(235);
+
+    $iFonte    = 8;
+    $iAlt      = 5;
+    $iPreenche = 1;
+
+    $head2 = "Relatório de Inconsistências";
+
+    $oPdf->AddPage();
+    $oPdf->SetFont('Arial','b',$iFonte);
+    $oPdf->Cell(20, $iAlt, "O. P."          , 1, 0, 'C', 1);
+    $oPdf->Cell(70, $iAlt, "Valor Pago"     , 1, 0, 'C', 1);
+    $oPdf->Cell(70, $iAlt, "Valor Estornado", 1, 1, 'C', 1);
+
+    foreach ($this->aOrdensInconsistentes as $oInconsistencia ) {
+
+      if ($oPdf->gety() > $oPdf->h - 30) {
+
+        $oPdf->AddPage();
+        $oPdf->SetFont('Arial','b',$iFonte);
+        $oPdf->Cell(20, $iAlt, "O. P."          , 1, 0, 'C', 1);
+        $oPdf->Cell(70, $iAlt, "Valor Pago"     , 1, 0, 'C', 1);
+        $oPdf->Cell(70, $iAlt, "Valor Estornado", 1, 1, 'C', 1);
+      }
+
+      if ($iPreenche == 1 ) {
+        $iPreenche = 0;
+      } else {
+        $iPreenche = 1;
+      }
+
+      $oPdf->SetFont('Arial','',$iFonte);
+      $oPdf->Cell(20, $iAlt, $oInconsistencia->iOrdemPagamento, 0, 0, 'C', $iPreenche);
+      $oPdf->Cell(70, $iAlt, $oInconsistencia->nValorPago     , 0, 0, 'L', $iPreenche);
+      $oPdf->Cell(70, $iAlt, $oInconsistencia->nValorEstornado, 0, 1, 'L', $iPreenche);
+    }
+
+    ob_start();
+    $oPdf->Output($sNomeArquivo);
+    ob_end_clean();
+
+    $aArquivos[] = $sNomeArquivo;
+    return $aArquivos;
+  }
+
+  /**
+   * Processa dados da contablidade
+   *
+   * @access public
+   * @return void
+   */
+  public function processarDadosContabilidade() {
+
+    $sSqlDadosContabilidade  = "SELECT z01_numcgm, ";
+    $sSqlDadosContabilidade .= "       trim(z01_cgccpf) as z01_cgccpf, ";
+    $sSqlDadosContabilidade .= "       trim(z01_nome)   as z01_nome,   ";
+    $sSqlDadosContabilidade .= "       coalesce(sum(case when c53_tipo = 30 then c70_valor else 0 end),0) as valor_pago, ";
+    $sSqlDadosContabilidade .= "       coalesce(sum(case when c53_tipo = 31 then c70_valor else 0 end),0) as valor_estornado, ";
+    $sSqlDadosContabilidade .= "       extract(month from c70_data) as mes, ";
+    $sSqlDadosContabilidade .= "      case when (select e30_codigo";
+    $sSqlDadosContabilidade .= "         from retencaopagordem";
+    $sSqlDadosContabilidade .= "              inner join retencaoreceitas on e23_retencaopagordem = e20_sequencial";
+    $sSqlDadosContabilidade .= "                                         and e23_recolhido is true";
+    $sSqlDadosContabilidade .= "              inner join retencaotiporec  on e23_retencaotiporec = e21_sequencial";
+    $sSqlDadosContabilidade .= "                                         and e21_retencaotipocalc in(1,2)";
+    $sSqlDadosContabilidade .= "                                         and e21_retencaotiporecgrupo = 1";
+    $sSqlDadosContabilidade .= "              inner  join  retencaonaturezatiporec on e31_retencaotiporec = e21_sequencial";
+    $sSqlDadosContabilidade .= "              inner  join  retencaonatureza        on e31_retencaonatureza = e30_sequencial";
+    $sSqlDadosContabilidade .= "                                                 and e31_retencaonatureza is not null";
+    $sSqlDadosContabilidade .= "        where e20_pagordem = c80_codord limit 1";
+    $sSqlDadosContabilidade .= "        )";
+    $sSqlDadosContabilidade .= "        is not null then";
+    $sSqlDadosContabilidade .= "        (select e30_codigo";
+    $sSqlDadosContabilidade .= "         from retencaopagordem";
+    $sSqlDadosContabilidade .= "              inner join retencaoreceitas on e23_retencaopagordem = e20_sequencial";
+    $sSqlDadosContabilidade .= "                                         and e23_recolhido is true";
+    $sSqlDadosContabilidade .= "              inner join retencaotiporec  on e23_retencaotiporec = e21_sequencial";
+    $sSqlDadosContabilidade .= "                                         and e21_retencaotipocalc in(1,2)";
+    $sSqlDadosContabilidade .= "                                         and e21_retencaotiporecgrupo = 1";
+    $sSqlDadosContabilidade .= "              inner  join  retencaonaturezatiporec on e31_retencaotiporec = e21_sequencial";
+    $sSqlDadosContabilidade .= "              inner  join  retencaonatureza        on e31_retencaonatureza = e30_sequencial";
+    $sSqlDadosContabilidade .= "                                                 and e31_retencaonatureza is not null";
+    $sSqlDadosContabilidade .= "        where e20_pagordem = c80_codord limit 1)";
+    $sSqlDadosContabilidade .= "        else";
+    $sSqlDadosContabilidade .= "           case when length(z01_cgccpf) = 14 then '1708' else '0588' end end as tipo,";
+    $sSqlDadosContabilidade .= "       c80_codord ";
+    $sSqlDadosContabilidade .= "  from conlancam ";
+    $sSqlDadosContabilidade .= "       inner join conlancamdoc on c70_codlan = c71_codlan ";
+    $sSqlDadosContabilidade .= "       inner join conlancamord on c70_codlan = c80_codlan ";
+    $sSqlDadosContabilidade .= "       inner join conlancamemp on c75_codlan = c70_Codlan ";
+    $sSq

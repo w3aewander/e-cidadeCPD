@@ -1,0 +1,50 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.diarioprogressaoresultadorecuperacao" description="Recuperação de um resultado." type="0">
+
+  <fields>
+    <field name="ed994_sequencial"
+           conteudo="int4"
+           description="Sequencial"
+           inivalue="0"
+           label="Sequencial"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sequencial"
+           reference=""
+           ispk="t"
+           hassequence="t">
+        <sequence name="plugins.diarioprogressaoresultadorecuperacao_ed994_sequencial_seq"></sequence>
+    </field>
+    <field name="ed994_diarioprogressaoresultado"
+           conteudo="int4"
+           description="Diario Resultado"
+           inivalue="0"
+           label="Diario Resultado"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Diario Resultado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+  </fields>
+
+  <primarykey>
+    <fieldpk name="ed994_sequencial"></fieldpk>
+  </primarykey>
+
+  <foreignkeys>
+    <foreignkey reference="plugins.diarioprogressaoresultado" inner='true'>
+      <fieldfk name="ed994_diarioprogressaoresultado" reference="ed998_sequencial"></fieldfk>
+    </foreignkey>
+  </foreignkeys>
+
+</table>

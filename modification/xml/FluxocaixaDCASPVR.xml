@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>FluxocaixaDCASPVR</id>
+  <name>Fluxo caixa DCASP VR</name>
+  <ecidade-version>2.3.53</ecidade-version>
+  <file path='con2_fluxocaixaDCASP002.php'>
+    <operation>
+      <search><![CDATA[use ECidade\Financeiro\Contabilidade\Relatorio\DCASP\FluxoCaixaFactory;]]></search>
+      <add position="replace">
+        <![CDATA[//use ECidade\Financeiro\Contabilidade\Relatorio\DCASP\FluxoCaixaFactory;]]>
+      </add>
+    </operation>  
+    <operation>
+      <search><![CDATA[require_once modification("fpdf151/PDFDocument.php");]]></search>
+      <add position="after">
+        <![CDATA[
+
+$oGet     = db_utils::postMemory($_GET);
+$aQuadros = array();]]>
+      </add>
+    </operation>  
+    <operation>
+      <search><![CDATA[$oGet = db_utils::postMemory($_GET);
+    $fluxoCaixaFactory = new FluxoCaixaFactory($oGet->periodo);
+    $fluxoCaixa = $fluxoCaixaFactory->obterFluxoCaixa();
+    $aQuadros = array();]]></search>
+      <add position="replace">
+        <![CDATA[//$oGet = db_utils::postMemory($_GET);
+    //$fluxoCaixaFactory = new FluxoCaixaFactory($oGet->periodo);
+    //$fluxoCaixa = $fluxoCaixaFactory->obterFluxoCaixa();
+    //$aQuadros = array();]]>
+      </add>
+    </operation>  
+    <operation>
+     <search><![CDATA[if ($oGet->lQuadroPrincipal && $oGet->lQuadroPrincipal === 'true') {
+        $aQuadros[] = $fluxoCaixa::QUADRO_PRINCIPAL;
+    }
+
+    if ($oGet->lQuadroReceitas && $oGet->lQuadroReceitas === 'true') {
+        $aQuadros[] = $fluxoCaixa::QUADRO_RECEITAS;
+    }
+
+    if ($oGet->lQuadroTransferencias && $oGet->lQuadroTransferencias === 'true') {
+        $aQuadros[] = $fluxoCaixa::QUADRO_TRANSFERENCIAS;
+    }
+
+    if ($oGet->lQuadroDesembolsos && $oGet->lQuadroDesembolsos === 'true') {
+        $aQuadros[] = $fluxoCaixa::QUADRO_DESEMBOLSOS;
+    }
+
+    if ($oGet->lQuadroDivida && $oGet->lQuadroDivida === 'true') {
+        $aQuadros[] = $fluxoCaixa::QUADRO_DIVIDA;
+    }]]></search>
+      <add position="replace">
+        <![CDATA[if (!empty($oGet->lQuadroPrincipal) && $oGet->lQuadroPrincipal === "true") {
+    $aQuadros[] = FluxoCaixaDCASP2015::QUADRO_PRINCIPAL;
+  }
+
+  if (!empty($oGet->lQuadroReceitas) && $oGet->lQuadroReceitas === "true") {
+    $aQuadros[] = FluxoCaixaDCASP2015::QUADRO_RECEITAS;
+  }
+
+  if (!empty($oGet->lQuadroTransferencias) && $oGet->lQuadroTransferencias === "true") {
+    $aQuadros[] = FluxoCaixaDCASP2015::QUADRO_TRANSFERENCIAS;
+  }
+
+  if (!empty($oGet->lQuadroDesembolsos) && $oGet->lQuadroDesembolsos === "true") {
+    $aQuadros[] = FluxoCaixaDCASP2015::QUADRO_DESEMBOLSOS;
+  }
+
+  if (!empty($oGet->lQuadroDivida) && $oGet->lQuadroDivida === "true") {
+    $aQuadros[] = FluxoCaixaDCASP2015::QUADRO_DIVIDA;
+  }]]>
+      </add>
+    </operation>        
+    <operation>
+      <search><![CDATA[$fluxoCaixa->setInstituicoes(str_replace('-', ',', $oGet->db_selinstit));
+    $fluxoCaixa->setExibirQuadros($aQuadros);
+    $fluxoCaixa->setExibirExercicioAnterior($lExibirExercicioAnterior);
+    $fluxoCaixa->emitir();]]></search>
+      <add position="replace">
+        <![CDATA[$oRelatorio = new FluxoCaixaDCASP2015(db_getsession('DB_anousu'),
+                                        FluxoCaixaDCASP2015::CODIGO_RELATORIO,
+                                        $oGet->periodo
+                                       );
+  $oRelatorio->setInstituicoes(str_replace('-', ',', $oGet->db_selinstit));
+  $oRelatorio->setExibirQuadros($aQuadros);
+  $oRelatorio->setExibirExercicioAnterior($lExibirExercicioAnterior);
+  $oRelatorio->emitir();]]>
+      </add>
+    </operation>     
+  </file>
+
+</modification>

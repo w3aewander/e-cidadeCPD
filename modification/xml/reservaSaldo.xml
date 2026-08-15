@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<modification>
+<id>reservaSaldo</id>
+    <name>Reseva de saldo no Orcamento da Solicitacao</name>
+    <version>1.0</version>
+
+    <file path="com1_trocpcorcamtroca.php">
+
+        <operation>
+            <search><![CDATA[include("classes/db_pcorcamitem_classe.php");]]></search>
+            <add position="replace"><![CDATA[require_once("std/Modification.php");
+require_once(Modification::getFile("classes/db_pcorcamitem_classe.php"));]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[<script language="JavaScript" type="text/javascript" src="scripts/scripts.js"></script>]]></search>
+            <add position="after"><![CDATA[<script language="JavaScript" type="text/javascript" src="scripts/prototype.js"></script>
+<script language="JavaScript" type="text/javascript" src="scripts/strings.js"></script>]]></add>
+        </operation>
+
+        <operation>
+            <search><![CDATA[</table>
+</form>
+<script>]]></search>
+            <add position="before"><![CDATA[ <?php
+    if ($sol == 'true') {
+      ?>
+      <tr>
+        <td>
+          <input type='button' value='Atualizar Solicitação pelo Valor Unitário' onclick="atualizarValorReserva(1)" name="btnAtualizarValorUnitario">
+          <input type='button' value='Atualizar Solicitação pelo Valor Médio' name="btnAtualizarValorMédio" onclick="atualizarValorReserva(2)">
+        </td>
+      </tr>
+      <?php
+    }
+?>]]></add>
+        </operation>
+
+        <operation>
+            <search><![CDATA[if(isset($orcamento) && trim($orcamento)!=""){]]></search>
+            <add position="before"><![CDATA[if (isset($_GET["atualizar_saldo"]) && $sol == "true") {
+
+  try {
+
+    $sCamposCalculo = "pc23_vlrun";
+    if ($_GET["atualizar_saldo"] == 2) {
+      $sCamposCalculo = "(select avg(a.pc23_vlrun) from pcorcamval a where a.pc23_orcamitem = pcorcamval.pc23_orcamitem) ";
+    }
+    $sSqlDadosReservaSolicitacao = $clpcorcamitem->sql_query_reserva_solicitacao(null, "pc11_codigo, pc13_sequencial, pc13_coddot, pc13_anousu, pc13_valor, pc13_quant, o82_codres, round({$sCamposCalculo}, 2) as valor", null, "pc22_codorc={$orcamento}");
+
+    $rsDotacoesAtualizar = $clpcorcamitem->sql_record($sSqlDadosReservaSolicitacao);
+    if ($clpcorcamitem->numrows > 0) {
+
+      $oDaoReserva          = new cl_orcreserva();
+      $oDaoSolicitem        = new cl_solicitem;
+      $oDaoPcDotac          = new cl_pcdotac;
+      $oDaoReservaSolicitem = new cl_orcreservasol();
+      $aReservas            = db_utils::getCollectionByRecord($rsDotacoesAtualizar);
+      foreach ($aReservas as $oDadosReserva) {
+
+        $oDaoSolicitem->pc11_codigo = $oDadosReserva->pc11_codigo;
+        $oDaoSolicitem->pc11_vlrun  = $oDadosReserva->valor;
+        $oDaoSolicitem->alterar($oDadosReserva->pc11_codigo);
+        if ($oDaoSolicitem->erro_status == 0) {
+          throw new Exception("Erro ao atualizar valor unitário do item!");
+        }
+
+        if (empty($oDadosReserva->pc13_coddot)) {
+          continue;
+        }
+
+        if (!empty($oDadosReserva->o82_codres)) {
+
+          $oDaoReservaSolicitem->excluir(null, "o82_codres = {$oDadosReserva->o82_codres}");
+          if ($oDaoReservaSolicitem->erro_status == 0) {
+            throw new Exception("Erro ao atualizar as Reservas de Saldo!");
+          }
+          $oDaoReserva->excluir($oDadosReserva->o82_codres);
+          if ($oDaoReserva->erro_status == 0) {
+            throw new Exception("Erro ao atualizar as Reservas de Saldo!");
+          }
+        }
+
+        /**
+         * Incluirmos a reserva novamente
+         */
+        $oDaoReserva->o80_anousu = $oDadosReserva->pc13_anousu;
+        $oDaoReserva->o80_coddot = $oDadosReserva->pc13_coddot;
+        $oDaoReserva->o80_descr  = "Reserva do item da solicitação {$oDadosReserva->pc11_codigo}";
+        $oDaoReserva->o80_dtini  = "{$oDadosReserva->pc13_anousu}/01/01";
+        $oDaoReserva->o80_dtfim  = "{$oDadosReserva->pc13_anousu}/12/31";
+        $oDaoReserva->o80_dtlanc = date("Y-m-d", db_getsession("DB_datausu"));
+        $oDaoReserva->o80_valor  = round($oDadosReserva->pc13_quant * $oDadosReserva->valor, 2);
+        $oDaoReserva->incluir(null);
+
+        if ($oDaoReserva->erro_status == 0) {
+          throw new Exception("Erro ao incluir a nova reserva de saldo\n{$oDaoReserva->erro_msg}");
+        }
+
+        $oDaoReservaSolicitem->o82_codres    = $oDaoReserva->o80_codres;
+        $oDaoReservaSolicitem->o82_pcdotac   = $oDadosReserva->pc13_sequencial;
+        $oDaoReservaSolicitem->o82_solicitem = $oDadosReserva->pc11_codigo;
+        $oDaoReservaSolicitem->incluir(null);
+        if ($oDaoReservaSolicitem->erro_status == 0) {
+          throw new Exception("Erro ao vincular reserva com os itens");
+        }
+        if ($oDaoReservaSolicitem->erro_status == 0) {
+          throw new Exception("Erro ao vincular reserva com os itens");
+        }
+
+        $oDaoPcDotac->pc13_sequencial = $oDadosReserva->pc13_sequencial;
+        $oDaoPcDotac->pc13_valor      = round($oDadosReserva->pc13_quant * $oDadosReserva->valor , 2);
+        $oDaoPcDotac->alterar($oDaoPcDotac->pc13_sequencial);
+        if ($oDaoPcDotac->erro_status == 0) {
+          throw new Exception("Erro ao alterar dados da dotacao do item");
+        }
+        if (!empty($oDadosReserva->pc13_sequencial)) {
+
+          $oDaoPcDotac->pc13_sequencial = $oDadosReserva->pc13_sequencial;
+          $oDaoPcDotac->pc13_valor      = round($oDadosReserva->pc13_quant * $oDadosReserva->valor , 2);
+          $oDaoPcDotac->alterar($oDadosReserva->pc13_sequencial);
+          if ($oDaoPcDotac->erro_status == 0) {
+            throw new Exception("Erro ao alterar dados da dotacao do item");
+          }
+        }
+      }
+    }
+
+    /**
+     * Atualizamos os valor unitario do item na solicitacao
+     */
+    db_msgbox("Reservas atualizadas com sucesso!");
+  } catch (Exception $eErro) {
+    db_msgbox($eErro->getMessage());
+  }
+}]]></add>
+
+        </operation>
+        <operation>
+            <search><![CDATA[</html>]]></search>
+            <add position="after"><![CDATA[<script>
+
+  function atualizarValorReserva(iTipo) {
+
+    var oGet       = js_urlToObject();
+    var sLocation  = 'com1_trocpcorcamtroca.php?orcamento='+oGet.orcamento+'&sol='+oGet.sol+"&atualizar_saldo="+iTipo;
+    location.href  = sLocation;
+  }
+</script>]]></add>
+        </operation>
+
+    </file>
+   <file path="classes/db_pcorcamitem_classe.php">
+       <operation>
+           <search><![CDATA[function sql_query_saldoModalidade( $pc22_orcamitem=null,$campos="*",$ordem=null,$dbwhere=""){]]></search>
+           <add position="before"><![CDATA[function sql_query_reserva_solicitacao ( $pc22_orcamitem=null,$campos="*",$ordem=null,$dbwhere=""){
+    $sql = "select ";
+    if($campos != "*" ){
+      $campos_sql = split("#",$campos);
+      $virgula = "";
+      for($i=0;$i<sizeof($campos_sql);$i++){
+        $sql .= $virgula.$campos_sql[$i];
+        $virgula = ",";
+      }
+    }else{
+      $sql .= $campos;
+    }
+    $sql .= " from pcorcamitem ";
+    $sql .= "      inner join pcorcam         on  pcorcam.pc20_codorc = pcorcamitem.pc22_codorc";
+    $sql .= "      inner join pcorcamitemsol  on  pcorcamitemsol.pc29_orcamitem = pcorcamitem.pc22_orcamitem";
+    $sql .= "      left  join pcorcamjulg     on  pcorcamitemsol.pc29_orcamitem = pcorcamjulg.pc24_orcamitem";
+    $sql .= "                                and  pcorcamjulg.pc24_pontuacao    = 1";
+    $sql .= "      left  join pcorcamval      on  pcorcamjulg.pc24_orcamitem    = pcorcamval.pc23_orcamitem";
+    $sql .= "                                and  pcorcamjulg.pc24_orcamforne   = pcorcamval.pc23_orcamforne";
+    $sql .= "      inner join solicitem       on  solicitem.pc11_codigo   = pcorcamitemsol.pc29_solicitem";
+    $sql .= "      left  join pcdotac         on  pcdotac.pc13_codigo     = solicitem.pc11_codigo";
+    $sql .= "      left  join orcreservasol   on  pcdotac.pc13_sequencial = orcreservasol.o82_pcdotac";
+    $sql2 = "";
+    if($dbwhere==""){
+      if($pc22_orcamitem!=null ){
+        $sql2 .= " where pcorcamitem.pc22_orcamitem = $pc22_orcamitem ";
+      }
+    }else if($dbwhere != ""){
+      $sql2 = " where $dbwhere";
+    }
+    $sql .= $sql2;
+    if($ordem != null ){
+      $sql .= " order by ";
+      $campos_sql = split("#",$ordem);
+      $virgula = "";
+      for($i=0;$i<sizeof($campos_sql);$i++){
+        $sql .= $virgula.$campos_sql[$i];
+        $virgula = ",";
+      }
+    }
+    return $sql;
+  }]]></add>
+       </operation>
+   </file>
+</modification>

@@ -1,0 +1,1 @@
+ls -ltias forms/db_frmempempenhoaltera.php forms/db_frmempautoriza.php forms/db_frmempempenhonota.php emp1_empautoriza004.php emp1_empautoriza005.php emp1_empempenho005.php scripts/classes/DBViewGeracaoAutorizacao.classe.js

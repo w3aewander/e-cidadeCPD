@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+	<id>Ouvidoria</id>
+	<label>Melhorias referente ao módulo Ouvidoria</label>
+
+  <!-- ouv1_consprocessos001.php -->
+  <file path="ouv1_consprocessos001.php">
+    <operation error="abort" label="ouv1_consprocessos001.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_consprocessos001.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+  <!-- ouv1_controleatendimento001.php -->
+  <file path="ouv1_controleatendimento001.php">
+    <operation error="abort" label="ouv1_controleatendimento001.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_controleatendimento001.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+    <!-- ouv1_controleatendimento.RPC.php -->
+  <file path="ouv1_controleatendimento.RPC.php">
+    <operation error="abort" label="ouv1_controleatendimento.RPC.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_controleatendimento.RPC.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+    <!-- ouv1_detalhesdespacho001.php -->
+  <file path="ouv1_detalhesdespacho001.php">
+    <operation error="abort" label="ouv1_detalhesdespacho001.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_detalhesdespacho001.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+  <!-- ouv1_detalhesdespacho002.php -->
+  <file path="ouv1_detalhesdespacho002.php">
+    <operation error="abort" label="ouv1_detalhesdespacho002.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_detalhesdespacho002.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+  <!-- ouv1_detalhesdespacho003.php -->
+  <file path="ouv1_detalhesdespacho003.php">
+    <operation error="abort" label="ouv1_detalhesdespacho003.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_detalhesdespacho003.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+    <!-- ouv1_reldetalhesprocesso002.php -->
+  <file path="ouv1_reldetalhesprocesso002.php">
+    <operation error="abort" label="ouv1_reldetalhesprocesso002.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_reldetalhesprocesso002.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+  <!-- ouv1_retornocidadao001.php -->
+  <file path="ouv1_retornocidadao001.php">
+    <operation error="abort" label="ouv1_retornocidadao001.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_retornocidadao001.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+  <!-- ouv1_retornocidadao002.php -->
+	<file path="ouv1_retornocidadao002.php">
+		<operation error="abort" label="ouv1_retornocidadao002.php">
+			<add position="top"><![CDATA[<?php require_once(modification('ouv1_retornocidadao002.modification.php')); exit;?>]]></add>
+		</operation>
+	</file>
+
+  <!-- ouv1_retornocidadao003.php -->
+  <file path="ouv1_retornocidadao003.php">
+    <operation error="abort" label="ouv1_retornocidadao003.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_retornocidadao003.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+  <!-- ouv1_retornocidadao003.php -->
+  <file path="ouv1_retornocliente.RPC.php">
+    <operation error="abort" label="ouv1_retornocliente.RPC.php">
+      <add position="top"><![CDATA[<?php require_once(modification('ouv1_retornocliente.RPC.modification.php')); exit;?>]]></add>
+    </operation>
+  </file>
+
+  <!-- pro4_proctransf.RPC.php -->
+  <file path="pro4_proctransf.RPC.php">
+    <operation error="abort" label="pro4_proctransf.RPC.php">
+      <search offset="0" limit="1"><![CDATA[$oDaoProtProcesso]]></search>
+      <add position="before"><![CDATA[
+      $sWhereProcessos .= " and not exists(select tfp.* from proctransferproc tfp where
+      tfp.p63_codproc = x.p58_codproc limit 1)";
+
+      ]]></add>
+    </operation>
+  </file>
+
+  <!-- classes/db_proctransferproc_classe.php -->
+  <file path="classes/db_proctransferproc_classe.php">
+    <operation error="abort" label="classes/db_proctransferproc_classe.php">
+      <search><![CDATA[$sql .= "                               and procandam.p61_codproc    = proctransferproc.p63_codproc ";]]></search>
+      <add position="replace"><![CDATA[//$sql .= "                               and procandam.p61_codproc    = proctransferproc.p63_codproc ";]]></add>
+    </operation>
+  </file>
+
+  <!-- classes/db_protprocesso_classe.php -->
+	<file path="classes/db_protprocesso_classe.php">
+		<operation error="abort" label="classes/db_protprocesso_classe.php">
+			<search><![CDATA[$sql .= " from protprocesso
+                    inner join cgm                  on cgm.z01_numcgm            = protprocesso.p58_numcgm
+                    inner join tipoproc             on tipoproc.p51_codigo       = protprocesso.p58_codigo
+                    left  join procandam            on procandam.p61_codandam    = protprocesso.p58_codandam
+                    left  join db_usuarios          on db_usuarios.id_usuario    = procandam.p61_id_usuario
+                    left  join db_depart            on db_depart.coddepto        = procandam.p61_coddepto
+                    left  join proctransand         on proctransand.p64_codandam = procandam.p61_codandam
+                    left  join proctransfer         on proctransfer.p62_codtran  = proctransand.p64_codtran
+                    left  join db_usuarios a        on a.id_usuario              = proctransfer.p62_id_usuario
+                    left  join db_depart   b        on b.coddepto                = proctransfer.p62_coddepto
+                    inner join db_usuarios c        on c.id_usuario              = protprocesso.p58_id_usuario
+                    inner join db_depart   d        on d.coddepto                = protprocesso.p58_coddepto
+                    left  join arqproc              on arqproc.p68_codproc       = protprocesso.p58_codproc
+                    left  join procarquiv           on procarquiv.p67_codproc    = protprocesso.p58_codproc
+                    left  join processoouvidoria    on ov09_protprocesso         = protprocesso.p58_codproc
+                    left  join ouvidoriaatendimento on ov01_sequencial           = ov09_ouvidoriaatendimento ";]]></search>
+      <add position="replace"><![CDATA[$sql .= " from protprocesso
+                    inner join cgm                  on cgm.z01_numcgm            = protprocesso.p58_numcgm
+                    inner join tipoproc             on tipoproc.p51_codigo       = protprocesso.p58_codigo
+                    left  join procandam            on procandam.p61_codandam    = protprocesso.p58_codandam
+                    left  join db_usuarios          on db_usuarios.id_usuario    = procandam.p61_id_usuario
+                    left  join db_depart            on db_depart.coddepto        = procandam.p61_coddepto
+                    left  join proctransand         on proctransand.p64_codandam = procandam.p61_codandam
+                    left  join proctransfer         on proctransfer.p62_codtran  = proctransand.p64_codtran
+                    left  join db_usuarios a        on a.id_usuario              = proctransfer.p62_id_usuario
+                    left  join db_depart   b        on b.coddepto                = proctransfer.p62_coddepto
+                    inner join db_usuarios c        on c.id_usuario              = protprocesso.p58_id_usuario
+                    inner join db_depart   d        on d.coddepto                = protprocesso.p58_coddepto
+                    left  join arqproc              on arqproc.p68_codproc       = protprocesso.p58_codproc
+                    left join procarquiv on procarquiv.p67_codproc = protprocesso.p58_codproc
+                    and arqproc.p68_codarquiv = procarquiv.p67_codarquiv
+                    left  join processoouvidoria    on ov09_protprocesso         = protprocesso.p58_codproc
+                    left  join ouvidoriaatendimento on ov01_sequencial           = ov09_ouvidoriaatendimento
+                    left join arqandam              on arqandam.p69_codarquiv    = procarquiv.p67_codarquiv";]]></add>
+		</operation>
+	</file>
+
+    <!-- libs/db_mail_class.php -->
+  <file path="libs/db_mail_class.php">
+    <operation error="abort" label="libs/db_mail_class.php">
+      <search offset="0" limit="1"><![CDATA[case 1:]]></search>
+      <add position="before"><![CDATA[case 9:
+          require_once(modification("vendor/phpmailer/phpmailer/PHPMailerAutoload.php"));
+
+          $mail = new PHPMailer;
+
+          $mail->isSMTP();
+          $mail->SMTPDebug = 0;
+          $mail->Debugoutput = 'html';
+          $mail->Host = "smtp.epdvr.com.br";
+          $mail->SMTPAutoTLS = false;
+          $mail->Port = '25';
+          $mail->SMTPAuth = false;
+
+          $mail->setFrom($this->sEmailFrom[0], $this->sEmailFrom[1]);
+          $mail->addAddress($this->sEmailTo);
+
+          $mail->Subject = $this->sSubject;
+          $mail->msgHTML($this->sMsg);
+
+          $mail->send();
+
+        break;
+
+        ]]></add>
+    </operation>
+  </file>
+
+  <!-- ouv2_fichaatendimentoagata002.php -->
+  <file path="ouv2_fichaatendimentoagata002.php">
+    <operation error="abort" label="ouv2_fichaatendimentoagata002.php">
+      <search><![CDATA[$oAgata           = new cl_dbagata("ouvidoria/ficha_atendimento.agt");]]></search>
+      <add position="replace"><![CDATA[$oAgata           = new cl_dbagata("ouvidoria/ficha_atendimento_cac.agt");]]></add>
+    </operation>
+  </file>
+
+</modification>

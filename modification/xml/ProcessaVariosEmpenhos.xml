@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <id>ProcessaVariosEmpenhos</id>
+  <name>ProcessaVariosEmpenhos</name>
+  <label>Processar Vários Empenhos</label>
+
+  <ecidade-version>2.3.46</ecidade-version>
+
+
+  <file path='con4_processatrans001.php'>
+    <operation>
+      <search><![CDATA[require_once(modification("model/contabilidade/lancamento/LancamentoAuxiliarContaCorrente.model.php"));]]></search>
+      <add position="after">
+        <![CDATA[      
+
+db_app::load("scripts.js,
+              strings.js,
+              prototype.js,
+              widgets/DBLancador.widget.js,
+              widgets/DBToogle.widget.js,
+              estilos.css, widgets/DBToogle.widget.js
+            ");
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+  <file path='con4_processatrans001.php'>
+    <operation>
+      <search><![CDATA[$sWhere .= " and e60_numemp = {$e60_numemp} ";]]></search>
+      <add position="before">
+        <![CDATA[      
+/*
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+  <file path='con4_processatrans001.php'>
+    <operation>
+      <search><![CDATA[$sWhere .= " and e60_numemp = {$e60_numemp} ";]]></search>
+      <add position="after">
+        <![CDATA[      
+
+    	*/
+      $sWhere .= " and e60_numemp in ({$e60_numemp})";
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+  <file path='con4_processatrans001.php'>
+    <operation>
+      <search><![CDATA[</html>]]></search>
+      <add position="after">
+        <![CDATA[      
+
+   <?php 
+	 if (db_getsession('DB_login') === "dbseller" && db_getsession("DB_id_usuario") === "1") {
+    ?> 
+  <center>
+    <fieldset style="width:400px" id='fieldsetEmpenhos'>
+      <legend>Processar Vários Empenhos</legend>
+      <div id='ctnLancadorEmpenho'></div>
+    </fieldset>
+  </center>
+ <?php } ?> 
+
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+  <file path='con4_processatrans001.php'>
+    <operation>
+      <search><![CDATA[<?php if (!empty($sArquivoLog)) : ?>]]></search>
+      <add position="before">
+        <![CDATA[      
+
+  <?php 
+		  if (db_getsession('DB_login') === "dbseller" && db_getsession("DB_id_usuario") === "1") {
+  ?>
+
+  var oLancadorEmpenho = new DBLancador('LancadorEmpenho');
+  oLancadorEmpenho.setLabelAncora("Empenho:");
+  oLancadorEmpenho.setTextoFieldset("Empenhos");
+  oLancadorEmpenho.setTituloJanela("Pesquisar Empenhos");
+  oLancadorEmpenho.setNomeInstancia("oLancadorEmpenho");
+  oLancadorEmpenho.setParametrosPesquisa("func_empempenho.php", ["e60_numemp", "z01_nome"]);
+  oLancadorEmpenho.setGridHeight(150);
+  oLancadorEmpenho.show($("ctnLancadorEmpenho"));
+
+
+  var oToogleEmpenhos = new DBToogle("fieldsetEmpenhos", false);
+      oToogleEmpenhos.oLegend.style.cursor = 'pointer';
+
+
+  function setaVariosEmpenhos(){
+
+  	var aEmpenhos       = oLancadorEmpenho.getRegistros(false);
+  	var sVirgula        = "";
+  	var sStringEmpenhos = "";
+  	
+        aEmpenhos . each( function( oDados , iIndice  ){
+
+      	   sStringEmpenhos += sVirgula + oDados.sCodigo;
+           sVirgula = ", ";
+         } );
+         
+        if (sStringEmpenhos != '') {
+          $('e60_numemp').value = sStringEmpenhos;
+        }
+  }
+                      
+<?php } ?>
+
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+  <file path='con4_processatrans001.php'>
+    <operation>
+      <search><![CDATA[function js_verifica() {]]></search>
+      <add position="after">
+        <![CDATA[      
+
+    	   <?php 
+    		if (db_getsession('DB_login') === "dbseller" && db_getsession("DB_id_usuario") === "1") {
+    	       
+                 echo "setaVariosEmpenhos();";
+              } 
+    		  ?> 
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <file path='con4_movimentacaopatrimonial001.php'>
+    <operation>
+      <search><![CDATA[$oRotulo->label("e69_numero");]]></search>
+      <add position="after">
+        <![CDATA[      
+
+
+db_app::load("scripts.js,
+              strings.js,
+              prototype.js,
+              widgets/DBLancador.widget.js,
+              widgets/DBToogle.widget.js,
+              estilos.css, widgets/DBToogle.widget.js
+            ");
+
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+  <file path='con4_movimentacaopatrimonial001.php'>
+    <operation>
+      <search><![CDATA[</html>]]></search>
+      <add position="after">
+        <![CDATA[      
+
+   <?php 
+		  if (db_getsession('DB_login') === "dbseller" && db_getsession("DB_id_usuario") === "1") {
+    ?> 
+  <center>
+    <fieldset style="width:400px" id='fieldsetEmpenhos'>
+      <legend>Processar Vários Empenhos</legend>
+      <div id='ctnLancadorEmpenho'></div>
+    </fieldset>
+  </center>
+ <?php } ?> 
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+
+
+  <file path='con4_movimentacaopatrimonial001.php'>
+    <operation>
+      <search><![CDATA[<script type="text/javascript">]]></search>
+      <add position="after">
+        <![CDATA[      
+
+
+<?php 
+		  if (db_getsession('DB_login') === "dbseller" && db_getsession("DB_id_usuario") === "1") {
+?>
+
+var oLancadorEmpenho = new DBLancador('LancadorEmpenho');
+oLancadorEmpenho.setLabelAncora("Empenho:");
+oLancadorEmpenho.setTextoFieldset("Empenhos");
+oLancadorEmpenho.setTituloJanela("Pesquisar Empenhos");
+oLancadorEmpenho.setNomeInstancia("oLancadorEmpenho");
+oLancadorEmpenho.setParametrosPesquisa("func_empempenho.php", ["e60_numemp", "z01_nome"]);
+oLancadorEmpenho.setGridHeight(150);
+oLancadorEmpenho.show($("ctnLancadorEmpenho"));
+
+
+var oToogleEmpenhos = new DBToogle("fieldsetEmpenhos", false);
+    oToogleEmpenhos.oLegend.style.cursor = 'pointer';
+
+
+function setaVariosEmpenhos(){
+
+	var aEmpenhos       = oLancadorEmpenho.getRegistros(false);
+	var sVirgula        = "";
+	var sStringEmpenhos = "";
+	
+      aEmpenhos . each( function( oDados , iIndice  ){
+
+    	   sStringEmpenhos += sVirgula + oDados.sCodigo;
+         sVirgula = ", ";
+       } );
+
+      if (sStringEmpenhos != '') {
+        $('e60_numemp').value = sStringEmpenhos;
+      }
+}
+                    
+<?php } ?>
+
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+
+
+  <file path='con4_reprocessalancamentos001.RPC.php'>
+    <operation>
+      <search><![CDATA[$sWhereConlancam .= " and c75_numemp = {$iEmpenho} ";]]></search>
+      <add position="before">
+        <![CDATA[      
+
+/*
+
+        ]]></add>
+    </operation>
+  </file>
+
+  <file path='con4_reprocessalancamentos001.RPC.php'>
+    <operation>
+      <search><![CDATA[$sWhereConlancam .= " and c75_numemp = {$iEmpenho} ";]]></search>
+      <add position="after">
+        <![CDATA[      
+
+*/
+$sWhereConlancam .= " and c75_numemp in ({$iEmpenho}) ";
+
+
+        ]]></add>
+    </operation>
+  </file>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</modification>

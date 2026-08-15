@@ -1,0 +1,210 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.diarioprogressaoavaliacao" description="Avaliação progressão parcial." type="0">
+
+  <fields>
+    <field name="ed999_sequencial"
+           conteudo="int4"
+           description="Sequencial"
+           inivalue="0"
+           label="Sequencial"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sequencial"
+           reference=""
+           ispk="t"
+           hassequence="t">
+        <sequence name="plugins.diarioprogressaoavaliacao_ed999_sequencial_seq"></sequence>
+    </field>
+    <field name="ed999_diarioprogressao"
+           conteudo="int4"
+           description="Diario"
+           inivalue=""
+           label="Diario"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Diario"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_procavaliacao"
+           conteudo="int4"
+           description="Avaliação do Procedimento"
+           inivalue=""
+           label="Avaliação do Procedimento"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Avaliação do Procedimento"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_faltas"
+           conteudo="int4"
+           description="Faltas"
+           inivalue=""
+           label="Faltas"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Faltas"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_nota"
+           conteudo="float8"
+           description="Nota"
+           inivalue=""
+           label="Nota"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="4"
+           tipoobj="text"
+           labelrel="Nota"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_conceito"
+           conteudo="varchar(3)"
+           description="Conceito"
+           inivalue=""
+           label="Conceito"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Conceito"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_parecer"
+           conteudo="text"
+           description="Parecer"
+           inivalue=""
+           label="Parecer"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Parecer"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_parecerpadronizado"
+           conteudo="text"
+           description="Parecer Padronizado"
+           inivalue=""
+           label="Parecer Padronizado"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Parecer Padronizado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_atingiominimo"
+           conteudo="bool"
+           description="Atingio mínimo para aprovação"
+           inivalue="f"
+           label="Atingio mínimo para aprovação"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Atingio mínimo para aprovação"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_amparado"
+           conteudo="bool"
+           description="Amparado"
+           inivalue="f"
+           label="Amparado"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Amparado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_amparado"
+           conteudo="bool"
+           description="Amparado"
+           inivalue="f"
+           label="Amparado"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="5"
+           tipoobj="text"
+           labelrel="Amparado"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="ed999_observacao"
+           conteudo="text"
+           description="Observação"
+           inivalue=""
+           label="Observação"
+           size="10"
+           null="t"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Observação"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+  </fields>
+  <primarykey>
+    <fieldpk name="ed999_sequencial"></fieldpk>
+  </primarykey>
+  <foreignkeys>
+    <foreignkey reference="plugins.diarioprogressao" inner='true'>
+      <fieldfk name="ed999_diarioprogressao" reference="ed993_sequencial"></fieldfk>
+    </foreignkey>
+    <foreignkey reference="procavaliacao" inner='true'>
+      <fieldfk name="ed999_procavaliacao" reference="ed41_i_codigo"></fieldfk>
+    </foreignkey>
+  </foreignkeys>
+</table>

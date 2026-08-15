@@ -1,0 +1,130 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.ordemauxiliarempenhoitens" description="Itens da ordem Auxiliar" prefix="" label="itens da ordem auxiliar" type="0">
+    <fields>
+        <field name="sequencial"
+               label="Código"
+               labelrel="Código"
+               description="Código"
+               conteudo="int4"
+               inivalue="0"
+               size="10"
+               null="f"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="t"
+               hassequence="t">
+            <sequence name="plugins.ordemauxiliarempenhoitens_sequencial_seq"></sequence>
+        </field>
+        <field name="ordemauxiliarempenho"
+               label="ordem auxiliar"
+               labelrel="ordem auxiliar"
+               description="ordem auxiliar"
+               conteudo="int4"
+               inivalue=""
+               size="10"
+               null="t"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+
+        </field>
+        <field name="matmater"
+               label="Itens"
+               labelrel="Itens"
+               description="Itens"
+               conteudo="int4"
+               inivalue=""
+               size="10"
+               null="t"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+
+        </field>
+        <field name="quantidade"
+               label="Quantidade"
+               labelrel="Quantidade"
+               description="Quantidade"
+               conteudo="numeric"
+               inivalue=""
+               size="10"
+               null="t"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+
+        </field>
+        <field name="valorunitario"
+               label="Valor Unitário"
+               labelrel="Valor Unitário"
+               description="Valor Unitário"
+               conteudo="numeric"
+               inivalue=""
+               size="10"
+               null="t"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+
+        </field>
+        <field name="valortotal"
+               label="Valor Total"
+               labelrel="valor Total"
+               description="Valor Total"
+               conteudo="numeric"
+               inivalue=""
+               size="10"
+               null="t"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+        </field>
+        <field name="observacao"
+               label="Observacao"
+               labelrel="Observacao"
+               description="Observacao"
+               conteudo="text"
+               inivalue=""
+               size="10"
+               null="t"
+               uppercase="f"
+               autocompl="f"
+               aceitatipo="0"
+               tipoobj="text"
+               reference=""
+               ispk="f"
+               hassequence="f">
+        </field>
+    </fields>
+    <primarykey>
+        <fieldpk  name="sequencial"></fieldpk>
+    </primarykey>
+    <foreignkeys>
+        <foreignkey reference="plugins.ordemauxiliarempenho" inner='true'>
+            <fieldfk name="ordemauxiliarempenho" reference="sequencial"></fieldfk>
+        </foreignkey>
+    </foreignkeys>
+</table>

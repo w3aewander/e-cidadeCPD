@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+	<id>ContratosXml</id>
+	<label>Contratos</label>
+
+  <file path="func_acordo.php">
+    <operation error="abort" label="func_acordo.php">
+      <search><![CDATA[<table border="0" align="center" cellspacing="0">]]></search>
+      <add position="after"><![CDATA[
+        <tr>
+          <td width="4%" align="left" nowrap title="<?php echo $Tac16_numeroprocesso; ?>" class="bold">
+            Processo:
+          </td>
+          <td width="96%" align="left" nowrap>
+            <?php db_input("ac16_numeroprocesso", 10, 0, true, "text", 4); ?>
+          </td>
+        </tr>]]></add>
+    </operation>
+  </file>
+
+  <file path="func_acordo.php">
+    <operation error="abort" label="func_acordo.php">
+      <search><![CDATA[$campos .= "(ac16_numeroacordo || '/' || ac16_anousu)::varchar as ac16_numeroacordo, ";]]></search>
+      <add position="after"><![CDATA[
+  $campos .= "ac16_numeroprocesso,";]]></add>
+    </operation>
+  </file>
+
+  <file path="func_acordo.php">
+    <operation error="abort" label="func_acordo.php">
+      <search><![CDATA[if (!empty($ac16_numeroacordo)) {]]></search>
+      <add position="before"><![CDATA[
+        if (!empty($ac16_numeroprocesso)) {
+          $aNumeroProcesso = $ac16_numeroprocesso;
+          $iAno    = db_getsession("DB_anousu");
+          $sWhere  = "ac16_numeroprocesso = '{$aNumeroProcesso}' and ac16_instit = {$iInstituicaoSessao} and {$sDepartamentos}";
+        }
+
+        ]]></add>
+    </operation>
+  </file>
+
+  <file path="funcoes/db_func_acordo.php">
+    <operation error="abort" label="funcoes/db_func_acordo.php">
+      <search><![CDATA[$campos .= "acordo.ac16_acordosituacao,acordo.ac16_coddepto, ";]]></search>
+      <add position="replace"><![CDATA[$campos .= "acordo.ac16_numeroprocesso, acordo.ac16_acordosituacao,acordo.ac16_coddepto, ";]]></add>
+    </operation>
+  </file>
+
+  <file path="con4_consacordos001.php">
+    <operation error="abort" label="con4_consacordos001 #1">
+      <search><![CDATA[var ac16_sequencial  = "";]]></search>
+      <add position="before"><![CDATA[var ac16_numeroprocesso = "";]]></add>
+    </operation>
+  </file>
+
+  <file path="con4_consacordos001.php">
+    <operation error="abort" label="con4_consacordos001 #2">
+      <search><![CDATA[var sQuery           = "";]]></search>
+      <add position="after"><![CDATA[
+        if ($F('ac16_numeroprocesso') != "") {
+          ac16_numeroprocesso = $F('ac16_numeroprocesso');
+        }
+      ]]></add>
+    </operation>
+  </file>
+
+  <file path="con4_consacordos001.php">
+    <operation error="abort" label="con4_consacordos001 #3">
+      <search><![CDATA[sQuery += "ac16_sequencial="+ac16_sequencial;]]></search>
+      <add position="after"><![CDATA[sQuery += "&ac16_numeroprocesso=" + ac16_numeroprocesso;]]></add>
+    </operation>
+  </file>
+
+  <file path="con4_consacordos001.php">
+    <operation error="abort" label="con4_consacordos001 #4">
+      <search><![CDATA[<table>]]></search>
+      <add position="after"><![CDATA[
+          <tr>
+            <td nowrap title="" width="130">
+              <b>Processo:</b>
+            </td>
+            <td colspan="2">
+              <?php db_input('ac16_numeroprocesso', 10, $Iac16_numeroprocesso, true, 'text', 1); ?>
+            </td>
+          </tr>]]></add>
+    </operation>
+  </file>
+
+  <file path="con4_consacordos002.php">
+    <operation error="abort" label="con4_consacordos002 #1">
+      <search><![CDATA[$sWhere = "";]]></search>
+      <add position="after"><![CDATA[//$sWhere = "";
+        $sAnd   = $sWhere != "" ? " and " : "";
+        if (trim($oGet->ac16_numeroprocesso) != "") {
+          $sWhere .= "{$sAnd} ac16_numeroprocesso = '{$oGet->ac16_numeroprocesso}'";
+        }]]></add>
+    </operation>
+  </file>
+
+  <file path="con4_consacordos002.php">
+    <operation error="abort" label="con4_consacordos002 #2">
+      <search><![CDATA[$sCampos    = "ac16_sequencial, (ac16_numeroacordo || '/' || ac16_anousu)::varchar as ac16_numeroacordo, ";]]></search>
+      <add position="replace"><![CDATA[$sCampos    = "ac16_sequencial, (ac16_numeroacordo || '/' || ac16_anousu)::varchar as ac16_numeroacordo, ac16_numeroprocesso, ";]]></add>
+    </operation>
+  </file>
+
+</modification>

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>CalculoValeTransporteVoltaRedonda</id>
+    <file path="model/pessoal/std/DBPessoal.model.php">
+        <operation error="log" label="Conta dias uteis do mes sem os sabados">
+            <search><![CDATA[$rsF032 = db_query($sSqlF032 = "SELECT
+                                      count(distinct datas_mes) as F032
+                                    FROM (SELECT
+                                            (ano_competencia||'-'||lpad(mes_competencia, 2, '0')||'-'||lpad(generate_series(1, ndias(ano_competencia, mes_competencia))::varchar, 2, '0'))::date AS datas_mes
+                                            FROM (SELECT
+                                                        {$iAno} AS ano_competencia,
+                                                        {$iMes} AS mes_competencia
+                                                  ) AS competencia
+                                          ) as datas_do_mes
+                                    WHERE datas_mes NOT IN  ( SELECT
+                                                                r62_data
+                                                                FROM calendf
+                                                               WHERE r62_calend = (SELECT
+                                                                                    rh53_calend
+                                                                                   FROM rhcadcalend
+                                                                                   INNER JOIN rhlotacalend ON rh64_calend = rh53_calend
+                                                                                   WHERE rh53_instit = {$iInstituicao}
+                                                                                     AND rh64_lota   = {$oServidor->getCodigoLotacao()}
+                                                                                  )
+                                                                 AND extract('year' from r62_data)  = {$iAno}
+                                                                 AND extract('month' from r62_data) = {$iMes}
+                                                            )");]]>
+            </search>
+
+            <add position="replace">
+                <![CDATA[$rsF032 = db_query($sSqlF032 = "
+WITH dados_competencia AS (
+    SELECT 
+        CASE WHEN {$iMes} = 12 THEN {$iAno} + 1 ELSE {$iAno} END AS ano_competencia,
+        CASE WHEN {$iMes} = 12 THEN 1 ELSE {$iMes} + 1 END AS mes_competencia
+),
+
+dias_trabalhados AS (
+    SELECT DISTINCT r63_dia
+    FROM vtfdias
+    WHERE r63_regist = {$iMatricula}
+      AND r63_anousu = (SELECT ano_competencia FROM dados_competencia)
+      AND r63_mesusu = (SELECT mes_competencia FROM dados_competencia)
+),
+
+dias_por_semana AS (
+    SELECT 
+        EXTRACT(WEEK FROM r63_dia) AS semana,
+        COUNT(DISTINCT r63_dia) AS dias_trabalhados
+    FROM vtfdias
+    WHERE r63_regist = {$iMatricula}
+      AND r63_anousu = (SELECT ano_competencia FROM dados_competencia)
+      AND r63_mesusu = (SELECT mes_competencia FROM dados_competencia)
+    GROUP BY semana
+),
+
+feriados AS (
+    SELECT r62_data 
+    FROM calendf 
+    WHERE r62_calend = ( 
+        SELECT rh53_calend 
+        FROM rhcadcalend 
+        INNER JOIN rhlotacalend ON rh64_calend = rh53_calend 
+        WHERE rh64_lota = {$oServidor->getCodigoLotacao()}
+    ) 
+    AND EXTRACT('year' FROM r62_data) = (SELECT ano_competencia FROM dados_competencia)
+    AND EXTRACT('month' FROM r62_data) = (SELECT mes_competencia FROM dados_competencia)
+)
+
+SELECT 
+    CASE
+        WHEN NOT EXISTS (SELECT 1 FROM dias_por_semana WHERE dias_trabalhados >= 5) THEN
+                (SELECT COUNT(*) FROM dias_trabalhados)
+        ELSE
+            (SELECT COUNT(*) 
+             FROM dias_trabalhados 
+             WHERE EXTRACT(DOW FROM r63_dia) NOT IN (0, 6) 
+             AND r63_dia NOT IN (SELECT r62_data FROM feriados))
+    END AS F032");]]>
+    
+            </add>
+        </operation>
+    </file>
+
+    <file path="pes4_gerafolha004.php">
+
+         <operation error="log" label="Calcula 6 por cento em cima do valor da D912 ou da F010">
+            <search><![CDATA[global $dtot_vpass,$dperc_pass,$dquant_pass,$quant_pass,$perc_pass,$tot_vpass;]]>
+            </search>
+            <add position="replace">
+                 <![CDATA[global $dtot_vpass,$dperc_pass,$dquant_pass,$quant_pass,$perc_pass,$tot_vpass,$valor_base;]]>
+            </add>
+        </operation>
+       
+        <operation error="log" label="Calcula 6 por cento em cima do valor da D912 ou da F010">
+            <search><![CDATA[$tot_vpass  += ($quantvale * $vtfempr[0]["r16_valor"]);]]>
+            </search>
+            <add position="replace">
+                 <![CDATA[  // Query para buscar o total da base B050
+  
+    $sql = "SELECT coalesce(sum(g.r14_valor), 0) as total 
+          FROM gerfsal g
+          INNER JOIN basesr b ON g.r14_rubric = b.r09_rubric 
+              AND g.r14_anousu = b.r09_anousu 
+              AND g.r14_mesusu = b.r09_mesusu 
+              AND g.r14_instit = b.r09_instit 
+          WHERE g.r14_regist = " . db_sqlformat($registro) . "
+            AND g.r14_anousu = " . db_sqlformat($anousu) . "
+            AND g.r14_mesusu = " . db_sqlformat($mesusu) . "
+            AND g.r14_instit = " . db_sqlformat($DB_instit) . "
+            AND b.r09_base = 'B050'";
+            
+    //die($sql);
+    $result = db_query($sql);
+
+    // Verifique se a query foi executada com sucesso
+    if (!$result) {
+        echo "Erro na execução da query: " . pg_last_error();
+        return;
+    }
+
+    // Verifique se a query retornou resultados
+    if (pg_num_rows($result) == 0) {
+        echo "Nenhum resultado encontrado para a query.";
+        return;
+    }
+
+    $valor_base = pg_fetch_result($result, 0, 0);
+
+    if ($valor_base > 0) {
+        //$tot_vpass += ($valor_base * 0.06 / 30 * $quantvale);
+        $tot_vpass += ($valor_base * 0.06 / 30);
+    } else {
+        // Mantém o cálculo original caso não encontre valor
+        $tot_vpass += ($quantvale * $vtfempr[0]["r16_valor"]);
+    }]]>
+            </add>
+        </operation>
+          <operation error="log" label="">
+                <search><![CDATA[$dtot_vpass  += ($quantvale * $vtfempr[0]["r16_valor"]);]]>
+            </search>
+            <add position="replace">
+                <![CDATA[  // Query para buscar o total da base B050
+
+    $sql = "SELECT coalesce(sum(g.r14_valor), 0) as total 
+          FROM gerfsal g
+          INNER JOIN basesr b ON g.r14_rubric = b.r09_rubric 
+              AND g.r14_anousu = b.r09_anousu 
+              AND g.r14_mesusu = b.r09_mesusu 
+              AND g.r14_instit = b.r09_instit 
+          WHERE g.r14_regist = " . db_sqlformat($registro) . "
+            AND g.r14_anousu = " . db_sqlformat($anousu) . "
+            AND g.r14_mesusu = " . db_sqlformat($mesusu) . "
+            AND g.r14_instit = " . db_sqlformat($DB_instit) . "
+            AND b.r09_base = 'B050'";
+
+    //die($sql);
+    $result = @db_query($sql);
+
+    // Verifique se a query foi executada com sucesso
+    if (!$result) {
+        echo "Erro na execução da query: " . pg_last_error();
+        return;
+    }
+
+    // Verifique se a query retornou resultados
+    if (pg_num_rows($result) == 0) {
+        echo "Nenhum resultado encontrado para a query.";
+        return;
+    }
+
+    $valor_base = pg_fetch_result($result, 0, 0);
+
+    if ($valor_base > 0) {
+        //$dtot_vpass += ($valor_base * 0.06 / 30 * $quantvale);
+        $dtot_vpass += ($valor_base * 0.06 / 30);
+    } else {
+        // Mantém o cálculo original caso não encontre valor
+        $dtot_vpass += ($quantvale * $vtfempr[0]["r16_valor"]);
+    }]]>
+            </add>
+        </operation>
+        <operation error="log" label="Altera o nome da funcao quantvale_afas">
+            <search><![CDATA[select quantvale_afas]]>
+            </search>
+            <add position="replace">
+                <![CDATA[select pessoal.quantvale_afas_vr]]>
+            </add>
+        </operation>        
+    </file>
+    
+    
+    <!--<file path="pes4_inicializavt002.php">
+        
+        <operation error="log" label="">
+            <search><![CDATA[global $lotacao_faixa,$opcao_filtro;]]>
+            </search>
+            <add position="after">
+                 <![CDATA[// ========================================
+  // DELETE nos dados de VTFDIAS do mês atual
+  // ========================================
+
+  $dataii_ano = db_anofolha();
+  $dataii_mes = db_mesfolha();
+
+  $sql_exc1 = "DELETE FROM vtfdias
+                WHERE r63_anousu = $dataii_ano
+                  AND r63_mesusu = $dataii_mes
+                  AND r63_regist IN (
+                    SELECT rh02_regist
+                      FROM rhpessoalmov
+                     WHERE rh02_anousu = $dataii_ano
+                       AND rh02_mesusu = $dataii_mes
+                       AND rh02_instit = " . db_getsession("DB_instit") . "
+                  )";
+
+  $res_exc1 = db_query($sql_exc1, null, "");
+
+  if ($res_exc1 == false) {
+    db_msgbox("Erro ao excluir dados da VTFDIAS do mês atual.\nCancelamento da folha cancelado.");
+    return false;
+  }
+
+  // ========================================]]>
+            </add>
+        </operation>
+       
+    </file>-->
+</modification>

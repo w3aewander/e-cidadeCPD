@@ -65,8 +65,7 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
         //$sSqlOrcSuplem = $daoOrcSuplem->sql_query_suplementacoes_despesa(null, $sCampos, $orderBy, $sWhere);
         $sSqlOrcSuplem = $daoOrcSuplem->sql_query_suplementacoes_despesaSigfis(null, $sCampos, $orderBy, $sWhere);
 
-        $rsOrcSuplem   = db_query($sSqlOrcSuplem);
-        //var_dump($sSqlOrcSuplem); die("Confere");
+        $rsOrcSuplem   = db_query($sSqlOrcSuplem);        
 
         if(($this->instit == 30 || $this->instit == 45 || $this->instit == 75 || $this->instit == 85 || $this->instit == 90) && pg_num_rows($rsOrcSuplem) == 0){
             $inst = db_getsession("DB_instit");
@@ -74,25 +73,18 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
                     $novosdados = pg_query($novosql);
                     $rsOrcSuplem = $novosdados;
             }
-                    
-
         
-        //$nuevo = $this->buscaSuplementacoes();
-        //var_dump($nuevo);
-        //die("Testa");
         if(db_getsession("DB_instit") == 50){
             $fonteselemento = array(
-            //337270 => 337239,
-            //337270 => 337299,
             337270 => 337170,
             319009 => 339008,
             319034 => 339034
         );
             if (pg_num_rows($rsOrcSuplem) > 0){
             
-            if (empty($this->sCodigoTribunal)) {
-                throw new \Exception("O código do tribunal deve ser informado para geração do arquivo");
-            }
+                if (empty($this->sCodigoTribunal)) {
+                    throw new \Exception("O código do tribunal deve ser informado para geração do arquivo");
+                }
 
             $RemessaAlteracaoOrcamentariaDespesa = new \stdClass();
             $alteracaoOrcamentariaDespesa = array();
@@ -102,9 +94,6 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
 
             for ($i = 0; $i < pg_num_rows($rsOrcSuplem); $i++) {
                 $oDadosQuery = db_utils::fieldsMemory($rsOrcSuplem, $i);
-
-
-                //if(abs($oDadosQuery->valor) != "360000" && abs($oDadosQuery->valor) != "45000"){continue;}
 
                 $anoInstrumento = explode("-", $oDadosQuery->data_instrumento)[0];
                 $mesInstrumento = explode("-", $oDadosQuery->data_instrumento)[1];
@@ -128,55 +117,18 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
                     $conta = substr($oDadosQuery->c60_estrut, 1, 6);
                 }
 
-
                 $noinstrumento = str_replace(".", "", $oDadosQuery->numero_instrumento);
                 $codfunc = (strlen($oDadosQuery->o58_funcao) == 1) ? "0" . $oDadosQuery->o58_funcao : $oDadosQuery->o58_funcao;
                 $codsubfunc = (strlen($oDadosQuery->o58_subfuncao) == 2) ? "0" . $oDadosQuery->o58_subfuncao : $oDadosQuery->o58_subfuncao;
                 $codacao = (strlen($oDadosQuery->o55_projativ) == 3) ? "0".$oDadosQuery->o55_projativ : $oDadosQuery->o55_projativ;
 
                 $chave = "c" . $oDadosQuery->o58_orgao . $oDadosQuery->o58_unidade . $noinstrumento . $oDadosQuery->tipo_atualizacao . $deParaSuplemTipo->tipoalteracao . $deParaSuplemTipo->fonteabertura . $codfunc . $codsubfunc . $oDadosQuery->o58_programa . $oDadosQuery->o55_tipo . $codacao . $conta . "c";
-                //$chave = string($chave);
                 
-                //if($chave != "5011865712110122110126514339039"){continue;}
-
-                
-                /*
-                if(in_array($chave, $guarda)){
-                    $guardavalor[$chave] += abs($oDadosQuery->valor);
-                    continue;
-                }else{
-                    $xvalor = abs($oDadosQuery->valor);
-                }
-                array_push($guarda, $chave);
-                */
-                /*
-                var_dump($chave);
-                var_dump(abs($oDadosQuery->valor)); echo "<br>";
-                if(in_array($chave, $guardavalor)){
-                    $guardavalor[$chave] += abs($oDadosQuery->valor);
-                }else{
-                    $guardavalor[$chave] = abs($oDadosQuery->valor);
-                }
-
-                if(in_array($chave, $guarda)){
-                    $guardavalor[$chave] += abs($oDadosQuery->valor);
-                    continue;
-                }else{
-                    $xvalor = abs($oDadosQuery->valor);
-                }
-                array_push($guarda, $chave);
-                */
-
-                
-                if(array_key_exists($chave, $guardavalor)){                    
-                    //var_dump($chave);
-                    //var_dump(abs($oDadosQuery->valor)); echo "<br>";
+                if(array_key_exists($chave, $guardavalor)){
                     $xvalor = abs($oDadosQuery->valor);
                     $xvalor = (float)$xvalor;
                     $guardavalor[$chave] += $xvalor;
                 }else{
-                    //var_dump($chave);
-                    //var_dump(abs($oDadosQuery->valor)); echo "<br>";
                     $xvalor = abs($oDadosQuery->valor);
                     $xvalor = (float)$xvalor;
                     $guardavalor[$chave] = $xvalor;
@@ -187,14 +139,8 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
                 }
                 array_push($guarda, $chave);
 
-                
-
-                
-                //var_dump($guardavalor);
-                //var_dump($guardavalor[$chave]); echo "<br>";
-
                 $oDadosAlteracaoOrcamentariaDespesa = new \stdClass();
-                $oDadosAlteracaoOrcamentariaDespesa->Identificador = $ix; //$identificador;
+                $oDadosAlteracaoOrcamentariaDespesa->Identificador = $ix;
                 $oDadosAlteracaoOrcamentariaDespesa->CodigoOrgao = $oDadosQuery->o58_orgao;
                 $oDadosAlteracaoOrcamentariaDespesa->CodigoUnidadeOrcamentaria = $oDadosQuery->o58_unidade;
                 $oDadosAlteracaoOrcamentariaDespesa->Competencia = $competencia;
@@ -214,9 +160,9 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
                 $oDadosAlteracaoOrcamentariaDespesa->CodigoPrograma = $oDadosQuery->o58_programa;
                 $oDadosAlteracaoOrcamentariaDespesa->TipoAcao = $oDadosQuery->o55_tipo;
                 $oDadosAlteracaoOrcamentariaDespesa->CodigoAcao =  (strlen($oDadosQuery->o55_projativ) == 3 && $oDadosQuery->o55_projativ != 300) ? "0".$oDadosQuery->o55_projativ : $oDadosQuery->o55_projativ;
-                $oDadosAlteracaoOrcamentariaDespesa->NaturezaDespesa = $conta; //substr($oDadosQuery->c60_estrut, 1, 6);
+                $oDadosAlteracaoOrcamentariaDespesa->NaturezaDespesa = $conta;
                 $oDadosAlteracaoOrcamentariaDespesa->FonteRecurso = $oDadosQuery->codigo_siconfi;
-                $oDadosAlteracaoOrcamentariaDespesa->ValorAlteracao = $chave; //($guardavalor[$chave]) ? $guardavalor[$chave] : $xvalor; //abs($oDadosQuery->valor);
+                $oDadosAlteracaoOrcamentariaDespesa->ValorAlteracao = $chave;
                 $oDadosAlteracaoOrcamentariaDespesa->CodigoCreditoAdicional = $deParaSuplemTipo->creditoadicional;
 
                 $alteracaoOrcamentariaDespesa[] =  (object) [
@@ -224,18 +170,10 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
                 ];
                 $ix++;                
             }
-
-            //$this->testa($alteracaoOrcamentariaDespesa);
-            //die("Mostra");
-
             
             foreach ($alteracaoOrcamentariaDespesa as $linha) {
                 $linha->AlteracaoOrcamentariaDespesa->ValorAlteracao = $guardavalor[$linha->AlteracaoOrcamentariaDespesa->ValorAlteracao];
             }
-            
-
-            //$this->testa($guardavalor);
-            //die("confere");
 
             $RemessaAlteracaoOrcamentariaDespesa->AlteracoesOrcamentariasDespesas = $alteracaoOrcamentariaDespesa;
             $this->aDados= $RemessaAlteracaoOrcamentariaDespesa;
@@ -272,7 +210,6 @@ class ArquivoAlteracaoOrcamentariaDespesa extends ArquivoBase
 
                 if($fontessubelemento[substr($oDadosQuery->c60_estrut, 1, 6)]){
                     $natdespesa = $fontessubelemento[substr($oDadosQuery->c60_estrut, 1, 6)];
-                    //$oDadosQuery->c60_estrut = $fontessubelemento[substr($oDadosQuery->c60_estrut, 1, 6)];
                 }else{
                     $natdespesa = substr($oDadosQuery->c60_estrut, 1, 6);
                 }

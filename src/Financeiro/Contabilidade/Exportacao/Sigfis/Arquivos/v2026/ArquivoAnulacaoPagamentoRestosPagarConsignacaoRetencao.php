@@ -63,7 +63,6 @@ class ArquivoAnulacaoPagamentoRestosPagarConsignacaoRetencao extends ArquivoBase
 
         $guardaempenho = array();
         foreach ($retencoes as $retencao) {
-            //if($retencao->NumeroEmpenho != 4396){continue;}
             $verificaisso = $this->verifica161($retencao->e60_numemp);
             if(!$verificaisso){continue;}
             if(in_array($retencao->NumeroEmpenho, $guardaempenho)){
@@ -85,39 +84,23 @@ class ArquivoAnulacaoPagamentoRestosPagarConsignacaoRetencao extends ArquivoBase
                     }
                 }
                 $textofinal .= $textofinal0;
-                
-                //$textofinal .= $linha['justificativa'] . " ";
-                
-            }
-            
-                /*$novotexto = explode(" ", $retencao->Justificativa);
-                $textofinal = "";
-                foreach ($novotexto as $texto) {
-                    if(strlen($texto) > 0){
-                        $textofinal .= $texto . " ";
-                    }
-                }*/
-        
+            }        
             
             $AnuConsigRet = new stdClass();
-            //var_dump($retencao->Justificativa); echo "<br>";
             $AnuConsigRet->Identificador = $retencao->Identificador;
             $AnuConsigRet->CodigoUnidadeGestora = $this->sCodigoTribunal;
             $AnuConsigRet->Competencia = $this->competencia;
             $AnuConsigRet->NumeroRestosPagarEmpenho = $retencao->NumeroEmpenho;
             $AnuConsigRet->AnoRestosPagarEmpenho = $retencao->AnoEmpenho;
-            $AnuConsigRet->NumeroNotaPagamentoDeEmpenhoConsignacaoRetencao = $retencao->NumeroNota; //$retencao->e50_codord;
-            $AnuConsigRet->AnoNotaPagamentoDeEmpenhoConsignacaoRetencao = substr($this->competencia, 0, 4); //$retencao->AnoLiquidacaoEmpenho;            
+            $AnuConsigRet->NumeroNotaPagamentoDeEmpenhoConsignacaoRetencao = $retencao->NumeroNota;
+            $AnuConsigRet->AnoNotaPagamentoDeEmpenhoConsignacaoRetencao = substr($this->competencia, 0, 4);
             $AnuConsigRet->NumeroNotaAnulacao = substr($retencao->IdentificadorLiquidacao, 0, 6);
             $AnuConsigRet->DataAnulacao = $retencao->DataAnulacao;
-            $AnuConsigRet->Justificativa = utf8_encode(trim(substr($textofinal, 0, 4000))); //utf8_encode(trim(substr($retencao->Justificativa, 0, 4000)));
-            $AnuConsigRet->CpfResponsavel = $ugs;//$retencao->CPFResponsavel;
+            $AnuConsigRet->Justificativa = utf8_encode(trim(substr($textofinal, 0, 4000)));
+            $AnuConsigRet->CpfResponsavel = $ugs;
             $AnuConsigRet->TipoConsignacaoRetencaoPaga = $this->convertTipoRetencao($retencao->Tipo);
             $AnuConsigRet->TipoAnulacaoMovimento = 2;
-            $AnuConsigRet->Valor = $valorfinal;//$retencao->Valor;
-            //$AnuConsigRet->CodigoOrgao = $retencao->CodigoOrgao;
-            //$AnuConsigRet->CodigoUnidadeOrcamentaria = $retencao->CodigoUnidadeOrcamentaria;
-
+            $AnuConsigRet->Valor = $valorfinal;
 
             $RPAnuConsignacaoRetencao->AnulacoesPagamentosRestosPagarConsignacoesRetencoes[] = (object) [
                 'AnulacaoPagamentoRestosPagarConsignacaoRetencao' => $AnuConsigRet
@@ -172,11 +155,7 @@ class ArquivoAnulacaoPagamentoRestosPagarConsignacaoRetencao extends ArquivoBase
             ->whereIn('c71_coddoc', [6009, 6011])
             ->where('e60_instit', $this->instit)
             ->whereBetween('c70_data', [$this->dtDataInicial, $this->dtDataFinal])
-            ->orderBy('e60_codemp');
-
-            //$sql_with_bindings = str_replace_array('?', $query->getBindings(), $query->toSql());
-            //$sql_with_bindings = str_replace("\"", "", $sql_with_bindings);
-            //var_dump($sql_with_bindings); die("confere");
+            ->orderBy('e60_codemp');            
 
         return $query->get();
     }

@@ -163,7 +163,6 @@ class ArquivoAlteracaoOrcamentariaReceita extends ArquivoBase
             //Alterado        
             $novosdados = $this->buscaSuplementacoes();
             $guardado = $this->guardaAdicionais();
-            //$this->testa($novosdados); die("Veja");
 
             $dados = array();        
             foreach ($novosdados as $item) {            
@@ -270,7 +269,6 @@ class ArquivoAlteracaoOrcamentariaReceita extends ArquivoBase
 
             $sSqlOrcSuplem = $daoOrcSuplem->sql_query_suplementacoes_receita_modificado(null, $sCampos, null, $sWhere, null);
             $rsOrcSuplem   = db_query($sSqlOrcSuplem);
-            //var_dump($sSqlOrcSuplem); die("Consulta");
 
             if (pg_num_rows($rsOrcSuplem) > 0) {            
                 if (empty($this->sCodigoTribunal)) {
@@ -320,8 +318,7 @@ class ArquivoAlteracaoOrcamentariaReceita extends ArquivoBase
                 $RemessaAlteracaoOrcamentaria->AlteracoesOrcamentariasReceitas = $alteracaoOrcamentariaReceita;
                 $this->aDados= $RemessaAlteracaoOrcamentaria;
             }
-        }//else original
-    
+        }//else original    
     }//chave da função
 
 

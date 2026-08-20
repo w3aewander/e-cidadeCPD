@@ -5,7 +5,6 @@ namespace ECidade\Financeiro\Contabilidade\Exportacao\Sigfis\Arquivos\v2024;
 use ECidade\Financeiro\Contabilidade\Exportacao\Sigfis\Common\Helper;
 use Illuminate\Database\Capsule\Manager as DB;
 
-//require_once modification("../../../../../../../libs/db_libcontabilidade.php");
 require_once modification('libs/db_libcontabilidade.php');
 
 class ArquivoBalancete extends ArquivoBase
@@ -74,17 +73,6 @@ class ArquivoBalancete extends ArquivoBase
         });
         $novotudao = array_values($novotudao);
 
-        
-        /*
-        foreach ($novotudao as $tudo) {                        
-            $init = substr($tudo["estrutural"], 0, 1);
-            if($init == "4"){
-                $this->testa($tudo);
-            }
-        }
-        die("COnfere");
-        */
-
         $xmes = substr($this->competencia, 4, 2);
         $iAnoSessao = db_getsession('DB_anousu');
         if($arquivosdo == 13){
@@ -92,100 +80,98 @@ class ArquivoBalancete extends ArquivoBase
         }else{
             $dados = $this->buscaDados($xmes);    
         }
-        
-        
 
         $fontes0 = array(
-      5 => 1569,
-      28 => 1550,
-      200 => 1500,
-      201 => 1501, 
-      202 => 1501, 
-      203 => 1501, 
-      204 => 1501, 
-      205 => 1501, 
-      206 => 1501, 
-      207 => 1501, 
-      208 => 1501, 
-      209 => 1501, 
-      210 => 1501, 
-      212 => 1501, 
-      225 => 1501, 
-      219 => 1704, 
-      8 => 1704, 
-      219 => 1705, 
-      8 => 1705, 
-      211 => 1700, 
-      211 => 1701, 
-      211 => 1702, 
-      211 => 1703, 
-      6 => 1750, 
-      173 => 1751, 
-      24 => 1708, 
-      92 => 1700, 
-      220 => 1749, 
-      160 => 1749, 
-      98 => 1701, 
-      21 => 1701, 
-      97 => 1755, 
-      97 => 1756, 
-      215 => 1801, 
-      216 => 1800, 
-      80 => 1501, 
-      50 => 1799, 
-      213 => 1754, 
-      224 => 1899, 
-      214 => 1802, 
-      178 => 1752, 
-      117 => 1701,
-      23 => 1540,
-    11 => 1551,
-    45 => 1553,
-    34 => 1569,
-    164 => 1660,
-    148 => 1700,
-    22 => 1700,
-    105 => 1700,
-    18 => 1700,
-    44 => 1700,
-    14 => 1700,
-    124 => 1700,
-    158 => 1700,
-    151 => 1700,
-    6212 => 1621,
-    171 => 1701,
-    170 => 1700,
-    12 => 1552,
-    134 => 6002,
-    167 => 1569,
-    16 => 1569,
-    147 => 1660,
-    62 => 1660,
-    102 => 1700,
-    6002 => 1600,
-    6594 => 1659,
-    1500 => 1500,
-    1700 => 1500,
-    1704 => 1500,
-    101 => 1500,
-    108 => 1500,
-    111 => 1500,
-    157 => 1500,
-    1703 => 1500,
-    29 => 1500,
-    104 => 1500,
-    78 => 1500,
-    139 => 1500,
-    136 => 1500,
-    149 => 1500,
-    161 => 1500,
-    1569 => 1500,
-    150 => 1500,
-    68 => 1500,
-    131 => 1500,
-    145 => 1500,
-    138 => 1500,
-    10 => 1500
+          5 => 1569,
+          28 => 1550,
+          200 => 1500,
+          201 => 1501, 
+          202 => 1501, 
+          203 => 1501, 
+          204 => 1501, 
+          205 => 1501, 
+          206 => 1501, 
+          207 => 1501, 
+          208 => 1501, 
+          209 => 1501, 
+          210 => 1501, 
+          212 => 1501, 
+          225 => 1501, 
+          219 => 1704, 
+          8 => 1704, 
+          219 => 1705, 
+          8 => 1705, 
+          211 => 1700, 
+          211 => 1701, 
+          211 => 1702, 
+          211 => 1703, 
+          6 => 1750, 
+          173 => 1751, 
+          24 => 1708, 
+          92 => 1700, 
+          220 => 1749, 
+          160 => 1749, 
+          98 => 1701, 
+          21 => 1701, 
+          97 => 1755, 
+          97 => 1756, 
+          215 => 1801, 
+          216 => 1800, 
+          80 => 1501, 
+          50 => 1799, 
+          213 => 1754, 
+          224 => 1899, 
+          214 => 1802, 
+          178 => 1752, 
+          117 => 1701,
+          23 => 1540,
+        11 => 1551,
+        45 => 1553,
+        34 => 1569,
+        164 => 1660,
+        148 => 1700,
+        22 => 1700,
+        105 => 1700,
+        18 => 1700,
+        44 => 1700,
+        14 => 1700,
+        124 => 1700,
+        158 => 1700,
+        151 => 1700,
+        6212 => 1621,
+        171 => 1701,
+        170 => 1700,
+        12 => 1552,
+        134 => 6002,
+        167 => 1569,
+        16 => 1569,
+        147 => 1660,
+        62 => 1660,
+        102 => 1700,
+        6002 => 1600,
+        6594 => 1659,
+        1500 => 1500,
+        1700 => 1500,
+        1704 => 1500,
+        101 => 1500,
+        108 => 1500,
+        111 => 1500,
+        157 => 1500,
+        1703 => 1500,
+        29 => 1500,
+        104 => 1500,
+        78 => 1500,
+        139 => 1500,
+        136 => 1500,
+        149 => 1500,
+        161 => 1500,
+        1569 => 1500,
+        150 => 1500,
+        68 => 1500,
+        131 => 1500,
+        145 => 1500,
+        138 => 1500,
+        10 => 1500
     );
         
         if (empty($dados)) {
@@ -249,16 +235,10 @@ class ArquivoBalancete extends ArquivoBase
                 $xdados3["tipo_abertura"] = $novo["tipo_abertura"];
                 $xdados3["tipo_contax"] = ($pegavalor < 0) ? "D" : "C";
                 $xdados3["novovalorx"] = abs($pegavalor);
-                array_push($novosdados, $xdados3);
+                array_push($novosdados, $xdados3);                
                 
-                
-                $pegavalor = 0;
-                
+                $pegavalor = 0;                
             }
-            
-            
-            
-            
             $indice++;
         }
         
@@ -266,17 +246,10 @@ class ArquivoBalancete extends ArquivoBase
         $xontador = 0;
         $guardanapo = array();
         foreach ($novosdados as $dado) {
-            //if($dado["reduzido"] != 14425){continue;}
-            
-
             if(in_array($dado["reduzido"], $guardanapo)){
                 continue;
             }
             array_push($guardanapo, $dado["reduzido"]);
-
-                
-            
-
             
             $sIndice = $dado['estrutural'] . $dado['competencia'] . $dado['tipo_movimento'] . $dado['reduzido'];
             
@@ -308,10 +281,9 @@ class ArquivoBalancete extends ArquivoBase
                 $cpo = 10132;
             }else{
                 $cpo = 10131;
-            }
+            }            
             
             
-            //if (substr($dado['competencia'], -2) == "01") {
                 if ($dado['valor_credito'] > 0 || $dado['valor_debito'] > 0) {
                     $novovalor = 0;
                     if($dado['tipo_movimento'] == 1 || $dado['tipo_movimento'] == 3){
@@ -332,10 +304,6 @@ class ArquivoBalancete extends ArquivoBase
                     }
 
                     $novafonte = $this->buscaRec($dado['reduzido'],$this->iAnoUsu);
-                    /*if(substr($dado['estrutural'], 0, 7) == 1111119){
-                        echo $dado['estrutural'] . "*****";
-                        echo $ix . " - " . $dado["reduzido"] . " - ". $novafonte; echo "<br>";
-                    }*/
                     
                     if($fontes0[$novafonte]){
                       $novafonte2 = $fontes0[$novafonte];
@@ -366,19 +334,7 @@ class ArquivoBalancete extends ArquivoBase
                             $caeo = 1070;
                         }
                     }
-
-                    /*if($this->instit == 50){
-                        if( substr($dado['estrutural'], 0, 2) == 33 || substr($dado['estrutural'], 0, 2) == 32 || substr($dado['estrutural'], 0, 2) == 21) {
-                            $caeo = 1070;
-                        }
-                    }*/
-
-                    /*if($this->instit == 80){
-                        var_dump($dado["estrutural"]); die("Confere");
-                        if( substr($dado['estrutural'], 0, 2) == 33 || substr($dado['estrutural'], 0, 2) == 32 || substr($dado['estrutural'], 0, 2) == 21) {
-                            $caeo = 1070;
-                        }
-                    }*/
+                    
                     if($this->instit == 80){
                      if(substr($dado['estrutural'], 0, 9) == 123810280){$contacontabilx = 123810299;}   
                     }
@@ -527,7 +483,6 @@ class ArquivoBalancete extends ArquivoBase
                         elseif(substr($dado['estrutural'], 0, 15) == 237110200000000){$contacontabilx = 237110200;}
                         elseif(substr($dado['estrutural'], 0, 15) == 237110301000000){$contacontabilx = 237110300;}
                         elseif(substr($dado['estrutural'], 0, 15) == 237110302000000){$contacontabilx = 237110300;}
-                        //elseif(substr($dado['estrutural'], 0, 15) == 321110108010000){$contacontabilx = 321110100;}
                         elseif(substr($dado['estrutural'], 0, 15) == 322110201000000){$contacontabilx = 322110100;}
                         elseif(substr($dado['estrutural'], 0, 15) == 332110500000000){$contacontabilx = 332110100;}
                         elseif(substr($dado['estrutural'], 0, 15) == 332213100000000){$contacontabilx = 332213100;}
@@ -578,20 +533,13 @@ class ArquivoBalancete extends ArquivoBase
                         elseif(substr($dado['estrutural'], 0, 15) == 631101900000000){$contacontabilx = 631100000;}
                         elseif(substr($dado['estrutural'], 0, 15) == 631308100000000){$contacontabilx = 631300000;}
                         elseif(substr($dado['estrutural'], 0, 15) == 631408100000000){$contacontabilx = 631400000;}
-                        //elseif(substr($dado['estrutural'], 0, 15) == 631708100000000){$contacontabilx = 631700000;}
                         elseif(substr($dado['estrutural'], 0, 15) == 632701000000000){$contacontabilx = 632700000;}
                         elseif(substr($dado['estrutural'], 0, 15) == 721110100000000){$contacontabilx = 721110000;}
                         elseif(substr($dado['estrutural'], 0, 15) == 721130000000000){$contacontabilx = 721130000;}
-                        //elseif(substr($dado['estrutural'], 0, 15) == 821110001000000){$contacontabilx = 821110000;}
-                        //elseif(substr($dado['estrutural'], 0, 15) == 821120001000000){$contacontabilx = 821120000;}
                         elseif(substr($dado['estrutural'], 0, 15) == 821120100000000){$contacontabilx = 821120100;}
-                        //elseif(substr($dado['estrutural'], 0, 15) == 821130001000000){$contacontabilx = 821130000;}
                         elseif(substr($dado['estrutural'], 0, 15) == 821130100000000){$contacontabilx = 821130100;}
                         elseif(substr($dado['estrutural'], 0, 15) == 821130201000000){$contacontabilx = 821130200;}
                         elseif(substr($dado['estrutural'], 0, 15) == 821130800000000){$contacontabilx = 821139900;}
-                        //elseif(substr($dado['estrutural'], 0, 15) == 821140100000000){$contacontabilx = 821140000;}
-                        //elseif(substr($dado['estrutural'], 0, 15) == 821140800000000){$contacontabilx = 821140000;}
-
                     }else{
                         if(substr($dado['estrutural'], 0, 4) == 6321){$contacontabilx = 632100000;}
                         elseif(substr($dado['estrutural'], 0, 4) == 6322){$contacontabilx = 632200000;}
@@ -679,7 +627,6 @@ class ArquivoBalancete extends ArquivoBase
                         elseif(substr($dado['estrutural'], 0, 9) == 897110100){$contacontabilx = 891210100;}
                         elseif(substr($dado['estrutural'], 0, 9) == 111110103){$contacontabilx = 111110100;}
                         elseif(substr($dado['estrutural'], 0, 9) == 123810280){$contacontabilx = 123810204;}
-                        //elseif(substr($dado['estrutural'], 0, 9) == 124108000){$contacontabilx = 124100000;}
                         elseif(substr($dado['estrutural'], 0, 9) == 124810180){$contacontabilx = 124810100;}
                         elseif(substr($dado['estrutural'], 0, 9) == 218918001){$contacontabilx = 218919800;}
                         elseif(substr($dado['estrutural'], 0, 9) == 236910180){$contacontabilx = 236910000;}
@@ -719,7 +666,6 @@ class ArquivoBalancete extends ArquivoBase
                         elseif(substr($dado['estrutural'], 0, 9) == 211410100){$contacontabilx = 211410101;}
                         elseif(substr($dado['estrutural'], 0, 9) == 311210100){$contacontabilx = 311210101;}
                         elseif(substr($dado['estrutural'], 0, 9) == 211430601){$contacontabilx = 211430500;}
-                        //elseif(substr($dado['estrutural'], 0, 9) == 211430101){$contacontabilx = 211430100;}
                         elseif(substr($dado['estrutural'], 0, 9) == 223130200){$contacontabilx = 223130000;}
                         elseif(substr($dado['estrutural'], 0, 9) == 521210000){$contacontabilx = 521210100;}
                         elseif(substr($dado['estrutural'], 0, 9) == 451020114){$contacontabilx = 521210100;}
@@ -842,12 +788,8 @@ class ArquivoBalancete extends ArquivoBase
                      if(substr($dado['estrutural'], 0, 9) == 123810280){$contacontabilx = 123810299;}
                     }
 
-                    
-                    //if($contacontabilx != 111111900){continue;}
-
                     if($contacontabilx == 511000000){continue;}
                     if($this->instit == 80 && $contacontabilx == 233919900){continue;}
-                    
                     
 
                     $csf = $this->buscaCodigoSuperavit($dado['estrutural'], $this->iAnoUsu);
@@ -860,9 +802,7 @@ class ArquivoBalancete extends ArquivoBase
                         $csf = "1";
                     }else{
                         $csf = null;
-                    }
-
-                    
+                    }                    
 
                 $tem = 0;
                 foreach ($novotudao as $xbalancete) {
@@ -912,38 +852,27 @@ class ArquivoBalancete extends ArquivoBase
                                 }
                                 
                                 
-                                $cfr = $this->buscaFonteRecurso($dado["reduzido"]);
-                                //if($arquivosdo == "13"){
-                                    if(substr($contacontabilx, 0, 4) != "1111"){
-                                        $novafonte2 = null;
-                                    }
-                                    if($contacontabilx == "111111900"){
-                                        //$novafonte2 = 1501;
-                                    }
-                                    if($this->instit == 80 && substr($contacontabilx, 0, 7) == 1111101){
-                                        $novafonte2 = 1501;
-                                    }
+                                $cfr = $this->buscaFonteRecurso($dado["reduzido"]);                                
+                                if(substr($contacontabilx, 0, 4) != "1111"){
+                                    $novafonte2 = null;
+                                }
+                                if($contacontabilx == "111111900"){
+                                    //$novafonte2 = 1501;
+                                }
+                                if($this->instit == 80 && substr($contacontabilx, 0, 7) == 1111101){
+                                    $novafonte2 = 1501;
+                                }
 
-                                    if($dado["estrutural"] == 111111915001100){
-                                        $novafonte2 = 1500;
-                                    }
+                                if($dado["estrutural"] == 111111915001100){
+                                    $novafonte2 = 1500;
+                                }
 
-                                    if($dado["estrutural"] == 111111915013000){
-                                        $novafonte2 = 1540;
-                                    }
-                                    
-                                //}
-
-                                /*if($ix == 841){
-                                    $this->testa($dado);
-                                    var_dump($novafonte);
-                                    var_dump($novafonte2);
-                                    die("Confere II");
-                                }*/
+                                if($dado["estrutural"] == 111111915013000){
+                                    $novafonte2 = 1540;
+                                }
 
                                 $oConta = (object)[
-                                    'Identificador' => $ix, //$dado["reduzido"],
-                                    //'Identificador' => $dado["reduzido"],
+                                    'Identificador' => $ix,
                                     'CodigoUnidadeGestora' => $this->sCodigoTribunal,
                                     'Exercicio' => $this->iAnoUsu,
                                     'Competencia' => $this->competencia,
@@ -951,39 +880,29 @@ class ArquivoBalancete extends ArquivoBase
                                     'CodigoPoderOrgao' => $cpo,
                                     'CodigoSuperavitFinanceiro' => ($csf) ? $csf : null,
                                     'DividaConsolidada' => null,
-                                    //'FonteDestinacaoRecursos' => ($arquivosdo == "13") ? $novafonte2 : $cfr, //$cfr, //$novafonte2, //$this->buscaRec($dado['reduzido'],$this->iAnoUsu),
                                     'FonteDestinacaoRecursos' => $novafonte2,
                                     'CodigoAcompanhamentoExecucaoOrcamentaria' => $caeo,
                                     'NaturezaReceita' => null,
-                                    'NaturezaDespesa' => null,                        
+                                    'NaturezaDespesa' => null,
                                     'Funcao' => null,
                                     'SubFuncao' => null,
                                     'AnoInscricaoRestosPagar' => null,
-                                    'Valor' => $xvalor, //$dado["novovalorx"], //$novovalor,
-                                    'Tipo' => $xtipo,//$dado['tipo_movimento'],
-                                    'NaturezaSaldo' => $xnatureza, //$dado["tipo_contax"], //$tipoconta,//$dado['tipo_abertura'],                        
+                                    'Valor' => $xvalor,
+                                    'Tipo' => $xtipo,
+                                    'NaturezaSaldo' => $xnatureza,
                                     'CodigoDetalhamentoSubfuncao' => null,
                                     'Deducao' => $deducao,
                                 ];
                                 $ix++;
                                 $obj->Balancetes[] = (object)['Balancete' => $oConta];
                             }
-                            //die("conrre");
                         }
                     }
                 }
-                
                 if($tem == 0){continue;}
                     
                 }
         }//foreach
-        //$this->testa($obj); die("Confere");
-        
         $this->aDados = $obj;
     }//função
-
-
-
-
-
 }//classe

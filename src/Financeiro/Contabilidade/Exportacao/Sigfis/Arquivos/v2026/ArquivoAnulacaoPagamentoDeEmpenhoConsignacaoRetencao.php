@@ -33,7 +33,6 @@ class ArquivoAnulacaoPagamentoDeEmpenhoConsignacaoRetencao extends ArquivoBase
     }
 
     public function gerarDados(){
-        //$retencoes = $this->getRetencoes();
         $retencoes = $this->retencoesAnuladas();
 
         if (count($retencoes) == 0) {
@@ -43,7 +42,7 @@ class ArquivoAnulacaoPagamentoDeEmpenhoConsignacaoRetencao extends ArquivoBase
         $EmpenhoAnuConsignacaoRetencao = new stdClass();
         $EmpenhoAnuConsignacaoRetencao->AnulacoesPagamentosDeEmpenhoConsignacoesRetencoes = [];
         $ix = 1;
-        //$this->testa($retencoes); die("Confere");
+        
         foreach ($retencoes as $retencao) {            
             $AnuConsigRet = new stdClass();
             $AnuConsigRet->Identificador = $ix;
@@ -119,17 +118,10 @@ class ArquivoAnulacaoPagamentoDeEmpenhoConsignacaoRetencao extends ArquivoBase
             ->join('conlancamretencao', 'c127_conlancam', 'c70_codlan')
             ->join('retencaotiporec', 'e21_sequencial', 'c127_retencaotiporec')
             ->join('retencaotipocalc', 'e32_sequencial', 'e21_retencaotipocalc')
-            //->whereIn('c71_coddoc', [6003, 6005])
-            ->whereIn('c71_coddoc', [163, 6005])
-            //->whereIn('c71_coddoc', [163, 6004, 6005, 6000, 6001])
-            //->whereIn('c71_coddoc', [6005, 6003])
+            ->whereIn('c71_coddoc', [163, 6005])            
             ->where('e60_instit', $this->instit)
             ->whereBetween('c70_data', [$this->dtDataInicial, $this->dtDataFinal])
             ->get();
-
-            //$sql_with_bindings = str_replace_array('?', $query->getBindings(), $query->toSql());
-            //$sql_with_bindings = str_replace("\"", "", $sql_with_bindings);
-            //var_dump($sql_with_bindings); die("confere");
 
         return $query;
     }

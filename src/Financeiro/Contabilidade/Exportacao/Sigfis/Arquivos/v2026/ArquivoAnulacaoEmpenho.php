@@ -35,7 +35,6 @@ class ArquivoAnulacaoEmpenho extends ArquivoBase
             44905206 => 44905208,
             33903981 => 33903999,            
             33909218 => 33901801,
-            //33909299 => 33901801,
             33903937 => 33903936,
             33901499 => 33901401,
             33904713 => 33904705,
@@ -175,16 +174,9 @@ class ArquivoAnulacaoEmpenho extends ArquivoBase
         foreach ($empenhos as $empenho) {
             $elementos = DB::table('empanuladoele')
                 ->select(['e95_codele', 'e95_valor', 'c60_estrut'])
-                ->join('conplanoorcamento', 'c60_codcon', 'e95_codele')
-                /*->join('planodespesaconplanoorcamento', 'conplanoorcamento_codigo', 'c60_codigo')
-                ->join('planodespesa', function (JoinClause $join) {
-                    $join->on('planodespesa.id', 'planodespesa_id')
-                        ->where('uniao', '=', 't');
-                })*/
+                ->join('conplanoorcamento', 'c60_codcon', 'e95_codele')                
                 ->where('e95_codanu', $empenho->e94_codanu)
                 ->where('c60_anousu', $empenho->e60_anousu)
-                //->where('exercicio', $empenho->e60_anousu)
-                //->where('uniao', '=', 't');
                 ->get()                
                 ->map(function ($elemento) {
                     return (object)[
@@ -193,15 +185,10 @@ class ArquivoAnulacaoEmpenho extends ArquivoBase
                         'NaturezaDespesa' =>  substr($elemento->c60_estrut, 1, 8),
                     ];
                 })
-                ->toArray();
-
-                
+                ->toArray();                
 
                 if($fontessubelemento[$elementos[0]->NaturezaDespesa]){
                 $elementos[0]->NaturezaDespesa = $fontessubelemento[$elementos[0]->NaturezaDespesa];
-
-                
-
             }
 
             $data = (object) [

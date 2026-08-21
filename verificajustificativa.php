@@ -1,6 +1,4 @@
-<?
-//error_reporting(E_ALL); 
-//ini_set('display_errors', '1');
+<?php
 
 require_once(modification("libs/db_stdlib.php"));
 require_once(modification("libs/db_utils.php"));
@@ -22,11 +20,6 @@ function testa($var){
   echo "</pre>";
 }
 
-/*function verificaJustificativa($seq){
-  $sql = pg_query("SELECT * FROM pagordem WHERE e50_numemp = {$seq}");
-  $resultado = pg_fetch_all($sql);
-  return $resultado[0];
-}*/
 function verificaJustificativa($ordem){
   $sql = pg_query("SELECT * FROM pagordem WHERE e50_codord = {$ordem}");
   $resultado = pg_fetch_all($sql);
@@ -44,14 +37,8 @@ $seqempenho = $_GET["sequencial"];
 $ordem = $_GET["op"];
 
 $conferencia = buscaSeqPorOp($ordem);
-//$rs = verificaJustificativa($seqempenho);
 $rs = verificaJustificativa($ordem);
-//var_dump($rs["e50_justificativaquebraordem"]);
-//var_dump($conferencia["e50_numemp"]);
-//var_dump($seqempenho);
-//var_dump($rs);
-//die("Opa");
-//<button type="button" onclick="libera();">Sim</button>
+
 
 if($conferencia["e50_numemp"] == $seqempenho){
   if(!empty($rs["e50_justificativaquebraordem"])){
@@ -101,59 +88,3 @@ if($conferencia["e50_numemp"] == $seqempenho){
 } else { ?>  
   <h4>O Número da OP digitada não corresponde ao empenho escolhido!</h4>  
 <?php }
-
-//die("Confere");
-
-//$rs = vx();
-//$rs = verificaJustificativa($seqempenho);
-
-//testa($rs);
-
-
-
-/*
-
-if(!empty($rs["e50_justificativaquebraordem"])){  
-
-  $datapb = implode("/", array_reverse(explode("-", $rs["e50_dataquebraordem"])));
-  ?>
-  <span><h4>Justificativa já existente.</h4></span>
-  <td style="width: 120px;display: inline-block;"><b>Data da Publicação:</b></td>
-  <td style="display: inline-block;margin-right: 70px"><input style="background-color: #DEB887" type="text" name="datapublicacao" value="<?=$datapb?>" readonly></td>
-
-  <td style="width: 80px;display: inline-block;"><b>Nº da Edição:</b></td>
-  <td style="display: inline-block;"><input style="background-color: #DEB887" type="text" name="numedi" value="<?=$rs['e50_numedi'];?>" readonly></td>
-  <br>
-  <tr>
-  <td style="width: 30px;display: inline-block;"><b>Link:</b></td>
-  <td style="display: inline-block;"><input style="background-color: #DEB887" type="text" name="link" size="80" value="<?=$rs["e50_justificativaquebraordem"]?>" readonly></td>
-  </tr>
-  <input type="hidden" name="existente" value="sim">  
-  <br>
-  
-  
-<?php } elseif(!empty($rs["e50_codord"])) { ?>
-
-
-              <td style="width: 120px;display: inline-block;"><b>Data da Publicação:</b></td>
-              <td style="display: inline-block;margin-right: 70px">
-                <!--<input type="text" id="datap" name="datap" required >-->
-                <?php db_inputdata("datapublicacao", null, null, null, true, "text", 1); ?>
-              </td>
-
-              <td style="width: 80px;display: inline-block;"><b>Nº da Edição:</b></td>
-              <td style="display: inline-block;"><input type="text" name="numedi" required onKeyPress="return js_mascara(event);"></td>
-            <br>
-          
-            <tr>
-              <td style="width: 30px;display: inline-block;"><b>Link:</b></td>
-              <td style="display: inline-block;"><input type="text" name="link" size="80" readonly></td>
-            </tr>
-            
-
-
-<?php } else { ?>
-  <h4>Não há registros.</h4>
-<?php } ?>
-
-*/

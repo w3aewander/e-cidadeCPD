@@ -1,29 +1,4 @@
-<?
-/*
- *     E-cidade Software Publico para Gestao Municipal
- *  Copyright (C) 2014  DBselller Servicos de Informatica
- *                            www.dbseller.com.br
- *                         e-cidade@dbseller.com.br
- *
- *  Este programa e software livre; voce pode redistribui-lo e/ou
- *  modifica-lo sob os termos da Licenca Publica Geral GNU, conforme
- *  publicada pela Free Software Foundation; tanto a versao 2 da
- *  Licenca como (a seu criterio) qualquer versao mais nova.
- *
- *  Este programa e distribuido na expectativa de ser util, mas SEM
- *  QUALQUER GARANTIA; sem mesmo a garantia implicita de
- *  COMERCIALIZACAO ou de ADEQUACAO A QUALQUER PROPOSITO EM
- *  PARTICULAR. Consulte a Licenca Publica Geral GNU para obter mais
- *  detalhes.
- *
- *  Voce deve ter recebido uma copia da Licenca Publica Geral GNU
- *  junto com este programa; se nao, escreva para a Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- *  02111-1307, USA.
- *
- *  Copia da licenca no diretorio licenca/licenca_en.txt
- *                                licenca/licenca_pt.txt
- */
+<?php
 
 require_once(modification("libs/db_stdlib.php"));
 require_once(modification("libs/db_conecta.php"));
@@ -34,9 +9,6 @@ require_once(modification("dbforms/db_funcoes.php"));
 require_once(modification("dbforms/db_classesgenericas.php"));
 require_once(modification("classes/db_empempenho_classe.php"));
 include("classes/db_orcdotacao_classe.php");
-
-
-
 
 function testa($var){
   echo "<pre>";
@@ -55,8 +27,7 @@ function retiraDados($op){
   $resultado = pg_fetch_all($sql);
   return $resultado[0];
 }
-   
-
+ 
 //---  parser POST/GET
 parse_str($_SERVER["QUERY_STRING"]);
 db_postmemory($_POST);
@@ -71,8 +42,6 @@ $aux = new cl_arquivo_auxiliar;
 //--- cria rotulos e labels
 $clempempenho->rotulo->label();
 
-//----
-//----
 $cllote = new cl_lote;
 $cliframe_seleciona = new cl_iframe_seleciona;
 
@@ -80,13 +49,9 @@ $cllote->rotulo->label();
 $clrotulo = new rotulocampo;
 $clrotulo->label("z01_nome");
 
-
 $anousu = db_getsession("DB_anousu");
 
-
-
 if(isset($_POST["salvar"])){
-  //testa($_POST); die("Confere");
     
     if(empty($_POST["datapublicacao"]) || empty($_POST["numedi"]) ){
       if(isset($_POST["numedi2"])){
@@ -105,25 +70,17 @@ if(isset($_POST["salvar"])){
       $edicao_publicacao = $_POST["numedi"];
       $codord = $_POST["op"];
     }
-
-    //Verificação
-    //$sql = "UPDATE pagordem SET e50_dataquebraordem = '{$data_publicacao}', e50_justificativaquebraordem = '{$link_publicacao}', e50_numedi = {$edicao_publicacao} WHERE e50_codord = $codord";
-      //var_dump($sql);
-      //die("Verifica aqui");
-
+    
     //Inserção
     $sql = pg_query($conn, "UPDATE pagordem SET e50_dataquebraordem = '{$data_publicacao}', e50_justificativaquebraordem = '{$link_publicacao}', e50_numedi = {$edicao_publicacao} WHERE e50_codord = $codord");
 
     if(!$sql){
       $error = pg_last_error($conn);
-      //var_dump($error);
     } else {
       //Busca a certificação pela OP
       $certificacao = temCertificacao($codord);
 
       if($certificacao){
-        //testa($certificacao);
-        //die("Confere");
         //Altera nocertificado e cseq2 (incrementa 1)
         $dados["e60_numemp"] = $certificacao["e60_numemp"];
         $dados["e60_codemp"] = $certificacao["e60_codemp"];
@@ -133,16 +90,14 @@ if(isset($_POST["salvar"])){
         $dados["o58_orgao"] = $certificacao["corgao"];
         $dados["cempenho"] = $certificacao["cempenho"];
         $dados["cseq1"] = $certificacao["cseq1"];
-  $dados["cseq2"] = $certificacao["cseq2"] + 1;    
+        $dados["cseq2"] = $certificacao["cseq2"] + 1;    
         $dados["cano"] = $certificacao["cano"];
-  $dados["nocertificado"] = $certificacao["nocertificado"];
-  $vseq2 = $dados["cseq2"];
-  $vseq2 = (string)$vseq2;
-  if(strlen($vseq2) == 1){
-    $vseq2 = "0".$vseq2;
-  }  
-  $dados["nocertificado"] = substr_replace($dados["nocertificado"], $vseq2, 12, 2);
-
+        $dados["nocertificado"] = $certificacao["nocertificado"];
+        $vseq2 = $dados["cseq2"];
+        $vseq2 = (string)$vseq2;
+        if(strlen($vseq2) == 1){$vseq2 = "0".$vseq2;}  
+        
+        $dados["nocertificado"] = substr_replace($dados["nocertificado"], $vseq2, 12, 2);
         $dados["noprocesso"] = $certificacao["noprocesso"];
         $dados["datageracao"] = $certificacao["datageracao"];
         $dados["ordenadordadespesa"] = $certificacao["ordenadordadespesa"];
@@ -193,14 +148,11 @@ if(isset($_POST["salvar"])){
         $sqlc = pg_query($conn, $sqlinsercao);
         if(!$sqlc){
           $error = pg_last_error($conn);
-          var_dump($error);
         }
       }
       //Repete os dados e muda o sequencial 2 em uma nova inserção
       echo "<script>alert('Justificativa cadastrada com sucesso.');</script>";
     }
-  
-  
  //post 
 }elseif(isset($_POST["retirar"])){
   $codord = $_POST["op"];
@@ -210,20 +162,15 @@ if(isset($_POST["salvar"])){
   $ne = $dados["e50_numedi"];
 
   $sql1 = pg_query($conn, "INSERT INTO dadosretirada(e50_codord, e50_dataquebraordem, e50_justificativaquebraordem, e50_numedi) VALUES({$codord}, '{$dq}', '{$jq}', {$ne})");
-  //$sql1 = pg_query($conn, "UPDATE pagordem SET e50_dataquebraordem = '', e50_justificativaquebraordem = '', e50_numedi = 0 WHERE e50_codord = $codord");
-//Empenho: 920582
-//OP: 450588
-    if(!$sql1){
+    
+  if(!$sql1){
+    $error = pg_last_error($conn);
+  } else{
+    $atualiza = pg_query($conn, "UPDATE pagordem SET e50_dataquebraordem = null, e50_justificativaquebraordem = '', e50_numedi = 0 WHERE e50_codord = $codord");
+    if(!$atualiza){
       $error = pg_last_error($conn);
-      var_dump($error);      
-    } else{
-      $atualiza = pg_query($conn, "UPDATE pagordem SET e50_dataquebraordem = null, e50_justificativaquebraordem = '', e50_numedi = 0 WHERE e50_codord = $codord");
-      if(!$atualiza){
-        $error = pg_last_error($conn);
-        var_dump($error);        
-      }
-      
     }
+  }
   echo "<script>alert('OP retirada da quebra.');</script>";
 }
 
@@ -328,8 +275,7 @@ if(isset($_POST["salvar"])){
 var bt_lanca = document.getElementById("db_lanca");
 
   bt_lanca.addEventListener("click", function(){
-    var sequencial = document.getElementById("e60_numemp").value;
-    
+    var sequencial = document.getElementById("e60_numemp").value;    
     document.getElementById('op').readOnly = false;
     document.getElementById('op').style.backgroundColor = '#FFFFFF';
 
@@ -340,10 +286,6 @@ var bt_lanca = document.getElementById("db_lanca");
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function(){
         if((xhr.readyState === 4) && (xhr.status === 200)){
-          //console.log("***********");
-          console.log("Tamanho: " + xhr.responseText.length);
-          //console.log("***********");
-
           //Não tem justificativa
           if(xhr.responseText.length > 1600){
             console.log("Sem justificativa");
@@ -353,7 +295,6 @@ var bt_lanca = document.getElementById("db_lanca");
             document.getElementById('numedi').style.backgroundColor = '#FFFFFF';
             document.getElementById("vazio").style.display = "none";
           } else if(xhr.responseText.length < 100){
-            console.log("Entrou no meio?");
             alert("O Número da OP digitada não corresponde ao empenho escolhido!");
             window.location.href = "abaquebraocporop.php";
           } else {
@@ -400,31 +341,18 @@ document.getElementById("datapublicacao").addEventListener("change", mpreencherj
   }
 
 
-function libera(){  
-  console.log("Libera");
+function libera(){
   document.getElementById('numedi').readOnly = false;
   document.getElementById('numedi').style.backgroundColor = '#FFFFFF';
   document.getElementById('datapublicacao').readOnly = false;
   document.getElementById('datapublicacao').style.backgroundColor = '#FFFFFF';
-
   document.getElementById('retirar').style.display = 'none';
   document.getElementById('salvar').style.display = 'inline-block';
-  
-
-  //document.getElementById("numedi").addEventListener("blur", mpreencherjustificativa);
 }
 
-function libera2(){  
-  console.log("Libera2");
-  //document.getElementById('numedi').readOnly = false;
-  //document.getElementById('numedi').style.backgroundColor = '#FFFFFF';
-  //document.getElementById('datapublicacao').readOnly = false;
-  //document.getElementById('datapublicacao').style.backgroundColor = '#FFFFFF';
+function libera2(){
   document.getElementById('retirar').style.display = 'inline-block';
   document.getElementById('salvar').style.display = 'none';
-  
-
-  //document.getElementById("numedi").addEventListener("blur", mpreencherjustificativa);
 }
 
 function fecha(){  
@@ -435,19 +363,6 @@ function fecha(){
 
   document.getElementById('retirar').style.display = 'none';
   document.getElementById('salvar').style.display = 'inline-block';
-}
-
-function retira(){  
-  console.log("Retira");
-  //document.getElementById('numedi').readOnly = true;
-  //document.getElementById('numedi').style.backgroundColor = '#FFFFFF';
-  //document.getElementById('datapublicacao').readOnly = true;
-  //document.getElementById('datapublicacao').style.backgroundColor = '#FFFFFF';  
-  //document.getElementById('link').value = '';
-  //document.getElementById('retirar').style.display = 'inline-block';
-  //document.getElementById('salvar').style.display = 'none';
-
-  //document.getElementById("numedi").addEventListener("blur", mpreencherjustificativa);
 }
 
 function arrumadata(val){
@@ -511,9 +426,6 @@ function arrumadata(val){
   return true;
 }
 
-
-
-
   function js_alterarempenho(){
 
       var F = document.getElementById("empenho").options;
@@ -528,21 +440,7 @@ function arrumadata(val){
           else
               strempenhos += "," +  F[i].value;
       }
-      //document.form1.submit();
-      //alert(strempenhos);
-
-      /*var oParam                = new Object();
-      oParam.strempenhos        = strempenhos;
-      oParam.ops = ops;
-
-      new Ajax.Request('emp2_empliqpag07_novo.php',
-          {
-              method:'post',
-              parameters:'json='+Object.toJSON(oParam),
-              onComplete: alert("Empenhos alterados com sucesso.")
-
-          });*/
-
+      
       if(F.length > 0) {
           $.ajax({
               url: 'emp2_empliqpag07_novo.php',
@@ -586,14 +484,9 @@ function arrumadata(val){
   }
   function js_mostraempenho1(chave1){
       document.form1.e60_numemp.value = chave1;
-      // document.form1.z01_nome1.value = chave2;
       db_iframe_empempenho.hide();
   }
-
 </script>
-
-
-
 
 </center>
 </body>

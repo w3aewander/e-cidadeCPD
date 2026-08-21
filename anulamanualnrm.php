@@ -1,29 +1,4 @@
-<?
-/*
- *     E-cidade Software Publico para Gestao Municipal
- *  Copyright (C) 2014  DBSeller Servicos de Informatica
- *                            www.dbseller.com.br
- *                         e-cidade@dbseller.com.br
- *
- *  Este programa e software livre; voce pode redistribui-lo e/ou
- *  modifica-lo sob os termos da Licenca Publica Geral GNU, conforme
- *  publicada pela Free Software Foundation; tanto a versao 2 da
- *  Licenca como (a seu criterio) qualquer versao mais nova.
- *
- *  Este programa e distribuido na expectativa de ser util, mas SEM
- *  QUALQUER GARANTIA; sem mesmo a garantia implicita de
- *  COMERCIALIZACAO ou de ADEQUACAO A QUALQUER PROPOSITO EM
- *  PARTICULAR. Consulte a Licenca Publica Geral GNU para obter mais
- *  detalhes.
- *
- *  Voce deve ter recebido uma copia da Licenca Publica Geral GNU
- *  junto com este programa; se nao, escreva para a Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- *  02111-1307, USA.
- *
- *  Copia da licenca no diretorio licenca/licenca_en.txt
- *                                licenca/licenca_pt.txt
- */
+<?php
 
 require_once(modification("libs/db_stdlib.php"));
 require_once(modification("libs/db_conecta.php"));
@@ -64,8 +39,6 @@ db_app::import("Dotacao");
 
 db_app::import("contabilidade.contacorrente.*");
 
-
-
 function testa($var){
   echo "<pre>";
   print_r($var);
@@ -79,16 +52,7 @@ function retornaDados($idnrm){
 }
 
 $idnrm = $_GET["id"];
-//$m70_codigo = $_GET["m70codigo"];
-//$m71_codlanc = $_GET["m71colanc"];
-
 $dadosuteis = retornaDados($idnrm);
-
-//testa($dadosuteis);
-//die("Confere II");
-
-//pg_query("UPDATE controleentradanota SET anulada = 'sim' WHERE id = {$idnrm}");
-
 
 function buscaDadosMateriais($codlancamento){
   $sql = pg_query("SELECT * FROM materiaisnrm WHERE m80_codigo = {$codlancamento}");
@@ -146,32 +110,6 @@ $db_opcao = 33;
 
 $iCodidoMovimentacaoEstoque = '';
 
-/*
-if($_GET){
-  $codigolancamento = $_GET["chavepesquisa"];
-  $idnrm = $_GET["idnrm"];
-  $dadosnrm = buscaNRM($idnrm);
-  $dadosmateriais = buscaDadosMateriais($codigolancamento);
-  
-  
-  $sequencialempenho = $dadosnrm["sequencialempenho"];
-
-  $m51_codordem = $dadosnrm["m51_codordem"];
-  $e69_dtrecebe = $dadosnrm["e69_dtrecebe"];
-  
-  $valortotalempenho = buscaValorTotalEmpenho($sequencialempenho);
-  $valortotalmenosesse = buscaValorTotalItens($idnrm, $codigolancamento);
-  
-
-
-  $noempenho = buscaEmpenhoPorSeq($sequencialempenho);
-  $tipounidade = $dadosmateriais["m61_abrev"];
-  $nonrm = $dadosnrm["sequencial"] . "/" . $dadosnrm["anousuario"];
-
-  $dadosmnrm = buscaItensPorNrm($idnrm);
-
-  
-}*/
 $excluir = "sim";
 foreach($dadosuteis as $linha){
 if ($excluir == "sim") {
@@ -237,8 +175,6 @@ if ($excluir == "sim") {
           }
         }
       }
-      
-      
       
       $m80_login = db_getsession("DB_id_usuario");
       $m80_data  = date("Y-m-d",db_getsession("DB_datausu"));
@@ -314,8 +250,7 @@ if ($excluir == "sim") {
 
       $oInstituicao = new Instituicao(db_getsession("DB_instit"));
       $dtAtual      = date("Y-m-d", db_getsession("DB_datausu"));
-      $oDataAtual   = new DBDate($dtAtual);
-      
+      $oDataAtual   = new DBDate($dtAtual);      
       
       if ($sqlerro == false && USE_PCASP  &&  (ParametroIntegracaoPatrimonial::possuiIntegracaoMaterial($oDataAtual, $oInstituicao) ))  {        
         try {
@@ -355,10 +290,6 @@ if ($excluir == "sim") {
       }
       
       if($sqlerro == false){
-        //$kql1 = "UPDATE materiaisnrm SET anulada = 'sim' WHERE idnrm = {$idnrm} AND m80_codigo = {$m80_codigo}";
-        //$kql2 = "UPDATE controleentradanota SET anulada = 'sim' WHERE id = {$idnrm} ";
-        //var_dump($kql1);
-        //var_dump($kql2);
         pg_query("UPDATE materiaisnrm SET anulada = 'sim' WHERE idnrm = {$idnrm} AND m80_codigo = {$m80_codigo}");
         pg_query("UPDATE controleentradanota SET anulada = 'sim' WHERE id = {$idnrm} ");
       }
@@ -376,9 +307,3 @@ if($sqlerro == false){
   sleep(3);
   echo "<script>location.href='mat1_matestoqueini003nrm.php?entrada=true';</script>";
 }
-
-      /*if($sqlerro == false){  
-        db_msgbox("Anulação feita com sucesso");
-        echo "<script>location.href='mat1_matestoqueini003nrm.php?entrada=true';</script>";
-      }*/
-    

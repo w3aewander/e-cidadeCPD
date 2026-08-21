@@ -1,29 +1,4 @@
-<? 
-/*
- *     E-cidade Software Publico para Gestao Municipal
- *  Copyright (C) 2014  DBSeller Servicos de Informatica
- *                            www.dbseller.com.br
- *                         e-cidade@dbseller.com.br
- *
- *  Este programa e software livre; voce pode redistribui-lo e/ou
- *  modifica-lo sob os termos da Licenca Publica Geral GNU, conforme
- *  publicada pela Free Software Foundation; tanto a versao 2 da
- *  Licenca como (a seu criterio) qualquer versao mais nova.
- *
- *  Este programa e distribuido na expectativa de ser util, mas SEM
- *  QUALQUER GARANTIA; sem mesmo a garantia implicita de
- *  COMERCIALIZACAO ou de ADEQUACAO A QUALQUER PROPOSITO EM
- *  PARTICULAR. Consulte a Licenca Publica Geral GNU para obter mais
- *  detalhes.
- *
- *  Voce deve ter recebido uma copia da Licenca Publica Geral GNU
- *  junto com este programa; se nao, escreva para a Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- *  02111-1307, USA.
- *
- *  Copia da licenca no diretorio licenca/licenca_en.txt
- *                                licenca/licenca_pt.txt
- */
+<?php
 
 require_once(modification("libs/db_stdlib.php"));
 require_once(modification("libs/db_conecta.php"));
@@ -48,7 +23,6 @@ require_once(modification("model/contabilidade/planoconta/ClassificacaoConta.mod
 require_once(modification("model/contabilidade/planoconta/ContaCorrente.model.php"));
 require_once(modification("model/contabilidade/planoconta/ContaOrcamento.model.php"));
 require_once(modification("model/contabilidade/planoconta/ContaPlanoPCASP.model.php"));
-
 
 db_app::import("exceptions.*");
 db_app::import("contabilidade.*");
@@ -123,8 +97,7 @@ if($_GET){
   $codigolancamento = $_GET["chavepesquisa"];
   $idnrm = $_GET["idnrm"];
   $dadosnrm = buscaNRM($idnrm);
-  $dadosmateriais = buscaDadosMateriais($codigolancamento);
-  
+  $dadosmateriais = buscaDadosMateriais($codigolancamento);  
   
   $sequencialempenho = $dadosnrm["sequencialempenho"];
 
@@ -133,8 +106,6 @@ if($_GET){
   
   $valortotalempenho = buscaValorTotalEmpenho($sequencialempenho);
   $valortotalmenosesse = buscaValorTotalItens($idnrm, $codigolancamento);
-  
-
 
   $noempenho = buscaEmpenhoPorSeq($sequencialempenho);
   $tipounidade = $dadosmateriais["m61_abrev"];
@@ -142,19 +113,9 @@ if($_GET){
 
   $dadosmnrm = buscaItensPorNrm($idnrm);
   $contaitens = count($dadosmnrm);
-
-  
 }
 
-
-
-
-
-
 if (isset($excluir)) {
-  //testa($_POST);
-  //die("Confere");
-
   $sqlerro = false;
   $m80_codigo = (isset($m80_codigo)&&!empty($m80_codigo))?$m80_codigo:'null';
   $sSql = $clmatestoqueini->sql_query_mater(null,"matestoqueini.m80_codigo,
@@ -312,7 +273,7 @@ if (isset($excluir)) {
           $erro_msg = $eErro->getMessage();
         }
       }
-//	  $sqlerro=true;
+
       if($sqlerro==false){
         $m80_codigo = $_POST["m80_codigo"];
         $idnrm = $_POST["idnrm"];
@@ -336,7 +297,6 @@ if (isset($excluir)) {
   }
 } else if(isset($chavepesquisa)) {
    $db_opcao = 3;
-//   die($clmatestoqueini->sql_query_mater(null,"matestoqueini.m80_codigo,m70_codigo,m71_codlanc,m71_quantatend,m70_quant,m60_codmater,m60_descr,coddepto,descrdepto,m71_quant,m71_valor,(m71_valor/m71_quant) as m71_valorunit,matestoqueini.m80_obs","","matestoqueini.m80_codigo=$chavepesquisa and m71_quantatend=0"));
    $result = $clmatestoqueini->sql_record($clmatestoqueini->sql_query_mater(
                                           null,
                                           "matestoqueini.m80_codigo,

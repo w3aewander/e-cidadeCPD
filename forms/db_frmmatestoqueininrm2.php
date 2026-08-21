@@ -1,4 +1,4 @@
-<? 
+<?php 
 
 //MODULO: material
 require_once("classes/db_matmater_classe.php");
@@ -56,8 +56,7 @@ if (isset($m60_codmater) && trim($m60_codmater) != "" && ( USE_PCASP && db_getse
       case 3:
       case 33:
         $iRedirecionaMenu = 3;
-    }
-    //db_redireciona("mat1_matestoqueini00{$iRedirecionaMenu}.php");
+    }    
     return true;
   }
 
@@ -126,9 +125,7 @@ if (isset($m60_codmater) && trim($m60_codmater) != "" && ( USE_PCASP && db_getse
           <input title="Unidade
 
 Campo:m61_descr                               " name="m61_descr" type="text" id="m61_descr" value="<?=$tipounidade?>" size="20" maxlength="40" readonly="" style="background-color:#DEB887;text-transform:uppercase;" autocomplete="off">
-          <?
-            //db_input('m61_descr',20,$Im61_descr,true,'text',3)          
-          ?>
+          
         </td>
         <td nowrap title="Unid. Saída" align="right"><strong>Unid. Saída:</strong></td>
         <td align="right">
@@ -139,42 +136,13 @@ Campo:m61_descr                               " name="m61_descr" type="text" id=
         </td>
       </tr>
         
-        <? /*
-          if (isset($m60_codmater) && trim($m60_codmater) != "" && $db_opcao != 3 && $db_opcao != 33) {
-            $result = $clmatmater->sql_record($clmatmater->sql_query($m60_codmater,"m61_descr,m60_controlavalidade"));
-            if ($clmatmater->numrows>0){
-              db_fieldsmemory($result,0);
-            }
-            $result_unisai = $clmatmaterunisai->sql_record($clmatmaterunisai->sql_query($m60_codmater,null,"matunid.m61_descr as m61_descrsai"));
-            if ($clmatmaterunisai->numrows>0){
-              db_fieldsmemory($result_unisai,0);
-            }
-        ?>
-      <tr>
-        <td nowrap title="Unid. Entrada:"><strong>Unid. Entrada:</strong></td>
-        <td>
-          <?
-            db_input('m61_descr',20,$Im61_descr,true,'text',3)
-          ?>
-        </td>
-        <td nowrap title="Unid. Saída" align="right"><strong>Unid. Saída:</strong></td>
-        <td align="right">
-          <?
-            db_input('m61_descrsai',20,$Im61_descr,true,'text',3)
-          ?>
-        </td>
-      </tr>
       <?
-          } */
-
-
-
-      $colspan = 3;
-      $onchange= "";
-      if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
-        $colspan = 1;
-        $onchange= "js_verificaquant(this.value);";
-      }
+        $colspan = 3;
+        $onchange= "";
+        if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
+          $colspan = 1;
+          $onchange= "js_verificaquant(this.value);";
+        }
       ?>
 <tr>
         <td nowrap title="<?=@$Tm71_quant?>">
@@ -182,7 +150,6 @@ Campo:m61_descr                               " name="m61_descr" type="text" id=
 </td>
         <td nowrap colspan="<?=$colspan?>">
 <?
-//db_input('m71_quant',10,$Im71_quant,true,'text',$tranca,"onchange='js_calculavalortotal(this.value,\"quant\");$onchange'")
 db_input('m71_quant',10,$Im71_quant,true,'text',"1","onchange='js_calculavalortotal(this.value,\"quant\");$onchange'")
 ?>
 </td>
@@ -193,10 +160,7 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
   <strong>Qtd. já solicitada:</strong>
   </td>
   <td align='right'>";
-  // if(isset($m71_quantatend) && isset($m70_quant)){
     if(isset($m71_quantatend)){
-      // $quantrest = ($m71_quant-$m71_quantatend)." / ".$m70_quant;
-      // $quantrest = ($m71_quant-$m71_quantatend);
       $quantrest = ($m71_quantatend);
     }
     db_input('quantrest',10,$Im71_quant,true,'text',3);
@@ -230,9 +194,6 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
       ';
 
       $result_valoritens = $clempempitem->sql_record($clempempitem->sql_query_file(null,null,"e62_vltot/e62_quant as valorunit","e62_numemp desc","e62_item=$m63_codpcmater"));
-    }else{
-      //$m71_valorunit = "";
-      //$m71_valor = "";
     }
   }
   ?>
@@ -240,7 +201,6 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
         <td nowrap title="Valor unitário do item"><strong>Valor unitário do item:</strong></td>
         <td>
   <?
-  //db_input('m71_valorunit',10,$Im71_valor,true,'text',$tranca,"onchange='js_calculavalortotal(this.value,\"unit\");'")
   db_input('m71_valorunit',10,$Im71_valor,true,'text',"1","onchange='js_calculavalortotal(this.value,\"unit\");'")
   ?>
   </td>
@@ -254,7 +214,7 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
       <tr>
         <td><b>Lote:</b></td>
         <td>
-      <? //db_input('m77_lote',10,$Im77_lote,true,'text',$tranca);
+      <? 
       db_input('m77_lote',10,$Im77_lote,true,'text',"1");
       ?>
     </td>
@@ -267,7 +227,6 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
         $m77_dtvalidade_mes = "";
         $m77_dtvalidade_ano = "";
       }
-      //db_inputdata('m77_dtvalidade',$m77_dtvalidade_dia,$m77_dtvalidade_mes,$m77_dtvalidade_ano,true,'text',$tranca);
       db_inputdata('m77_dtvalidade',$m77_dtvalidade_dia,$m77_dtvalidade_mes,$m77_dtvalidade_ano,true,'text',"1");
       ?>
        </td>
@@ -310,8 +269,6 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
     </td>
   </tr>
 
-
-
 <?php  
   function buscaDadosSerie($numnota){
     $sql = pg_query("SELECT * FROM notafiscalcoc WHERE nota = '{$numnota}'");  
@@ -329,13 +286,7 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
     $numsubserie = "";
     $numprocessolicit = "";
   }
-
 ?>
-
-
-
-
-
   <tr>
     <td nowrap title="Série NF"><b>Série da NF:</b></td>
     <td>
@@ -366,24 +317,12 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
           ?>
         </td>
   </tr>
-
-
-
-
   </tr>
-
-
   </tr>
       <tr>
         <td nowrap title="<?=@$Tm80_obs?>" colspan="4">
           <fieldset>
-            <legend><b><?=@$Lm80_obs?></b></legend>
-            <?php
-              /*if($db_opcao==3 || $db_opcao==33){
-                $m80_obs = "";
-              }*/
-              //db_textarea('m80_obs',4,70,$Im80_obs,true,'text',1,"");
-            ?>
+            <legend><b><?=@$Lm80_obs?></b></legend>            
             <input type="text" name="m80_obs" id="m80_obs" maxlength="300" size="75" value="<?=$m80_obs?>">
           </fieldset>
         </td>
@@ -400,8 +339,6 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
 <input type="hidden" name="vtitens" id="vtitens" value="<?=$valortotalmenosesse?>">
 <input type="hidden" name="novototal" id="novototal">
 </table>
-  
-
 
 <?php if($db_opcao == 2 || $db_opcao == 22) : ?>
 
@@ -420,12 +357,8 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
 <?php endif; ?>
 
   <?php if($db_opcao==3 || $db_opcao==33) : ?>
-    <button disabled style="height: 18px !important;background-color: #d9d5d5; border-radius: 2px;font-size: 12px; color: #000;margin-top: 15px"><a style="text-decoration: none" href="anulamanualnrm.php?id=<?=$idnrm?>">Anula NRM</a></button>
-
+    <button disabled style="height: 18px !important;background-color: #d9d5d5; border-radius: 2px;font-size: 12px; color: #000;margin-top: 15px"><a style="text-decoration: none" href="anulamanualnrm.php?id=<?=$idnrm?>">Anula NRM</a></button>    
     
-    <?php /* ?>
-    <input name="excluir" type="submit" id="anula" name="anula" value="Anular NRM">
-    <?php */ ?>
     <table>
       <tr>
         <td><span>Itens da NRM <?=$nonrm?></span></td>
@@ -469,9 +402,7 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
   }
   db_input('m80_codtipo',10,$Im80_codtipo,true,'hidden',3);
   ?>
-  </form>
-
-  
+  </form>  
 
 <script>
   function js_calculavalortotal(valor,opcao){
@@ -589,16 +520,7 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
     ?>
     js_OpenJanelaIframe('top.corpo','db_iframe_matestoqueini','func_matestoqueininrm.php?funcao_js=parent.js_preenchepesquisa|m80_codigo|idnrm|empenho|sequencialempenho'+qry,'Pesquisa',true);
   }
-  function js_preenchepesquisa(chave, chave2, chave3, chave4){
-    console.log("=====================");
-    console.log(chave2);
-    console.log(chave3);
-    console.log(chave4);
-    console.log("=====================");
-
-    //document.form1.valorempenho.value = chave2;
-    //document.form1.e60_codemp.value = chave2;
-    //document.form1.sequencialempenho.value = chave4;
+  function js_preenchepesquisa(chave, chave2, chave3, chave4){    
     nid =  "&idnrm="+chave2;
     
     db_iframe_matestoqueini.hide();
@@ -610,7 +532,6 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
     ?>
     <?
     if($db_opcao!=1){
-      //echo " location.href = '".basename($GLOBALS["HTTP_SERVER_VARS"]["PHP_SELF"])."?chavepesquisa='+chave+qry";
       echo " location.href = '".basename($GLOBALS["HTTP_SERVER_VARS"]["PHP_SELF"])."?chavepesquisa='+chave+qry+nid";
     }
     ?>
@@ -626,11 +547,8 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
     qry = "&chave_m80_codtipo=<?=$m80_codtipo?>";
     js_OpenJanelaIframe('top.corpo','db_iframe_matestoqueini','func_matestoqueininrm.php?funcao_js=parent.js_preenchepesquisa|m60_codmater|m80_codigo'+qry,'Pesquisa',true);
   }
-  function js_verificaquant(valor){
-    //  splitar = document.form1.quantrest.value.split(" / ");
+  function js_verificaquant(valor){    
     valor = new Number(valor);
-    //  soli  = new Number(splitar[0]);
-    //  rest  = new Number(splitar[1]);
     soli  = 0;
     rest  = new Number(document.form1.quantrest.value);
     erro  = 0;
@@ -717,47 +635,22 @@ if(isset($m80_codigo) && trim($m80_codigo)!="" && $db_opcao==2){
     if ($F("m71_valorunit") == "") {
       alert("Necessário preenchimento dos valores");
       return false;
-    } 
+    }
 
-    /*if ($F("m80_obs") == "") {
-      alert("Necessário preenchimento da observação");
-      return false;
-    }*/ 
-
-
-    //Confere total AQUI
-    
     var totalempenho = document.getElementById("valorempenho").value;
     var totalmenosesse = document.getElementById("vtitens").value;
     var esse = document.getElementById("m71_valor").value;
-
-
-    
-
-
     var somatorio = parseFloat(totalmenosesse).toFixed(2) + parseFloat(esse).toFixed(2);
     document.getElementById("novototal").value = somatorio;
-    
-
-    console.log(somatorio > parseFloat(totalempenho).toFixed(2));
 
     if(somatorio > parseFloat(totalempenho).toFixed(2)){
       alert("Somatório dos itens ultrapassa o valor total do empenho.");
       return false;
     }
 
-
-    
-
-    
-
-    
-
     iControleValidade = $F('m60_controlavalidade');
     if (iControleValidade == 1 || iControleValidade == 2) {
-
       if ($F('m77_lote') == '' || $F('m77_dtvalidade') == '') {
-
         if (!confirm('Não foi informado o lote/data de validade do item.\nDeseja Prosseguir?')) {
           return false;
         } else {
@@ -790,19 +683,12 @@ function js_mostramatfabricante1(chave1,chave2){
   db_iframe_matfabricante.hide();
 }
 
-
-
 document.getElementById("m79_notafiscal").required = true;
 document.getElementById("m79_data").required = true;
-
-
-
 
 function js_pesquisae60_codemp(mostra){
   if(mostra==true){
     js_OpenJanelaIframe('top.corpo','db_iframe_empempenho','func_empempenho.php?funcao_js=parent.js_mostraempempenho2|e60_codemp|e60_anousu|e60_numemp|e60_vlremp','Pesquisa',true);
-  }else{
-   // js_OpenJanelaIframe('top.corpo','db_iframe_empempenho02','func_empempenho.php?pesquisa_chave='+document.form1.e60_numemp.value+'&funcao_js=parent.js_mostraempempenho','Pesquisa',false);
   }
 }
 function js_mostraempempenho2(chave1, chave2, chave3, chave4){
@@ -812,21 +698,14 @@ function js_mostraempempenho2(chave1, chave2, chave3, chave4){
   db_iframe_empempenho.hide();  
 }
 
-
-
 function js_mascara(evt){
-      var evt = (evt) ? evt : (window.event) ? window.event : "";
-      
-      if( (evt.charCode >46 && evt.charCode <58) || evt.charCode ==0 ){//8:backspace|46:delete|190:. 
-  return true;
-      }else{
-  return false;
-      }  
-    }
+  var evt = (evt) ? evt : (window.event) ? window.event : "";      
+  if( (evt.charCode >46 && evt.charCode <58) || evt.charCode ==0 ){
+    return true;
+  }else{
+    return false;
+  }  
+}
 
-
-
-    var guardatotal = 0;
-
-    
-  </script>
+var guardatotal = 0;    
+</script>

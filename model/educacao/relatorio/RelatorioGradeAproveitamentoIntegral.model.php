@@ -94,10 +94,10 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
   /**
    * Escreve a grade de avaliação no pdf
    */
-  public function montarGrade($ed29_c_descr=null, $ed11_c_descr=null, $guardapagina=null,$calendar=null) {//**********************************************************************
-    //var_dump($ed29_c_descr, $ed11_c_descr); die("Confere");
-    
-    $this->montarCabecalho($this->oGradeAproveitamento->getProcedimentoAvaliacao()); //**************  MONTA O CABEÇALHO DAS MATERIAS
+  public function montarGrade($ed29_c_descr=null, $ed11_c_descr=null, $guardapagina=null,$calendar=null) {
+
+  	//MONTA O CABEÇALHO DAS MATÉRIAS    
+    $this->montarCabecalho($this->oGradeAproveitamento->getProcedimentoAvaliacao()); 
 
 
     $this->oPdf->SetFont("Arial", "", 7);
@@ -145,7 +145,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 		$imp = true;
 	}	
 	
-    //foreach ($this->oGradeAproveitamento->getGradeAproveitamento($this->periodoprova) as $oFaltas)
+    
     $b                 = 1;
 	$quantbolet        = 1;
 	$quantlinha        = 1;
@@ -154,7 +154,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 	$RRSvalor          = 0;
 	$a=1;
 	$b = 1;
-//$oDisciplina->aAproveitamento[$b]->sDescricao	
+
     $xx=0;
     $y=1;
 	$x=0;
@@ -165,7 +165,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 	$this->turma2 = $xxx->getTurma()->getCodigo();
     $inicial = true;	
 	
-//	foreach ($this->oGradeAproveitamento->getGradeAproveitamento($this->periodoprova) as $oDisciplina1) {
+
 	foreach ($this->oGradeAproveitamento->getGradeAproveitamento() as $oDisciplina1) {	
 		$b=1;
 		foreach ($oDisciplina1->aAproveitamento as $oAvaliacao1){
@@ -189,8 +189,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 	$y=0;
     foreach ($this->oGradeAproveitamento->getGradeAproveitamento() as $oDisciplina){
 			$iAlturaLinha = 4;
-			$iLinhasNomeDisciplina = $this->oPdf->NbLines($this->iTamanhoDisciplina, $oDisciplina->sNome); //  verifica em quantas linhas a disciplina usara para o tamanho escolhido
-			//Turmas em tempo integral s? foi criada para anos finais 
+			$iLinhasNomeDisciplina = $this->oPdf->NbLines($this->iTamanhoDisciplina, $oDisciplina->sNome);
 			if ($ed11_c_descr == "6º ANO" || $ed11_c_descr == "7º ANO" || $ed11_c_descr == "8º ANO" || $ed11_c_descr == "9º ANO"){
               $n1 = $oDisciplina->aAproveitamento[0]->oAproveitamento->nAproveitamento;
 			  $n2 = $oDisciplina->aAproveitamento[1]->oAproveitamento->nAproveitamento;
@@ -198,7 +197,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 			  $n4 = $oDisciplina->aAproveitamento[3]->oAproveitamento->nAproveitamento;
 			  $volta = 1;
 			}
-            if ( $iLinhasNomeDisciplina > 1) {  // se a disciplina ocupar mais de uma linha
+            if ( $iLinhasNomeDisciplina > 1) {
 			    $iAlturaLinha *= $iLinhasNomeDisciplina;
 			}
 			$iYAntes = $this->oPdf->GetY();
@@ -214,30 +213,27 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 				$imp   = false;
 			}
 			$RSS = 1;
-			$discImp = 1; //colunas impressas da disciplina
-            $Ndiscip = array();            
+			$discImp = 1;
+      $Ndiscip = array();            
 
 			//busca a media da disciplina
 			$oMatricula1 = $this->oGradeAproveitamento->getMatricula();
 			$turma       = $oMatricula1->getTurma()->getCodigo();
 			$mediaFinal  = $this->mediaC(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],$oDisciplina->sNome,$turma,$periodo,$this->periodoprova);
-			if( $mediaFinal >=0 ) 
-			{	
-				if( $mediaFinal < 5.0 or $mediaFinal <> null or $mediaFinal <> '' ) // verifica se conseguiu ou n?o media
-				{
-					if( substr($this->periodoprova,3,8)  == 'BIMESTRE' ) // anos finais ? diferente de anos iniciais'
-					{
-					    $this->dependenciaF = 1;
+			if( $mediaFinal >=0 ){	
+				if( $mediaFinal < 5.0 or $mediaFinal <> null or $mediaFinal <> '' ){
+					if( substr($this->periodoprova,3,8)  == 'BIMESTRE' ){
+						$this->dependenciaF = 1;
 						$this->quantDepend++;
 					}
 				}
 			}
-            $impTec         = true;
+      $impTec         = true;
 			$resultadoFinal = true;
 			$this->recFinal = 0;
-            $coluna = 7;  // a partir de 2025 s? tera a coluna de recupera??o final
-			// rescrever toda a parte de disciplina para tempo integral 2025
-			foreach ($oDisciplina->aAproveitamento as $oAvaliacao) {// ************************** inicio foreach avalia??o ***********************************
+      $coluna = 7;
+			
+			foreach ($oDisciplina->aAproveitamento as $oAvaliacao) {
 				$oAvaliacao->oAproveitamento->nAproveitamento       = str_replace(".", ",", $oAvaliacao->oAproveitamento->nAproveitamento);
 				$oAvaliacao->oAproveitamento->nMinimoAprovacao      = str_replace(".", ",", $oAvaliacao->oAproveitamento->nMinimoAprovacao);
 				$oDisciplina->oNotaParcial->nNota                   = str_replace(".", ",", $oDisciplina->oNotaParcial->nNota);
@@ -249,7 +245,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
                 $sqlcalend = pg_query("SELECT substring(ed52_c_descr,1,11) as ed52_c_descr FROM escola.calendario where ed52_i_codigo = ".@$GLOBALS["HTTP_POST_VARS"]["calendarioF"]);
 				$rscalend  = db_utils::fieldsmemory($sqlcalend,0);
 				$resultado = $this->imprimeConceitoFinais(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],$oDisciplina->sNome,$turma,$periodo,$this->periodoprova); // busca notas	
-                //$ano_calendario = $this->AnoCalendario($turma);
+                
 				
 				if( $oDisciplina->sNome == 'APOIO À APRENDIZAGEM')
 				{	
@@ -275,21 +271,21 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
                 }				
 				if ( $oAvaliacao->lResultado ) 
 				{
-				    if( $Mnota > 0 ) // imprime dividindo ou n?o
+				    if( $Mnota > 0 )
 				    {
 						if( substr($this->periodoprova,3,8)  == 'BIMESTRE' and $imp and $nomeTurma <> 'EJA') // ? maior que zero e ? a primeira vez
 						{
 							$this->quantCol = $colunas;
-							$mediaSF = $mediaFinal; // media antes da formatacao para 1 casa decimal com virgula
+							$mediaSF = $mediaFinal;
 							$nm = explode(".", $mediaFinal);
 							if( substr($nm[1], 0, 1) == '' or substr($nm[1], 0, 1) == ' ')
 							{
 								$nm[1] = '0';
 							}	  
 							$media = $nm[0] . "," . substr($nm[1], 0, 1);
-							$Mnota2 = $media;     // recalcula Mnota, porque estava ficando errado
+							$Mnota2 = $media;
 							$Mnota  = $media;
-//imprime MA							
+
 							if( $mediaSF < 5 )
 							{
 								$this->oPdf->SetFont("Arial", "B", 7);
@@ -299,8 +295,8 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
                             $this->oPdf->Cell($this->iTamanhoResultados, $iAlturaLinha, $Mnota2, 1, 0, "C"); // imprime sem dividir
 							
 							$this->oPdf->SetFont("Arial", "", 7);
-							$imp = false; //imprime um vez
-///************************************************************************************************************							
+							$imp = false;
+
 						}else{
 							$mediaF = $this->mediaF(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],$oDisciplina->sNome,$turma,$mediaFinal,$periodo,$this->periodoprova);
 							$notaRS[$y]   = $mediaF;
@@ -317,31 +313,19 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 							{
 								$nm[1] = '0';
 							}	  
-							$nota = $nm[0] . "," . substr($nm[1], 0, 1); // n?o arredonda
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                            // impress?o da m?dia final							
+							$nota = $nm[0] . "," . substr($nm[1], 0, 1);
+                            
 							$this->oPdf->Cell($this->iTamanhoResultados, $iAlturaLinha, $nota, 1, 0, "C"); 
 							$this->oPdf->SetFont("Arial", "", 7);
 						}
-				    }else{ // nota n?o ? maior que zero, imprime global
-						if( $oAvaliacao->oAproveitamento->nAproveitamento < 5 )
-						{
+				    }else{
+						if( $oAvaliacao->oAproveitamento->nAproveitamento < 5 ){
 							$this->oPdf->SetFont("Arial", "B", 7);
 						}else{
 							$this->oPdf->SetFont("Arial", "", 7);
 						}
-						        if( $oDisciplina->sNome <> 'APOIO À APRENDIZAGEM')
-						{	
-					        // impress?o de conceitos na MA
-					        //$this->oPdf->Cell($this->iTamanhoResultados, $iAlturaLinha, $oAvaliacao->oAproveitamento->nAproveitamento, 1, 0, "C");
+						if( $oDisciplina->sNome <> 'APOIO À APRENDIZAGEM'){
 							$this->oPdf->Cell($this->iTamanhoResultados, $iAlturaLinha, $nota2, 1, 0, "C");
-//							$linhaF1 = $this->oPdf->GetY();
-//							$linhaF2 = $this->oPdf->GetX();
-					        //$this->oPdf->Cell($this->iTamanhoResultados+$this->iColunaAvaliacao+10, $iAlturaLinha, $nota2, 0, 0, "C");							
-//							$this->oPdf->SetY($linhaF1);
-//							$this->oPdf->SetX($linhaF2);
-							
-							
 						}	
 						$this->oPdf->SetFont("Arial", "", 7);
 				    }
@@ -379,7 +363,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 							}else{
 								if( $oDisciplina->sNome <> 'APOIO À APRENDIZAGEM')						
 						        {	
-								     $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C"); // imprime coluna em branco se o periodo n?o for menor
+								     $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C");
 								}	 
 							}	
 						}else{
@@ -397,7 +381,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 							}else{
 								if( $oDisciplina->sNome <> 'APOIO À APRENDIZAGEM')						
 						        {	
-							        $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C"); // imprime coluna em branco se o periodo n?o for menor
+							        $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C");
 								}	 
 							}	
 						}
@@ -405,8 +389,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
                     }else{
 						
 						if( $oAvaliacao->oAproveitamento->nAproveitamento < 5 ){
-							$this->oPdf->SetFont("Arial", "B", 7);
-							// se for por conceito
+							$this->oPdf->SetFont("Arial", "B", 7);							
 							if( $oAvaliacao->oAproveitamento->nAproveitamento == 'PA' or
 								$oAvaliacao->oAproveitamento->nAproveitamento == 'PI' or
 								$oAvaliacao->oAproveitamento->nAproveitamento == 'TE' or
@@ -426,7 +409,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 							}else{
 								if( $oDisciplina->sNome <> 'APOIO À APRENDIZAGEM')						
 						        {	
-								    $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C"); // imprime coluna em branco se o periodo n?o for menor
+								    $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C");
 								}	
 							}	
 						}else{
@@ -446,21 +429,19 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 							}else{
 								if( $oDisciplina->sNome <> 'APOIO À APRENDIZAGEM')						
 						        {	
-								    $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C"); // imprime coluna em branco se o periodo n?o for menor
+								    $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C");
 								}
 							}	
 						}
 					}
-                }else{ // se n?o for anos finais, deixei para o caso de ter tempo integral em outros anos
+                }else{
 					if( $oAvaliacao->oAproveitamento->nAproveitamento < 5 ){
 						$this->oPdf->SetFont("Arial", "B", 7);
 						if($b<=$periodo){
 					        if( $oDisciplina->sNome <> 'APOIO À APRENDIZAGEM')						
 					        {	
 							    $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, $oAvaliacao->oAproveitamento->nAproveitamento, 1, 0, "C");		
-							}	
-							//no caso abaixo a nota j? vinha formatada com virgula ou seja um texto, e n?o somava as casas decimais
-							//tive que transformala em numero flutuante, para somar os decimais
+							}								
 							$Mnota += floatval(str_replace(",", ".", $oAvaliacao->oAproveitamento->nAproveitamento));
 						}else{
 							$this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "", 1, 0, "C");		
@@ -512,13 +493,13 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
                 $b++; 
                 $d++;
 				$discImp++;
-			}// ************************** fim foreach avalia??o ************************************************************************************
+			}
 			$discImp = 0;
             $b=1;
 			if ($this->lApresentarNotaParcial ) {
 			   $this->oPdf->Cell($this->iTamanhoNP, 4, $oDisciplina->oNotaParcial->nNota, 1, 0, "C");
 			}
-			//      $naoimprimefinal = true;
+			
 			$sPercentualFrequencia = '';
 			if ($oDisciplina->oFrequencia->nPercentualFrequencia !== '') {
 			$sPercentualFrequencia = "{$oDisciplina->oFrequencia->nPercentualFrequencia}%";
@@ -545,7 +526,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 					  $imprimeFaltas = false;
 				   }  
 			    }
-			    $this->oPdf->Cell(47+$this->iColunaFalta, 4, "","LR", 1, "C"); // imprime uma coluna para ajustar o lado direito
+			    $this->oPdf->Cell(47+$this->iColunaFalta, 4, "","LR", 1, "C");
 			}else{
 				$faltastotal = $this->faltasPeriodo(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],@$GLOBALS["HTTP_POST_VARS"]["PeriodoFalta"],@$GLOBALS["HTTP_POST_VARS"]["CodEscola"], @$GLOBALS["HTTP_POST_VARS"]["calendarioF"]);
 				if( $imprimeFaltas)
@@ -565,7 +546,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 					$this->oPdf->Cell(47, 4, "","LR", 0, "C");
 				}
 			}
-			if( $imprimeFreq ) // imprime percentual de frequencia e a legenda
+			if( $imprimeFreq )
 			{
 				$linha1 = $this->oPdf->getX();
 				$linha2 = $this->oPdf->getY();
@@ -579,8 +560,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 				$this->oPdf->Cell(144,4, "","",1,"");
 				$this->oPdf->Cell(180, $iAlturaLinha, $this->pdfStr("Percentual de frequência: " . $sPercentualFrequencia), "", 0, "R");
 				$this->oPdf->Cell($this->iColunaFalta, $iAlturaLinha, '', '', 0, "C");
-
-                // legendas para as diciplinas de turma integral                
+                
 				$this->oPdf->Cell(180, $iAlturaLinha,"", "", 0, "L");
 				$this->oPdf->Cell($this->iColunaFalta, $iAlturaLinha, '', '', 1, "C");
 				$this->oPdf->Cell(180, $iAlturaLinha,"", "", 0, "L");
@@ -609,7 +589,7 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
                 $legenda = false;				
 			}
 			
-			if( $legenda ) // imprime a legenda mesmo sem percentual de frequencia
+			if( $legenda )
 			{
 				$linha1 = $this->oPdf->getX();
 				$linha2 = $this->oPdf->getY();
@@ -652,26 +632,24 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 			if( !$naoimprimefinal){
 			    $this->oPdf->ln();
 			}	 
-			if ( $iLinhasNomeDisciplina == 2 ) // caso a disciplina ocupe 2 linhas no tamanho reservado para disciplinas
+			if ( $iLinhasNomeDisciplina == 2 )
 			{	
 			    $this->oPdf->Cell(191, 4,"", "LR", 1, "");
 			}
-			if ( $iLinhasNomeDisciplina == 3 ) // caso a disciplina ocupe 3 linhas no tamanho reservado para disciplinas
+			if ( $iLinhasNomeDisciplina == 3 )
 			{	
 			   $this->oPdf->Cell(191, 4,"", "LR", 1, "");
 			   $this->oPdf->Cell(191, 4,"", "LR", 1, "");
 			}	
 			
 			
-    }//ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
-//********************************************************************************************************************	  
+    }
+
     if( $totalfaltas > 0 and $faltastotal==0 )	  
 	{	
-		$this->oPdf->SetFont("Arial", "", 7,'','');
-		//$this->oPdf->text($linha1+1,$linha2+2,"Total de faltas: "."{$totalfaltas}", "", 0, "");
+		$this->oPdf->SetFont("Arial", "", 7,'','');		
 		$this->oPdf->text($linha1+1,$linha2+2,"Total de faltas: "."{$faltastotalNova}", "", 0, "");
 	}	  
-//********************************************************************************************************************	  
     $oMatricula = $this->oGradeAproveitamento->getMatricula();
     $sAndamento = $oMatricula->retornaAndamentoDaMatricula();
 	if( $sAndamento == 'EM ANDAMENTO') // a pedido de suellem, se a turma n?o foi encerrada ainda, mas ja tem lan?amento no 4?bimestre ou 3?trimestre 
@@ -685,21 +663,20 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 				$this->encerrou = false;
 			}	
 		}
-//****************************************************************************************************************************		
-        $quantDep = 0; // variavel para quantidade de dependencia
+        $quantDep = 0;
 		$nomeDisc = array();
-		if( $this->encerrou == true) // ja tem todos os lan?amentos de nota
+		if( $this->encerrou == true)
 		{
-			if( $this->dependenciaF == 0) // teve alguma nota inferior a 5 e ficou com dependencia/reprovacao, verifica??o feita na linha 558 anos finais e 720 anos iniciais
+			if( $this->dependenciaF == 0)
 			{	
-				$sAndamento = "APROVADO"; // se n?o teve, passou direto
-			}else{ //se a nota for inferior a cinco ou nula
-				if( substr($this->periodoprova,3,9) == 'TRIMESTRE' ) // ? avaliado por trimestre, anos iniciais
+				$sAndamento = "APROVADO";
+			}else{
+				if( substr($this->periodoprova,3,9) == 'TRIMESTRE' )
 				{
-					$sAndamento = 'REPROVADO';   // se os anos iniciais for superior ou igual a 3? ano, existe disciplinas avaliado por nota e n?o conseguiu media
-				}else{ // anos finais
+					$sAndamento = 'REPROVADO';
+				}else{
 					$alunoEvadido =   $this->evadiu(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],null); // verifica se o aluno fez as dependencias ou n?o tinha 
-                    if( !$alunoEvadido ) // se fez ou n?o tinha dependencia
+                    if( !$alunoEvadido )
 					{
 					    $Naprovado = false;
 						$VerAprov  = true;
@@ -707,120 +684,112 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
                         $nomedisciplina = '';						
 						for($x=0;$x<=17;$x++)
 						{
-							if( $notaRS[$x] < 5.0) // procurar as notas menores que < 5 por disciplina
+							if( $notaRS[$x] < 5.0)
 							{	
 							    if( $nomedisciplina <> $discipRS[$x])
 								{	
-									$this->notasPorDisciplina(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],$discipRS[$x],$turma,$periodo); // verificar se foi feita a recupera??o
-									if($this->recFinal == null ) //se a recupera??o for null n?o foi feito
+									$this->notasPorDisciplina(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],$discipRS[$x],$turma,$periodo);
+									if($this->recFinal == null )
 									{
 										$recuper = true; 
-									}else{ // diferente de null, foi feita a recupera??o
-										if( $this->recFinal > 5.0 ) // a recupera??o ? maior que 5??? para que o aluno tenha a possibilidade de ser aprovado sem dependencia
+									}else{
+										if( $this->recFinal > 5.0 )
 										{
-											if( $VerAprov ) // verifica mat?ria por mat?ria at? que encontre alguma menor que 5 ou n?o
+											if( $VerAprov )
 											{
-												if( (($this->recFinal+$notaRS[$x])/2) < 5.0) // a nota da recupera??o com a media anual divido por 2 gera RES F, ? maior ou menor que 5??
+												if( (($this->recFinal+$notaRS[$x])/2) < 5.0)
 												{
-													$Naprovado = true; //se for menor o aluno fica na dependencia
-													$VerAprov  = false;// n?o entra aqui novamente, ja encontrou dependencia
+													$Naprovado = true;
+													$VerAprov  = false;
 												}	
 											}	
-										}else{ // n?o atingiu media na recuperacao tera que fazer dependencia
-											$Naprovado = true; // a recupera??o ? menor que 5, n?o conseguiu media e ficou em dependencia
-											if( (($this->recFinal+$notaRS[$x])/2) < 5.0) // dependendo da quantidade de dependencia, maior que 2 ? reprovado
+										}else{
+											$Naprovado = true;
+											if( (($this->recFinal+$notaRS[$x])/2) < 5.0)
 											{
-												$quantDep++; // conta as dependencias
-												$nomeDisc[$quantDep] = $discipRS[$x]; // nome disciplina para verificar se pertence a uma dependencia anterior
+												$quantDep++;
+												$nomeDisc[$quantDep] = $discipRS[$x];
 											}
 										}	
 									}	
 								}
 							    $nomedisciplina = $discipRS[$x];
 							}	
-						}	
-						// inicia a checagem da situa??o do aluno
-						if( !$Naprovado ) // fez a recupera??o e foi aprovado
+						}							
+						if( !$Naprovado )
 						{
 							$sAndamento = "APROVADO";
-						}else{ // fez, mas n?o conseguiu nota e ficou em dependencia
-						
+						}else{						
 							$sAndamento = "APROVADO COM PROGRESSÃO PARCIAL / DEPENDÊNCIA";
 						}
-                        if( $recuper ) // ainda n?o fez recupera??o
+                        if( $recuper )
 						{
-							$sAndamento = "EM RECUPERAÇÃO"; // continua a recupera??o
+							$sAndamento = "EM RECUPERAÇÃO";
 						}	
-						if( $quantDep > 2) // fez todo o processo, inclusive recupera??o, mas se tiver mais que duas dependencias n?o pode fazer e ? reprovado 
+						if( $quantDep > 2)
 						{
 							$sAndamento = "REPROVADO";
 						}	
-						if($quantDep > 0 and $quantDep <= 2 ) //ficou em at? 2 disciplina e pode fazer dependencia
-						{	
-						    // verifica se ja estava em dependencia na mesma disciplina no ano anterior e checa se o aluno passou no ano anterior
+						if($quantDep > 0 and $quantDep <= 2 )
+						{
 							$verificaDiscip = $this->checa_dep($nomeDisc,@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"]); 
-							if( $verificaDiscip == 't' ) // se estava e passou ou a disciplina ? outra
+							if( $verificaDiscip == 't' )
 							{
-								$sAndamento = "APROVADO COM PROGRESSÃO PARCIAL / DEPENDÊNCIA"; // se passou ou a dependencia e outra disciplina pode fazer a dependencia
+								$sAndamento = "APROVADO COM PROGRESSÃO PARCIAL / DEPENDÊNCIA";
 							}else{
-								$sAndamento = "REPROVADO"; // ficou em dependencia na mesma disciplina do ano anterior e nao passou no ano anterior 
+								$sAndamento = "REPROVADO";
 							}
 						}
 						$aprovado = $this->depanoant(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"]);
-						if( $quantDep == 2 and !$aprovado) // ficou em 2 disciplina e devia uma no ano anterior e foi reprovado, s? pode 2 dependencias
+						if( $quantDep == 2 and !$aprovado)
 						{
 							$sAndamento = "REPROVADO";
 						}	
 					}else{
-						$sAndamento = "REPROVADO"; // tinha dependencias mas foi evadido, n?o fez as dependencias
+						$sAndamento = "REPROVADO";
 					}	 
 				}
 			}	
-//****************************************************************************************************************************
-// Portugu?s, Matem?tica, Hist?rica, Geografia e Ci?ncias.
-// tem a nota do terceiro trimestre mas a turma pode ser segundo ano e avaliado por conceito
-			$sqlseg = 'select substring(ed57_c_descr,1,4) as turma from turma where ed57_i_codigo = '.$this->turma2;  // verifica se ? o segundo, ou seja so conceito
+			$sqlseg = 'select substring(ed57_c_descr,1,4) as turma from turma where ed57_i_codigo = '.$this->turma2;
 			$rsseg  = pg_query($sqlseg);
 			$oseq   = db_utils::fieldsMemory($rsseg,0);
-			if( $oseq->turma == 'EF 2' )  // se for o segundo ano
+			if( $oseq->turma == 'EF 2' )
 			{
-				if($this->repconceito) // verifica se o conceito do ultimo trimestre ? igual a D
+				if($this->repconceito)
 				{
-				    $sAndamento = 'REPPROVADO';	// D reprova
+				    $sAndamento = 'REPPROVADO';
 				}else{
-					$sAndamento = 'APROVADO';   // os outros n?o
+					$sAndamento = 'APROVADO';
 				}
 			}	
 		}
 	}
-	// se a turma ja foi encerrada, tudo no if acima n?o ser? usado e passar? diretamente para o if abaixo
-//******************************************************************************************************************************************************************	
-    if( $sAndamento == 'APROVADO' or $sAndamento == 'REPROVADO' or $sAndamento == 'EM ANDAMENTO' or 'APROVADO COM PROGRESSAO PARCIAL / DEPEND?NCIA')
+	
+    if( $sAndamento == 'APROVADO' or $sAndamento == 'REPROVADO' or $sAndamento == 'EM ANDAMENTO' or 'APROVADO COM PROGRESSAO PARCIAL / DEPENDÊNCIA')
     {		
 	    $encerramento = $this->final_anoletivo(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],$oDisciplina->sNome,$turma,$periodo,$this->periodoprova);
 		for($x=0;$x<pg_num_rows($encerramento);$x++)
 		{
 			$oencerramento = db_utils::fieldsmemory($encerramento,$x);
-			if( $oencerramento->ed72_i_valornota == null and trim($oencerramento->ed72_c_valorconceito) == '' ) //foi lan?ado todos os periodos
+			if( $oencerramento->ed72_i_valornota == null and trim($oencerramento->ed72_c_valorconceito) == '' )
 			{
 				$this->encerrou = false;
 			}	
 		}
-//****************************************************************************************************************************		
-        $quantDep = 0; // variavel para quantidade de dependencia
+        $quantDep = 0;
 		$nomeDisc = array();
-		if( $this->encerrou == true) // ja tem todos os lan?amentos de nota
+		if( $this->encerrou == true)
 		{
-			if( $this->dependenciaF == 0) // teve alguma nota inferior a 5 e ficou com dependencia/reprovacao, verifica??o feita na linha 558 anos finais e 720 anos iniciais
+			if( $this->dependenciaF == 0)
 			{	
-				$sAndamento = "APROVADO"; // se n?o teve, passou direto
-			}else{ //se a nota for inferior a cinco ou nula
-				if( substr($this->periodoprova,3,9) == 'TRIMESTRE' ) // ? avaliado por trimestre, anos iniciais
+				$sAndamento = "APROVADO";
+			}else{
+				if( substr($this->periodoprova,3,9) == 'TRIMESTRE' )
 				{
-					$sAndamento = 'REPROVADO';   // se os anos iniciais for superior ou igual a 3? ano, existe disciplinas avaliado por nota e n?o conseguiu media
-				}else{ // anos finais
-					$alunoEvadido =   $this->evadiu(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],null); // verifica se o aluno fez as dependencias ou n?o tinha 
-                    if( !$alunoEvadido ) // se fez ou n?o tinha dependencia
+					$sAndamento = 'REPROVADO';
+				}else{
+					$alunoEvadido =   $this->evadiu(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"],null);
+                    if( !$alunoEvadido )
 					{
 					    $Naprovado = false;
 						$VerAprov  = true;
@@ -828,85 +797,75 @@ class RelatorioGradeAproveitamentoIntegral extends PDFGradeAproveitamentoIntegra
 						$nomedisciplina = '';
 						for($x=0;$x<=17;$x++)
 						{
-                            if( $notaRS[$x] <> null) // verifica se o indice do array contem algum valor
+                            if( $notaRS[$x] <> null)
                             {			
-								if( $notaRS[$x] < 5.0) // procurar as notas menores que < 5 por disciplina
+								if( $notaRS[$x] < 5.0)
 								{	
 									if( $nomedisciplina <> $discipRS[$x])
 									{	
 										$Naprovado = true;
-										$quantDep++; // conta as dependencias
+										$quantDep++;
 									}	
-									$nomeDisc[$quantDep] = $discipRS[$x]; // nome disciplina para verificar se pertence a uma dependencia anterior
+									$nomeDisc[$quantDep] = $discipRS[$x];
 								}	
 							}	
 							$nomedisciplina = $discipRS[$x];
 						}	
 					
-						// inicia a checagem da situa??o do aluno
-						if( !$Naprovado ) // fez a recupera??o e foi aprovado
+						
+						if( !$Naprovado )
 						{
 							$sAndamento = "APROVADO";
-						}else{ // fez, mas n?o conseguiu nota e ficou em dependencia
+						}else{
 						
 							$sAndamento = "APROVADO COM PROGRESSÃO PARCIAL / DEPENDÊNCIA";
 						}
-						if( $quantDep > 2) // fez todo o processo, inclusive recupera??o, mas se tiver mais que duas dependencias n?o pode fazer e ? reprovado 
+						if( $quantDep > 2)
 						{
 							$sAndamento = "REPROVADO";
 						}	
-						if($quantDep > 0 and $quantDep <= 2 ) //ficou em at? 2 disciplina e pode fazer dependencia
+						if($quantDep > 0 and $quantDep <= 2 )
 						{	
-						    // verifica se ja estava em dependencia na mesma disciplina no ano anterior e checa se o aluno passou no ano anterior
+						    
 							$verificaDiscip = $this->checa_dep($nomeDisc,@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"]); 
-							if( $verificaDiscip == 't' ) // se estava e passou ou a disciplina ? outra
+							if( $verificaDiscip == 't' )
 							{
-								$sAndamento = "APROVADO COM PROGRESSÃO PARCIAL / DEPENDÊNCIA"; // se passou ou a dependencia e outra disciplina pode fazer a dependencia
+								$sAndamento = "APROVADO COM PROGRESSÃO PARCIAL / DEPENDÊNCIA";
 							}else{
-								$sAndamento = "REPROVADO"; // ficou em dependencia na mesma disciplina do ano anterior e nao passou no ano anterior 
+								$sAndamento = "REPROVADO";
 							}
 						}
 						$aprovado = $this->depanoant(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"]);
-						if( $quantDep == 2 and !$aprovado) // ficou em 2 disciplina e devia uma no ano anterior e foi reprovado, s? pode 2 dependencias
+						if( $quantDep == 2 and !$aprovado)
 						{
 							$sAndamento = "REPROVADO";
 						}	
 					}else{
-						$sAndamento = "REPROVADO"; // tinha dependencias mas foi evadido, n?o fez as dependencias
+						$sAndamento = "REPROVADO";
 					}	 
 				}
 			}	
-//****************************************************************************************************************************
-// Portugu?s, Matem?tica, Hist?rica, Geografia e Ci?ncias.
-// tem a nota do terceiro trimestre mas a turma pode ser segundo ano e avaliado por conceito
-			$sqlseg = 'select substring(ed57_c_descr,1,4) as turma from turma where ed57_i_codigo = '.$this->turma2;  // verifica se ? o segundo, ou seja so conceito
+
+			$sqlseg = 'select substring(ed57_c_descr,1,4) as turma from turma where ed57_i_codigo = '.$this->turma2;
 			$rsseg  = pg_query($sqlseg);
 			$oseq   = db_utils::fieldsMemory($rsseg,0);
-			if( $oseq->turma == 'EF 2' )  // se for o segundo ano
+			if( $oseq->turma == 'EF 2' )
 			{
-				if($this->repconceito) // verifica se o conceito do ultimo trimestre ? igual a D
+				if($this->repconceito)
 				{
-				    $sAndamento = 'REPPROVADO';	// D reprova
+				    $sAndamento = 'REPPROVADO';
 				}else{
-					$sAndamento = 'APROVADO';   // os outros n?o
+					$sAndamento = 'APROVADO';
 				}
 			}	
 		}
-//  O resultado final estava saindo reprovado, porque a rotina aprovadoComProgressaoParcial() na classe DiarioAvaliacaoDisciplina.model.php, linha 1025
-//  Só retorna que existe progressão parcial depois que o aluno foi matriculado para o ano seguinte e também matriculado na progressão parcial
-//  e ainda não tinha sido feito, então usei o mesmo procedimento para colocar o resultado quando todas as notas estiverem lançadas, mas o procedimento de 
-//  encerramento ainda não foi feito
-
 
         $this->oPdf->Cell(191, 4, $this->pdfStr("RESULTADO FINAL:  " . $sAndamento), "LR", 1, "L");	
 	}else{
-		$this->oPdf->Cell(191, 4, $this->pdfStr("RESULTADO FINAL:  EM ANDAMENTO"), "LR", 1, "L");	// houve uma situação que um aluno não tinha situação definida então coloquei essa condição
-	}
-	
-//$imprimeperiodo++;
-//}	
+		$this->oPdf->Cell(191, 4, $this->pdfStr("RESULTADO FINAL:  EM ANDAMENTO"), "LR", 1, "L");
+	}	
 $this->imprimeDependencia(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"]);
-}//***fim da função montarGrade *****************************************************************************************************
+}
     
 
 
@@ -935,10 +894,8 @@ $this->imprimeDependencia(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"]);
   public function imprimirMinimoParaAprovacao() {
 
     $this->oPdf->SetFont("Arial", "B", 8);
-    $mMinino  = "Mínimo para Aprovação Anual: ";
-    //$mMinino .= $this->oGradeAproveitamento->getMinimoParaAprovacao();
-    $mMinino .= str_replace(".", ",", $this->oGradeAproveitamento->getMinimoParaAprovacao());
-    //$notavirgula = str_replace(".", ",", $arr_explode[3]);
+    $mMinino  = "Mínimo para Aprovação Anual: ";    
+    $mMinino .= str_replace(".", ",", $this->oGradeAproveitamento->getMinimoParaAprovacao());    
     $this->oPdf->Cell($this->iLimiteLinha, 4, $this->pdfStr($mMinino), 1, 1, "L");
   }
 
@@ -1232,7 +1189,6 @@ $this->imprimeDependencia(@$GLOBALS["HTTP_POST_VARS"]["MatriculaFalta"]);
       }
     }
   }
-//*****************************************************************************************************************************************
 private function buscafalta(){
 
     $totaltotal = 0;
@@ -1271,10 +1227,7 @@ private function percfrequencia($calendar){
 	}
 	elseif( substr($nome,0,11) == 'ANOS FINAIS' or substr($nome,0,18) == 'EN FUN ANOS FINAIS')
 	{
-		// Autor: Uemerson Santana | Data: 19/01/2026 | Demanda: 18059
-		// Raz?o: Para Anos Finais, verificar se o turno ? INTEGRAL para aplicar 1522 horas/aula
-		//        ao inv?s de 1000 horas/aula fixas. Turno INTEGRAL tem carga hor?ria maior.
-		//        Este relat?rio ? espec?fico para Integral, mas ainda precisa verificar o turno.
+		
 		if (strtoupper($turno_completo) == 'INTEGRAL') {
 			$auladadas = 1522;
 		} else {
@@ -1301,7 +1254,7 @@ private function percfrequencia($calendar){
 private function faltasPeriodo($aluno,$periodoaval, $escola, $calendario )
 {
 	
-	// n?o esquecer de enviar edu2_boletim003.php
+	
 	$sql2 = " select ed60_i_aluno from matricula where ed60_i_codigo = {$aluno}";
 	$sqlA = pg_query($sql2);
 	$oAluno = db_utils::fieldsMemory($sqlA, 0);
@@ -1347,7 +1300,7 @@ private function faltasPeriodo($aluno,$periodoaval, $escola, $calendario )
 	return $quantFalta;
 }
 
-private function imprimeDependencia($aluno)  // imprime as dependencias 
+private function imprimeDependencia($aluno)
 {
     $sql1= "
 			select
@@ -1397,7 +1350,7 @@ private function imprimeDependencia($aluno)  // imprime as dependencias
 		$this->oPdf->Cell(10,4, $this->pdfStr('MÉDIA'), 'LR', 0, "C");
 		$this->oPdf->Cell(40,4,'FALTAS', 'LRB', 0, "C");
 		$this->oPdf->Cell(10,4,'TOTAL', 'LR', 0, "C");
-		//$this->oPdf->Cell(10,4,'FREQ.', 'LR', 0, "C");
+		
 		$this->oPdf->Cell(10,4,'', '', 0, "C");
 		$this->oPdf->Cell(10,4,'RES.', 'LR', 1, "C");
 		
@@ -1441,31 +1394,31 @@ private function imprimeDependencia($aluno)  // imprime as dependencias
 				
 			$this->oPdf->Cell(31,4,$disciplina, 'LRB', 0, "L");
 			$this->oPdf->Cell(10,4,$ano, 'LRB', 0, "C");
-			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C"); // 1? bimestre
+			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C");
 			$nota1 = $oDados->nota;
 			$faltas1 = $oDados->faltas;
 
 			$x++;
 			$oDados = db_utils::fieldsMemory($sql, $x);
-			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C"); // 2? bimestre
+			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C");
 			$nota2 = $oDados->nota;
 			$faltas2 = $oDados->faltas;
 
 			$x++;
-			$oDados = db_utils::fieldsMemory($sql, $x);   // recuperacao semestral
+			$oDados = db_utils::fieldsMemory($sql, $x);
 			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C");
 			$nota5 = $oDados->nota; // nota rec sem
 			
 			
 			$x++;
 			$oDados = db_utils::fieldsMemory($sql, $x);
-			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C"); // 3? bimestre
+			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C");
 			$nota3 = $oDados->nota;
 			$faltas3 = $oDados->faltas;
 			
 			$x++;
 			$oDados = db_utils::fieldsMemory($sql, $x);
-			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C"); // 4? bimestre
+			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C");
 			$nota4 = $oDados->nota;
 			$faltas4 = $oDados->faltas;
 			
@@ -1495,37 +1448,37 @@ private function imprimeDependencia($aluno)  // imprime as dependencias
             {
 				$nota2 = $nota5;
 			}
-//M A
+
             $media = ($nota1+$nota2+$nota3+$nota4)/$divisao;
 			
 			
 			$nm = explode(".", $media);
 			$mediaA = $nm[0] . "," . substr($nm[1], 0, 1);
 			
-			if( $nota4 <> null ) // foi lan?ado todas as notas
+			if( $nota4 <> null )
 			{	
-			    $this->oPdf->Cell(10,4,$mediaA, 'LRB' , 0, "C"); // m?dia
+			    $this->oPdf->Cell(10,4,$mediaA, 'LRB' , 0, "C");
 			}else{
-				$this->oPdf->Cell(10,4,'', 'LRB' , 0, "C"); // m?dia
+				$this->oPdf->Cell(10,4,'', 'LRB' , 0, "C");
 			}	
 			
 			$x++;
-			$oDados = db_utils::fieldsMemory($sql, $x);   // recuperacao final
+			$oDados = db_utils::fieldsMemory($sql, $x);
 			$this->oPdf->Cell(10,4,number_format($oDados->nota, 1, ',', '.'), 'LRB', 0, "C");
-			$nota6 = $oDados->nota; // nota rec sem
-//M F			
-            if( $nota6 <> null and $nota6 <> '' ) // o aluno fez a recupera??o final e teve nota maior que a media anual
+			$nota6 = $oDados->nota;
+
+            if( $nota6 <> null and $nota6 <> '' )
 			{
-				if( $nota6 > $media ) // mas ela s? ira entrar na media final se for maior que a media final
+				if( $nota6 > $media )
 				{	
-				    $mediaf  = ($media+$nota6)/2;        // se for maior, a media anual devera ser somada a recupera??o final e ai fazer a media final dividindo por 2
+				    $mediaf  = ($media+$nota6)/2;
 					$mediaAR = $mediaf;
 				}else{
-					$mediaf  = $media;  // se for menor que o 3? ou menor que o 4?, ? descartada e a media anual prevalece como media final
+					$mediaf  = $media;
 					$mediaAR = $media;
 				}
 			}else{
-			    $mediaf = $media; // o aluno n?o fez a recupera??o final
+			    $mediaf = $media;
 				$mediaAR = $media;
 			}
 
@@ -1533,11 +1486,10 @@ private function imprimeDependencia($aluno)  // imprime as dependencias
 			{	
 				$nmf = explode(".", $mediaf);
 				$mediaf = $nmf[0] . "," . substr($nmf[1], 0, 1);
-				$this->oPdf->Cell(10,4,$mediaf, 'LRB', 0, "C"); // media final (ver esse calculo)
+				$this->oPdf->Cell(10,4,$mediaf, 'LRB', 0, "C");
 		    }else{
-				$this->oPdf->Cell(10,4,'', 'LRB', 0, "C"); // media final (ver esse calculo)
+				$this->oPdf->Cell(10,4,'', 'LRB', 0, "C");
 			}
-
 
 			$this->oPdf->Cell(10,4,$faltas1, 'LRB', 0, "C");
 			$this->oPdf->Cell(10,4,$faltas2, 'LRB', 0, "C");
@@ -1546,8 +1498,8 @@ private function imprimeDependencia($aluno)  // imprime as dependencias
 			$this->oPdf->Cell(10,4,($faltas1+$faltas2+$faltas3+$faltas4), 'LRB', 0, "C");
 			
 			$diasletivos2 = $this->percfrequencia(@$GLOBALS["HTTP_POST_VARS"]["calendarioF"]);
-			$sPercentualFrequencia = floor(($diasletivos2 - ($faltas1+$faltas2+$faltas3+$faltas4)) / $diasletivos2 * 100);  // ver os dias letivos de recuperacao
-//			$this->oPdf->Cell(10,4,$sPercentualFrequencia, 'LRB', 0, "C");
+			$sPercentualFrequencia = floor(($diasletivos2 - ($faltas1+$faltas2+$faltas3+$faltas4)) / $diasletivos2 * 100);
+
             $this->oPdf->Cell(10,4,'', 'LRB', 0, "C");
 
 			$evadido2 = $this->evadiu($aluno,$coddisciplina);		
@@ -1587,8 +1539,6 @@ function notasPorDisciplina($matricula,$disciplina,$turma,$periodoprova){
   $r1 = pg_fetch_all($sql1);
   $serie = $r1[0]["ed59_i_serie"];
   $turma = $r1[0]["ed59_i_turma"];
-// voltei a disciplina para o nome para fazer anos iniciais
-//$disciplina = utf8_decode($disciplina);
 
 
 	$sqlD   = " SELECT 
@@ -1670,26 +1620,19 @@ function notasPorDisciplina($matricula,$disciplina,$turma,$periodoprova){
 		ed72_i_diario = {$codigo}
         ORDER BY ed72_i_procavaliacao";
 
-//if( trim($r2[0]["ed47_v_nome"]) == 'Isabela de Souza Fortes Estev?o')
-//{
-//$arq = fopen("/dados/www/homologacao.epdvr.com.br/backup/busca2.sql","a+");
-//fwrite($arq, $sqlN );
-//fwrite($arq,"\r\n");
-//fclose($arq);	
-//}	
     $sql3 = pg_query($sqlN);
     $resultado = pg_fetch_all($sql3);
 	
-	//verifica nas materias abaixo
+	
     if( trim($disciplina) == 'LINGUA PORTUGUESA' or trim($disciplina) == 'MATEM?TICA' or trim($disciplina) == 'HIST?RIA' or trim($disciplina) == 'GEOGRAFIA' or
         trim($disciplina) == 'CIENCIAS' )
     {	  
 	
-	    if(trim($resultado[2]['ed72_c_valorconceito']) == 'D') // se o ultimo conceito do aluno foi 'D'
+	    if(trim($resultado[2]['ed72_c_valorconceito']) == 'D')
 	    {	  
             if( $this->reprovou )
 		    {	  
-		        $this->repconceito = true; // se foi o aluno ser? reprovado
+		        $this->repconceito = true;
 				$this->reprovou    = false;
 		    }
 	    }	  
@@ -1700,23 +1643,22 @@ function notasPorDisciplina($matricula,$disciplina,$turma,$periodoprova){
 
 }
 
-function mediaC( $matricula,$disciplina,$turma,$periodo,$periodoprova)
-{
-//**********************************************************************************************************************
+function mediaC( $matricula,$disciplina,$turma,$periodo,$periodoprova){
+
 	$sql    = "select ed09_i_codigo from periodoavaliacao where ed09_c_descr = '".$periodoprova."'";
 	
 	$result = pg_query($sql);
 	$period = db_utils::fieldsmemory($result,0);
-    $result = $this->quantDividir($matricula,$disciplina,$turma,$period->ed09_i_codigo); // busca os dados dos anos iniciais
+    $result = $this->quantDividir($matricula,$disciplina,$turma,$period->ed09_i_codigo);
 
 	$quant = 0;
 	$media = 0;
-	if( $result[0]["ed72_i_valornota"]<>null ) // v? se o primeiro bimestre teve nota
+	if( $result[0]["ed72_i_valornota"]<>null )
 	{
 		$quant++;
 	}	
 	
-	if( $result[1]["ed72_i_valornota"]<>null ) // v? se o segundo bimestre teve nota
+	if( $result[1]["ed72_i_valornota"]<>null )
 	{
 		if( $periodo >= 2 )
 		{	
@@ -1724,7 +1666,7 @@ function mediaC( $matricula,$disciplina,$turma,$periodo,$periodoprova)
 		}	
 	}	
 	
-	if( $result[2]["ed72_i_valornota"]<>null ) // v? se o terceiro bimestre teve nota
+	if( $result[2]["ed72_i_valornota"]<>null )
 	{
 		if( $periodo >= 3 )
 		{	
@@ -1732,7 +1674,7 @@ function mediaC( $matricula,$disciplina,$turma,$periodo,$periodoprova)
 		}	
 	}	
 	
-	if( $result[3]["ed72_i_valornota"]<>null ) // v? se o quarto bimestre teve nota
+	if( $result[3]["ed72_i_valornota"]<>null )
 	{
 		if( $periodo == 4 )
 		{	
@@ -1741,34 +1683,32 @@ function mediaC( $matricula,$disciplina,$turma,$periodo,$periodoprova)
 	}	
 
 
-//**********************************************************************************************************************
-
 	  $resultado = $this->notasPorDisciplina($matricula,$disciplina,$turma,$period->ed09_i_codigo);
 
 	  $media = 0; 
 	  
-	  if( $periodo == 1) //se foi escolhido o primeiro bimestre
+	  if( $periodo == 1)
 	  {		
 		  $media = $resultado[0]["ed72_i_valornota"]; 
 	  }  
 
-	  if( $periodo == 2) //se foi escolhido o segundo bimestre	  
+	  if( $periodo == 2)
 	  {
 		  $media = ($resultado[0]["ed72_i_valornota"]+$resultado[1]["ed72_i_valornota"])/$quant;
 	  }
-	  if( $periodo == 3) //se foi escolhido o terceiro bimestre
+	  if( $periodo == 3)
 	  {
 		  $media = ($resultado[0]["ed72_i_valornota"]+$resultado[1]["ed72_i_valornota"]+$resultado[2]["ed72_i_valornota"])/$quant;
 	  }			  
-	  // todos os bimestre foram feitos mas n?o foi feito a recupera??o
-	  if( $periodo == 4) //se foi escolhido o segundo bimestre	  
+	  
+	  if( $periodo == 4)
 	  {	
 		  $media = ($resultado[0]["ed72_i_valornota"]+$resultado[1]["ed72_i_valornota"]+$resultado[2]["ed72_i_valornota"]+$resultado[3]["ed72_i_valornota"])/$quant;
 	  }			  
 	  
 	  
     return $media;
-}//*********************************************************************************************************************************************
+}
 
 function mediaF($matricula,$disciplina,$turma,$mediaSF,$periodoprova)
 {
@@ -1777,14 +1717,14 @@ function mediaF($matricula,$disciplina,$turma,$mediaSF,$periodoprova)
 	  $period    = db_utils::fieldsmemory($result,0);
 	  $resultado4 = $this->notasPorDisciplina($matricula,$disciplina,$turma,$period->ed09_i_codigo);
 	  $media = 0; 
-//	  if( $resultado4[5]["ed72_i_valornota"] > $mediaSF ) // Se o aluno fez a recupera??o Final e ela foi maior que a media anual
+
 
 
 	  if( $resultado4[5]["ed72_i_valornota"] <> null   )
 	  {	  
-	       $media = ($mediaSF + $resultado4[5]["ed72_i_valornota"])/2;	   // m?dia final conforme suellem (media+ rec final)/2
+	       $media = ($mediaSF + $resultado4[5]["ed72_i_valornota"])/2;
 	  }else{
-		   $media = $mediaSF;  //N?o havendo recupera??o final ou a recupera??o final a media final continua como a media anual
+		   $media = $mediaSF;
 	  }
     return $media;
 }
@@ -1794,17 +1734,17 @@ function mediaAnosIniciais( $matricula,$disciplina,$turma,$periodo,$periodoprova
 	$sql    = "select ed09_i_codigo from periodoavaliacao where ed09_c_descr = '".$periodoprova."'";
 	$result = pg_query($sql);
 	$period = db_utils::fieldsmemory($result,0);
-    $resultado = $this->notasPorDisciplina($matricula,$disciplina,$turma,$period->ed09_i_codigo); // busca os dados dos anos iniciais
+    $resultado = $this->notasPorDisciplina($matricula,$disciplina,$turma,$period->ed09_i_codigo);
 	$quant = 0;
 	$media = 0;
-	for($x=0;$x<=count($resultado);$x++) // percorre o array com os dados
+	for($x=0;$x<=count($resultado);$x++)
     {
-		if( $resultado[$x]["ed72_i_valornota"]<>null ) //pega apenas a quantidade de colunas com notas - demanda 16568
+		if( $resultado[$x]["ed72_i_valornota"]<>null )
 		{	
            $quant++;
 		}   
     }
-	// calcula a m?dia apenas das colunas que tem notas e descartando as colunas que est?o nulas
+	
 	if( $periodo == 1)
 	{
 		$media = $resultado[0]["ed72_i_valornota"];
@@ -1826,17 +1766,17 @@ function mediaEja( $matricula,$disciplina,$turma,$periodo,$periodoprova)
 	$sql    = "select ed09_i_codigo from periodoavaliacao where ed09_c_descr = '".$periodoprova."'";
 	$result = pg_query($sql);
 	$period = db_utils::fieldsmemory($result,0);
-    $resultado = $this->notasPorDisciplina($matricula,$disciplina,$turma,$period->ed09_i_codigo); // busca os dados dos anos iniciais
+    $resultado = $this->notasPorDisciplina($matricula,$disciplina,$turma,$period->ed09_i_codigo);
 	$quant = 0;
 	$media = 0;
-	for($x=0;$x<=count($resultado);$x++) // percorre o array com os dados
+	for($x=0;$x<=count($resultado);$x++)
     {
-		if( $resultado[$x]["ed72_i_valornota"]<>null ) //pega apenas a quantidade de colunas com notas - demanda 16568
+		if( $resultado[$x]["ed72_i_valornota"]<>null )
 		{	
            $quant++;
 		}   
     }
-	// calcula a m?dia apenas das colunas que tem notas e descartando as colunas que est?o nulas
+	
 	if( $periodo == 1)
 	{
 		$media = $resultado[0]["ed72_i_valornota"];
@@ -1853,10 +1793,7 @@ function mediaEja( $matricula,$disciplina,$turma,$periodo,$periodoprova)
 	{
 	    $media = ($resultado[0]["ed72_i_valornota"]+$resultado[1]["ed72_i_valornota"]+$resultado[2]["ed72_i_valornota"]+$resultado[3]["ed72_i_valornota"])/$quant;
 	}
-//$arq = fopen("/dados/www/homologacao.epdvr.com.br/backup/busca.txt","a+");
-//fwrite($arq, $media);
-//fwrite($arq,"\r\n");
-//fclose($arq);	
+
 	$media = $media + .001;
 	return $media;
 }
@@ -1867,8 +1804,6 @@ function quantDividir($matricula,$disciplina,$turma,$periodoprova){
   $r1 = pg_fetch_all($sql1);
   $serie = $r1[0]["ed59_i_serie"];
   $turma = $r1[0]["ed59_i_turma"];
-// voltei a disciplina para o nome para fazer anos iniciais
-//$disciplina = utf8_decode($disciplina);
 
 
 	$sqlD   = " SELECT 
@@ -1946,15 +1881,7 @@ function quantDividir($matricula,$disciplina,$turma,$periodoprova){
 		inner join caddisciplina    on ed232_i_codigo         = ed12_i_caddisciplina
 		where 
 		ed72_i_diario = {$codigo} ";
-/*		
-  if( $periodoprova <> null)		
-  {
-      $sqlN .="
-	          and 
-			  ed09_i_codigo <= {$periodoprova}
-	          ";	  
-  }	  
- */
+
   $sqlN .= "ORDER BY ed72_i_procavaliacao";
   
   $sql3 = pg_query($sqlN);
@@ -1976,9 +1903,6 @@ function final_anoletivo($matricula,$disciplina,$turma,$periodo,$periodoprova){
   $r1 = pg_fetch_all($sql1);
   $serie = $r1[0]["ed59_i_serie"];
   $turma = $r1[0]["ed59_i_turma"];
-// voltei a disciplina para o nome para fazer anos iniciais
-//$disciplina = utf8_decode($disciplina);
-
 
 	$sqlD   = " SELECT 
 	            distinct on (ed12_i_codigo)
@@ -2090,8 +2014,6 @@ function media_final($matricula,$disciplina,$turma,$periodoprova,$calend){
   $r1 = pg_fetch_all($sql1);
   $serie = $r1[0]["ed59_i_serie"];
   $turma = $r1[0]["ed59_i_turma"];
-// voltei a disciplina para o nome para fazer anos iniciais
-//$disciplina = utf8_decode($disciplina);
 
 
 	$sqlD   = " SELECT 
@@ -2189,17 +2111,17 @@ function media_final($matricula,$disciplina,$turma,$periodoprova,$calend){
 		
   $sql3 = pg_query($sqlN);
   $media = pg_fetch_all($sql3);
-  if( $media[2]["nota"] > $media[0]["nota"] and $media[2]["nota"] < $media[1]["nota"]) // se a recupera??o for maior que o 1? bimestre e menor que o 2?, substitue 
+  if( $media[2]["nota"] > $media[0]["nota"] and $media[2]["nota"] < $media[1]["nota"])
   {	  
       $n1 = $media[2]["nota"];
-  }else{  // caso contrario mant?m a nota do 1? bimestre
+  }else{
 	  $n1 = $media[0]["nota"];
   }	  
 
   if( $media[2]["nota"] > $media[1]["nota"] and $media[2]["nota"] < $media[0]["nota"]) // se a recupera??o for maior que o 2? bimestre e menor que o 1?, substitue 
   {	  
       $n2 = $media[2]["nota"];
-  }else{  // caso contrario mant?m a nota do 2? bimestre
+  }else{
 	  $n2 = $media[0]["nota"];
   }	  
   $n3 = $media[3]["nota"]; 
@@ -2209,7 +2131,7 @@ function media_final($matricula,$disciplina,$turma,$periodoprova,$calend){
 
 }
 
-private function cumpriuDependencia($aluno) // deixei esta funcao para o caso de precisa novamente
+private function cumpriuDependencia($aluno)
 {
   $n1 = null;
   $n2 = null;
@@ -2320,10 +2242,6 @@ function evadiu($aluno,$disciplina)
 			where
 			ed60_i_codigo = {$aluno}
 		   ";
-//$arq = fopen("/dados/www/homologacao.epdvr.com.br/backup/evadido.txt","a+");
-//fwrite($arq, $disciplina);
-//fwrite($arq,"\r\n");
-//fclose($arq); 		
 		   
     $result	    = pg_query($sql);
 	$evadido1   = false;
@@ -2339,22 +2257,20 @@ function evadiu($aluno,$disciplina)
 	return $evadido1;
 }
 
-function checa_dep($nomeDisc,$matricula) // verifica se a dependencia atual ? a mesma anterior e se foi aprovado
-{   
-    // nomeDisc  ? um array com as disciplinas que est?o na dependencia
-    $passou = 't'; // vai verificar se o aluno passou ou ficou na dependencia 
-	for($x=1;$x<=9;$x++) // vai percorrer o array
+function checa_dep($nomeDisc,$matricula){
+    $passou = 't';
+	for($x=1;$x<=9;$x++)
 	{
 		if($nomeDisc[$x] <> '' and $nomeDisc[$x] <> null )
 		{	
-			$passou = $this->mesmaDependencia($nomeDisc[$x],$matricula); // procura se a disciplina enviada no array esta como dependencia no ultimo ano
-			if( $passou == 'f' ) // se for e o aluno n?o passou, retorna falso
+			$passou = $this->mesmaDependencia($nomeDisc[$x],$matricula);
+			if( $passou == 'f' )
 			{
-				break; // abandona porque ja encontrou uma disciplina que n?o passou
+				break;
 			}	
 		}	
 	}
-	return $passou; // retorna a informa??o
+	return $passou;
 }
 
 private function mesmaDependencia($nomeDisc,$aluno) 
@@ -2506,19 +2422,19 @@ function depanoant($aluno)
 			$nota6       = null;
 			for($x=0;$x<pg_num_rows($sql);$x++)
 			{
-				$oDados = db_utils::fieldsMemory($sql, $x);   // 1? bimestre
+				$oDados = db_utils::fieldsMemory($sql, $x);
 				$nota1  = $oDados->nota;
 				$x++;
-				$oDados = db_utils::fieldsMemory($sql, $x);   // 2? bimestre
+				$oDados = db_utils::fieldsMemory($sql, $x);
 				$nota2  = $oDados->nota;
 				$x++;
-				$oDados = db_utils::fieldsMemory($sql, $x);   // recuperacao semestral
+				$oDados = db_utils::fieldsMemory($sql, $x);
 				$nota5  = $oDados->nota; // nota rec sem
 				$x++;
-				$oDados = db_utils::fieldsMemory($sql, $x);   // 3? bimestre
+				$oDados = db_utils::fieldsMemory($sql, $x);
 				$nota3  = $oDados->nota;
 				$x++;
-				$oDados = db_utils::fieldsMemory($sql, $x);   // 4? bimestre
+				$oDados = db_utils::fieldsMemory($sql, $x);
 				$nota4  = $oDados->nota;
 				$divisao = 0;
 				if( $nota1 <> null )
@@ -2546,24 +2462,24 @@ function depanoant($aluno)
 				{
 					$nota2 = $nota5;
 				}
-	//M A
+	
 				$media = ($nota1+$nota2+$nota3+$nota4)/$divisao;
 				$x++;
-				$oDados = db_utils::fieldsMemory($sql, $x);   // recuperacao final
-				$nota6 = $oDados->nota; // nota rec sem
+				$oDados = db_utils::fieldsMemory($sql, $x);
+				$nota6 = $oDados->nota;
 	//M F			
-				if( $nota6 > 0 ) // o aluno fez a recupera??o final
+				if( $nota6 > 0 )
 				{
-					if( $nota6 > $media ) // mas ela s? ira entrar na media final se for maior que a media final
+					if( $nota6 > $media )
 					{	
-						$mediaf  = ($media+$nota6)/2;        // se for maior, a media anual devera ser somada a recupera??o final e ai fazer a media final dividindo por 2
+						$mediaf  = ($media+$nota6)/2;
 						$mediaAR = $mediaf;
 					}else{
-						$mediaf  = $media;  // se for menor que o 3? ou menor que o 4?, ? descartada e a media anual prevalece como media final'
+						$mediaf  = $media;
 						$mediaAR = $media;
 					}
 				}else{
-					$mediaf  = $media; // o aluno n?o fez a recupera??o final
+					$mediaf  = $media;
 					$mediaAR = $media;
 				}
 				

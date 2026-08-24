@@ -64,8 +64,7 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
   /**
    * Escreve a grade de avaliação no pdf
    */
-  public function montarGrade($ed29_c_descr=null, $ed11_c_descr=null, $guardapagina=null) {      
-    //var_dump($ed29_c_descr, $ed11_c_descr); die("Confere");
+  public function montarGrade($ed29_c_descr=null, $ed11_c_descr=null, $guardapagina=null) {
     
     if($ed29_c_descr == "ENSINO FUNDAMENTAL" && $ed11_c_descr == "2º ANO"){
       $this->montarCabecalho($this->oGradeAproveitamento->getProcedimentoAvaliacao(), "ef2a");
@@ -92,8 +91,7 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
         if(!$oAvaliacao->lApareceBoletim ){continue;}
 
         $this->oPdf->SetFont("Arial", "", 7);
-        if ($oAvaliacao->oAproveitamento->nAproveitamento == "AMP" || !$oAvaliacao->oAproveitamento->lAtingiuMinimo) {
-          //$this->oPdf->SetFont("Arial", "B", 7);
+        if ($oAvaliacao->oAproveitamento->nAproveitamento == "AMP" || !$oAvaliacao->oAproveitamento->lAtingiuMinimo) {          
         }
 
         if ($oAvaliacao->lRecuperacao) {
@@ -102,7 +100,6 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
         }
 
         if ( $oAvaliacao->lResultado ) {
-          //$this->oPdf->Cell($this->iTamanhoResultados, $iAlturaLinha, $oAvaliacao->oAproveitamento->nAproveitamento, 1, 0, "C");
           continue;
         }
 
@@ -126,11 +123,10 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
 
       $mAproveitamentoFinal          = '';
       $sTermoResultadoFinalAbreviado = '';
-
-      //if ( $this->oGradeAproveitamento->getMatricula()->isConcluida() ) {
+      
         $mAproveitamentoFinal          = $oDisciplina->oResultadoFinal->nAproveitamentoFinal;
         $sTermoResultadoFinalAbreviado = $oDisciplina->oResultadoFinal->sTermoResultadoFinalAbreviado;
-      //}
+      
       
       if($guardapagina == "3º TRIMESTRE"){
         if($sTermoResultadoFinalAbreviado == "AP"){
@@ -154,22 +150,19 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
     $this->oPdf->Cell($this->iColunaRF + 28, $iAlturaLinha, "Total de Faltas: " . $totalfaltas, 0, 1, "L");
 
     $this->oPdf->Cell($this->iColunaRF + 124, $iAlturaLinha, "", 0, 0, "L");
-    $this->oPdf->Cell($this->iColunaRF + 28, $iAlturaLinha, "Percentual de Frequência: " . $sPercentualFrequencia, 0, 1, "L");
-    //var_dump($guardapagina, $this->oPdf->getY()); echo "<br>";
+    $this->oPdf->Cell($this->iColunaRF + 28, $iAlturaLinha, "Percentual de Frequência: " . $sPercentualFrequencia, 0, 1, "L");    
     if($_GET["assresp"] == "yes"){
       if($this->oPdf->getY() == 43){
         $this->oPdf->Rect(10, 35, 192, 71);
       }elseif($this->oPdf->getY() == 46){        
         $this->oPdf->Rect(10, 38, 192, 71);
-      }
-      //$this->oPdf->Rect(10, 35, 192, 65);
+      }      
     }else{
       if($this->oPdf->getY() == 43){
         $this->oPdf->Rect(10, 35, 192, 48);
       }elseif($this->oPdf->getY() == 46){        
         $this->oPdf->Rect(10, 38, 192, 48);
       }
-      //$this->oPdf->Rect(10, 35, 192, 45);
     }
     
     
@@ -203,7 +196,6 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
 
         $this->oPdf->SetFont("Arial", "", 7);
         if ($oAvaliacao->oAproveitamento->nAproveitamento == "AMP" || !$oAvaliacao->oAproveitamento->lAtingiuMinimo) {
-          //$this->oPdf->SetFont("Arial", "B", 7);
         }
 
         if ($oAvaliacao->lRecuperacao) {
@@ -238,10 +230,10 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
       $sTermoResultadoFinalAbreviado = '';
       
 
-      //if ( $this->oGradeAproveitamento->getMatricula()->isConcluida() ) {
+      
         $mAproveitamentoFinal          = $oDisciplina->oResultadoFinal->nAproveitamentoFinal;
         $sTermoResultadoFinalAbreviado = $oDisciplina->oResultadoFinal->sTermoResultadoFinalAbreviado;
-      //}
+      
         if($guardapagina == "3º TRIMESTRE"){
           if($sTermoResultadoFinalAbreviado == "AP"){
             $sTermoResultadoFinalAbreviado = "APROVADO";
@@ -281,9 +273,7 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
       }elseif($this->oPdf->getY() == 46){        
         $this->oPdf->Rect(10, 38, 192, 48);
       }
-      //$this->oPdf->Rect(10, 38, 192, 45);
     }
-
     $this->oPdf->SetY($guarday);
     //FIM DO IF 3º ao 5º ANO
   }elseif($ed29_c_descr == "ENSINO FUNDAMENTAL" && ($ed11_c_descr == "6º ANO" || $ed11_c_descr == "7º ANO" || $ed11_c_descr == "8º ANO" || $ed11_c_descr == "9º ANO")){
@@ -294,8 +284,7 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
       $rep = 0;
     foreach ($this->oGradeAproveitamento->getGradeAproveitamento() as $oDisciplina) {
       $totalfaltas = 0;
-      //var_dump($oDisciplina->sNome);
-      $iAlturaLinha          = 4;
+      $iAlturaLinha = 4;
       $iLinhasNomeDisciplina = $this->oPdf->NbLines($this->iTamanhoDisciplina, $oDisciplina->sNome);
       if ( $iLinhasNomeDisciplina > 1) {
         $iAlturaLinha *= $iLinhasNomeDisciplina;
@@ -310,12 +299,8 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
       $n2 = $oDisciplina->aAproveitamento[1]->oAproveitamento->nAproveitamento;
       $n3 = $oDisciplina->aAproveitamento[2]->oAproveitamento->nAproveitamento;
       $volta = 1;
-      
 
       foreach ($oDisciplina->aAproveitamento as $oAvaliacao){
-        
-        
-        //if($oAvaliacao->iCodigo == 29){continue;}
         $oAvaliacao->oAproveitamento->nAproveitamento = str_replace(".", ",", $oAvaliacao->oAproveitamento->nAproveitamento);
         $oAvaliacao->oAproveitamento->nMinimoAprovacao = str_replace(".", ",", $oAvaliacao->oAproveitamento->nMinimoAprovacao);
         $oDisciplina->oNotaParcial->nNota = str_replace(".", ",", $oDisciplina->oNotaParcial->nNota);
@@ -324,8 +309,7 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
         if(!$oAvaliacao->lApareceBoletim ){continue;}
 
         $this->oPdf->SetFont("Arial", "", 7);
-        if ($oAvaliacao->oAproveitamento->nAproveitamento == "AMP" || !$oAvaliacao->oAproveitamento->lAtingiuMinimo) {
-          //$this->oPdf->SetFont("Arial", "B", 7);
+        if ($oAvaliacao->oAproveitamento->nAproveitamento == "AMP" || !$oAvaliacao->oAproveitamento->lAtingiuMinimo) {          
         }
 
         if ($oAvaliacao->lRecuperacao) {
@@ -338,25 +322,18 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
           continue;
         }
         
-        if($oAvaliacao->oAproveitamento->nAproveitamento < $oAvaliacao->oAproveitamento->nMinimoAprovacao && ($oAvaliacao->iCodigo == 75 || $oAvaliacao->iCodigo == 76)){          
-          
-          //if($n1 < $n2 && $volta == 1){
+        if($oAvaliacao->oAproveitamento->nAproveitamento < $oAvaliacao->oAproveitamento->nMinimoAprovacao && ($oAvaliacao->iCodigo == 75 || $oAvaliacao->iCodigo == 76)){
           if($n1 < $n2 && $n1 < $n3 && $volta == 1){
             $this->oPdf->Line($this->oPdf->getX() + 3, $this->oPdf->getY() + 2, $this->oPdf->getX() + 7, $this->oPdf->getY() + 2);
           }
-
-          //if($n2 < $n1 && $volta == 2){
+          
           if($n2 < $n1 && $n2 < $n3 && $volta == 2){
             $this->oPdf->Line($this->oPdf->getX() + 3, $this->oPdf->getY() + 2, $this->oPdf->getX() + 7, $this->oPdf->getY() + 2);
           }
-          //$this->oPdf->Line(43, 45, 47, 45);
-          //$this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, "---", 0, 0, "C");
           $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, $oAvaliacao->oAproveitamento->nAproveitamento, 1, 0, "C");
         }else{
           $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, $oAvaliacao->oAproveitamento->nAproveitamento, 1, 0, "C");
         }
-        //$this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, $oAvaliacao->oAproveitamento->nAproveitamento, 1, 0, "C");
-        //$this->oPdf->SetFont("Arial", "", 7);
         $this->oPdf->Cell($this->iColunaFalta, $iAlturaLinha, $oAvaliacao->oAproveitamento->iFaltas, 1, 0, "C");
         $volta++;
       }
@@ -379,12 +356,10 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
       $mAproveitamentoFinal          = '';
       $sTermoResultadoFinalAbreviado = '';
 
-      //if ( $this->oGradeAproveitamento->getMatricula()->isConcluida() ) {
-        $mAproveitamentoFinal          = $oDisciplina->oResultadoFinal->nAproveitamentoFinal;
-        $sTermoResultadoFinalAbreviado = $oDisciplina->oResultadoFinal->sTermoResultadoFinalAbreviado;
-      //}
       
-        //if($this->oGradeAproveitamento->getMatricula()->isConcluida()){
+        $mAproveitamentoFinal          = $oDisciplina->oResultadoFinal->nAproveitamentoFinal;
+        $sTermoResultadoFinalAbreviado = $oDisciplina->oResultadoFinal->sTermoResultadoFinalAbreviado;            
+        
           if($guardapagina == "4º BIMESTRE"){
             if($sTermoResultadoFinalAbreviado == "AP"){
               $sTermoResultadoFinalAbreviado = "APROVADO";
@@ -395,15 +370,9 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
           }else{
             $sTermoResultadoFinalAbreviado = "EM ANDAMENTO";
           }
-        //}else{
-          //$sTermoResultadoFinalAbreviado = "EM ANDAMENTO";
-        //}
-
         
         $xfreq = ($oDisciplina->oFrequencia->iTotalAulas - $totalfaltas) / $oDisciplina->oFrequencia->iTotalAulas * 100;
         $this->oPdf->Cell($this->iColunaRF + 4.5, 4, $totalfaltas, "BLR", 0, "C");
-        //$this->oPdf->Cell($this->iColunaRF + 12.5, 4, $xfreq, "BLR", 0, "C");
-        
       $this->oPdf->ln();
     }
     if($rep > 0){
@@ -421,39 +390,26 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
     $this->oPdf->SetFont("Arial", "", 6.5);
     $this->oPdf->Cell($this->iColunaRF + 28, $iAlturaLinha, "Percentual de Frequência: " . $sPercentualFrequencia, 0, 1, "L");
     $this->oPdf->SetFont("Arial", "", 7);
-    
-    //$this->oPdf->SetY($iYAntes - 20);
-    //$this->oPdf->Cell($this->iColunaRF + 135, $iAlturaLinha, "", 0, 0, "L");
-    //$this->oPdf->Cell($this->iColunaRF + 28, $iAlturaLinha, "Total de Faltas: " . $totalfaltas, 0, 1, "L");
-    //$this->oPdf->Cell($this->iColunaRF + 135, $iAlturaLinha, "", 0, 0, "L");
-    //$this->oPdf->Cell($this->iColunaRF + 28, $iAlturaLinha, "Percentual de Frequência: " . $sPercentualFrequencia, 0, 1, "L");
 
     if($_GET["assresp"] == "yes"){
-      //var_dump($guardapagina, $this->oPdf->getY()); echo "<br>";
       if($this->oPdf->getY() == 54){
         $this->oPdf->Rect(10, 38, 192, 83);
       }elseif($this->oPdf->getY() == 51){        
         $this->oPdf->Rect(10, 35, 192, 83);
-      }      
-      //$this->oPdf->Rect(10, 38, 192, 80);
+      }
     }else{
       if($this->oPdf->getY() == 54){
         $this->oPdf->Rect(10, 38, 192, 66);
       }elseif($this->oPdf->getY() == 51){        
         $this->oPdf->Rect(10, 35, 192, 60);
       }
-      //$this->oPdf->Rect(10, 35, 192, 60);
     }
-    $this->oPdf->SetY($guarday);
-    //die("Confere");
+    $this->oPdf->SetY($guarday);    
     //FIM DO IF 6º ao 9º ANO
   }else{ 
 
     $this->montarCabecalho($this->oGradeAproveitamento->getProcedimentoAvaliacao());
     $this->oPdf->SetFont("Arial", "", 7);
-    //$xxx = $this->oGradeAproveitamento->getProcedimentoAvaliacao();
-    //$this->testa($xxx);
-    //die("Confere");
 
     foreach ($this->oGradeAproveitamento->getGradeAproveitamento() as $oDisciplina) {
       
@@ -498,7 +454,6 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
         $this->oPdf->Cell($this->iColunaAvaliacao, $iAlturaLinha, $oAvaliacao->oAproveitamento->nAproveitamento, 1, 0, "C");
         $this->oPdf->SetFont("Arial", "", 7);
         $this->oPdf->Cell($this->iColunaFalta, $iAlturaLinha, $oAvaliacao->oAproveitamento->iFaltas, 1, 0, "C");
-        //var_dump($oAvaliacao->oAproveitamento->iFaltas); echo "<br>";
       }
 
       if ($this->lApresentarNotaParcial ) {
@@ -509,11 +464,8 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
       if ($oDisciplina->oFrequencia->nPercentualFrequencia !== '') {
         $sPercentualFrequencia = "{$oDisciplina->oFrequencia->nPercentualFrequencia}%";
       }
-      $this->oPdf->SetFont("Arial", "", 7);
-          //$this->oPdf->Cell($this->iColunaAD,   $iAlturaLinha, $oDisciplina->oFrequencia->iTotalAulas,                1, 0, "C");
-          $this->oPdf->Cell($this->iColunaTF + 14,   $iAlturaLinha, $oDisciplina->oFrequencia->iTotalFaltas,               1, 0, "C");
-          //$this->oPdf->Cell($this->iColunaFA,   $iAlturaLinha, "{$oDisciplina->oFrequencia->iFaltasAbonadas}",        1, 0, "C");
-      //$this->oPdf->Cell($this->iColunaFreq, $iAlturaLinha, "{$sPercentualFrequencia}", 1, 0, "C");
+      $this->oPdf->SetFont("Arial", "", 7);          
+      $this->oPdf->Cell($this->iColunaTF + 14,   $iAlturaLinha, $oDisciplina->oFrequencia->iTotalFaltas, 1, 0, "C");
       $this->oPdf->Cell($this->iColunaAD + $this->iColunaTF + $this->iColunaFA + $this->iColunaFreq - 1, $iAlturaLinha, "{$sPercentualFrequencia}", 1, 0, "C");
 
       if ( $oDisciplina->oResultadoFinal->nAproveitamentoFinal != '' && $oDisciplina->oResultadoFinal->sResultadoAprovacao != "A") {
@@ -527,9 +479,6 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
         $mAproveitamentoFinal          = $oDisciplina->oResultadoFinal->nAproveitamentoFinal;
         $sTermoResultadoFinalAbreviado = $oDisciplina->oResultadoFinal->sTermoResultadoFinalAbreviado;
       }
-      //$this->oPdf->Cell($this->iColunaAprov, $iAlturaLinha, $mAproveitamentoFinal, 1, 0, "C");
-      //$this->oPdf->SetFont("Arial", "", 7);
-      //$this->oPdf->Cell($this->iColunaRF, $iAlturaLinha, $sTermoResultadoFinalAbreviado, 1, 1, "C");
       $this->oPdf->ln();
     }
   }//fim do else geral
@@ -562,9 +511,7 @@ class RelatorioGradeAproveitamentoM extends PDFGradeAproveitamento {
 
     $this->oPdf->SetFont("Arial", "B", 8);
     $mMinino  = "Mínimo para Aprovação Anual: ";
-    //$mMinino .= $this->oGradeAproveitamento->getMinimoParaAprovacao();
     $mMinino .= str_replace(".", ",", $this->oGradeAproveitamento->getMinimoParaAprovacao());
-    //$notavirgula = str_replace(".", ",", $arr_explode[3]);
     $this->oPdf->Cell($this->iLimiteLinha, 4, $mMinino, 1, 1, "L");
   }
 

@@ -230,7 +230,7 @@ class RelatorioDiarioClasseBase extends PDF {
   protected $codDisciplina;
   protected $mesext;
   protected $impMeses = 0 ;
-  //protected $pagina = 1;
+  
   public function __construct( Turma $oTurma, Etapa $oEtapa, AvaliacaoPeriodica $oAvaliacaoPeriodica ) {
     parent::fpdf('L');
 
@@ -342,11 +342,6 @@ class RelatorioDiarioClasseBase extends PDF {
     return "";
   }
 
-/**
- * Autor: Uemerson Santana
- * Demanda: 17795
- * Data: 15/09/2025
- */
   public function retornaDataTransferencia2($codmatricula){
     $sqla = "SELECT
 	         COALESCE(to_char(alunotransfturma.ed69_d_datatransf,'DD/MM/YYYY'), to_char(ed60_d_datasaida,'DD/MM/YYYY')) as datasaida,
@@ -361,12 +356,6 @@ class RelatorioDiarioClasseBase extends PDF {
     $resultado = pg_fetch_all($sql);
     return $resultado[0]["datasaida"];
   }  public function retornaDataDesistencia($codmatricula){
-// Divaldo 23/1/2024 - demanda 16792
-// Função criada para não colocar * ou F em alunos desistentes
-// chamada na linha 1576,
-// verifica a situação do aluno e caso seja DESISTENTE, verifica a data da desistencia
-// e para de marcar presença ou falta
-
     $sqla = "SELECT
 	         COALESCE(to_char(alunotransfturma.ed69_d_datatransf,'DD/MM/YYYY'), to_char(ed60_d_datasaida,'DD/MM/YYYY')) as datasaida,
 			 ed60_i_codigo,
@@ -375,7 +364,6 @@ class RelatorioDiarioClasseBase extends PDF {
 			 FROM matricula
 			 LEFT JOIN alunotransfturma ON alunotransfturma.ed69_i_matricula = matricula.ed60_i_codigo
 			 WHERE matricula.ed60_i_codigo = {$codmatricula}";
-
 
 	$sql = pg_query($sqla);
     $resultado = pg_fetch_all($sql);
@@ -654,12 +642,6 @@ public function faltaPorPeriodo($aluno, $regencia, $inicio, $fim){
             $this->Ln();
           }
 
-
-
-
-
-
-
           $this->Cell(282, 8, $this->oRegenciaAtual->getDisciplina()->getNomeDisciplina(), 0, 1, 'C');
           $this->Cell(71, 8, "", 0, 0, 'C');
           $this->Cell(140, 8, "Disciplina", "T", 0, 'C');
@@ -674,8 +656,6 @@ public function faltaPorPeriodo($aluno, $regencia, $inicio, $fim){
 
 
         }elseif(substr($xnomecalendario,0,10) == "EJA FINAIS"){
-          //zaqui
-
           $this->Image("imagens/files/bvr2.png",120,30, 60, 60);
           $this->setY(100);
           $this->SetFont('Arial', 'B', '14');
@@ -684,26 +664,22 @@ public function faltaPorPeriodo($aluno, $regencia, $inicio, $fim){
           $this->Cell(282, 8, "Secretaria Municipal de Educação", 0, 1, 'C');
           $this->Ln();
 
-
           $this->Cell(282, 8, $this->oTurma->getEscola()->getNome(), 0, 1, 'C');
           $this->Cell(71, 8, "", 0, 0, 'C');
           $this->Cell(140, 8, "Estabelecimento", "T", 0, 'C');
           $this->Cell(71, 8, "", 0, 1, 'C');
           $this->Ln();
 
-
           $xDocente = "";
           foreach ( $this->oRegenciaAtual->getDocentes() as $oDocente) {
             $xDocente = $oDocente->getNome();
             break;
           }
-
           $this->Cell(282, 8, $xDocente, 0, 1, 'C');
           $this->Cell(71, 8, "", 0, 0, 'C');
           $this->Cell(140, 8, "Nome do Professor", "T", 0, 'C');
           $this->Cell(71, 8, "", 0, 1, 'C');
           $this->Ln();
-
 
           $this->Cell(282, 8, $this->oRegenciaAtual->getDisciplina()->getNomeDisciplina(), 0, 1, 'C');
           $this->Cell(71, 8, "", 0, 0, 'C');
@@ -846,7 +822,7 @@ public function faltaPorPeriodo($aluno, $regencia, $inicio, $fim){
     }
 
     $this->roundedrect( 8, 8, 280, 20, 2, '', '1234' );
-  }// fim do header *******************************************************************************************************************************************
+  }// fim do header
 
 
   /**
@@ -874,28 +850,13 @@ public function faltaPorPeriodo($aluno, $regencia, $inicio, $fim){
         continue;
       }
 
-      $oDadosEstrutura = $this->getDadosPadraoSubCabecalho();  // getDadosPadraoSubCabecalho() na linha 504
-/*
-tdClass Object
-(
-    [iTamanhoGrade] => 171
-    [iLarguraColunaNumero] => 5
-    [iLarguraColunaNome] => 60
-    [iNumeroColunasVazias] => 0
-    [aMeses] => Array
-        (
-        )
+      $oDadosEstrutura = $this->getDadosPadraoSubCabecalho();
 
-)
-*/
       if ( $this->lRegistroManual ) {
-	    // recebe os dados (data, etc)
-
-        $aEstrutura[$oRegencia->getCodigo()] = $this->calcularColunaGradeRegistroManual($oDadosEstrutura); // esta funca é chamada na linha 976, $oDadosEstrutura linha 866
+        $aEstrutura[$oRegencia->getCodigo()] = $this->calcularColunaGradeRegistroManual($oDadosEstrutura);866
       } else {
 
         $oEstruturaCalculada = $this->calcularColunaGradeRegistroControleFrequencia($oDadosEstrutura, $oRegencia );
-        //ERRO RECUPERAçÃO ACIMA
         if ( empty($oEstruturaCalculada) ) {
           continue;
         }
@@ -903,7 +864,7 @@ tdClass Object
       }
     }
 
-    $this->aEstruturaCabecalho = $aEstrutura; // $aEstrutura um array que recebe os dados na linha  883
+    $this->aEstruturaCabecalho = $aEstrutura;
     return $this->aEstruturaCabecalho ;
   }
 
@@ -933,21 +894,17 @@ tdClass Object
 
   private function calcularColunaGradeRegistroControleFrequencia( $oDadosEstrutura, Regencia $oRegencia ) {
     $oPeriodoAvaliacao = $this->oAvaliacaoPeriodica->getPeriodoAvaliacao();
-    //$this->testa($oPeriodoAvaliacao);
     $oGradeHorario     = new GradeHorario($this->oTurma, $this->oEtapa);
     $aDatasLetiva      = $oGradeHorario->getDiasDeAulaDaDisciplinaNoPeriodoDeAvaliacao($oRegencia->getDisciplina(), $oPeriodoAvaliacao);
-
-    //$this->testa($aDatasLetiva);
-    //ERRO RECUPERAÇÃO ACIMA
+    
     $aDiasOrganizados = array();
 
-    foreach ($aDatasLetiva as $oDataLetiva) {
-        // Para cada periodo temos que repetir o dia letivo
+    foreach ($aDatasLetiva as $oDataLetiva) {        
         foreach ($oDataLetiva->aPeriodoAula as $oPeriodoAula) {
-			$oDataPeriodo           = new stdClass();
-			$oDataPeriodo->oData    = $oDataLetiva->oData;
-			$oDataPeriodo->iPeriodo = $oPeriodoAula->getPeriodoEscola()->getCodigo();
-			$aDiasOrganizados[]     = $oDataPeriodo;
+			   $oDataPeriodo           = new stdClass();
+			   $oDataPeriodo->oData    = $oDataLetiva->oData;
+			   $oDataPeriodo->iPeriodo = $oPeriodoAula->getPeriodoEscola()->getCodigo();
+			   $aDiasOrganizados[]     = $oDataPeriodo;
         }
     }
 
@@ -1120,9 +1077,8 @@ tdClass Object
    * @param $oEstrutura
    */
   protected function escreverSubCabecalho( $oEstrutura, $xcalendario="" ) {
-    //AQUI
     $calendario = $xcalendario;
-	$conta = 0;
+	  $conta = 0;
     $this->colunasImpressas = 0;
     $this->AddPage();
     $this->SetFont("arial", 'B', 8);
@@ -1169,11 +1125,6 @@ tdClass Object
         array_push($oEstrutura->aMeses["09"]->aDias, array("iDia" => "", "iPeriodo" => ""));
       }
     }
-/*
-    Nesta situação as colunas em branco dos dias impressos não estavam descontando a quantidade de dias que foram impressos nos meses
-	e imprimia alem do limite, busquei aqui a qantidade de dias para fazer o desconto nas colunas em branco a ser impressas
-	isso acontecia apenas nos meses abaixo que fecham o total de faltas setembro, novembro e dezembro
-*/
 
     if($oEstrutura->aMeses["12"]->sMes == "Dezembro"){
 	  $this->mesext = 'Dezembro';
@@ -1198,12 +1149,7 @@ tdClass Object
     $this->Cell($oEstrutura->iLarguraColunaNumero + 2, 4, "Sexo", 1, 0, "C");
     $this->Cell($oEstrutura->iLarguraColunaNumero + 8, 4, "Matrícula", 1, 0, "C");
     $this->Cell($oEstrutura->iLarguraColunaNumero + 12, 4, "Transferência", 1, 0, "C");
-    //Data de Nascimento
-    //Sexo
-    //Data da Matrícula
-    //Data de Transferência
-    //$this->Cell(10, 4, "Dia >", 1, 0, "C");
-
+    
     if ( count( $oEstrutura->aMeses ) == 0 ) {
       for ($i = 0; $i < $oEstrutura->iNumeroColunas; $i++) {
         $this->Cell($oEstrutura->iLarguraCelulaGrade, 4, "", 1);
@@ -1213,7 +1159,6 @@ tdClass Object
       $this->SetFont("arial", '', 6);
 	  $conta = 0;
       foreach ($oEstrutura->aMeses as $oMes ) {
-        //$this->testa($oMes); die("confere");
         foreach ($oMes->aDias as $oDia) {
  			if(!empty($oDia->iDia))
 			{
@@ -1225,17 +1170,12 @@ tdClass Object
       }
       if(substr($calendario,0,10) !== "EJA FINAIS" && $calendario !== "EJA ANOS FINAIS"){
             $this->escreverColunasFaltasEmBranco($oEstrutura);
-      }
-      //$this->escreverColunasFaltasEmBranco($oEstrutura);
+      }      
     }
-
-    //$this->escreverColunaNumeroAluno();
-    //$this->escreverColunasAvaliacao(false);
-    //$this->escreverColunasDisciplinasGlobalizada(false);
+    
     if($oEstrutura->mostrafalta){
       $this->escreverColunaFalta();
-    }
-    //$this->escreverColunaFalta();
+    }    
     $this->ln();
   }
 
@@ -1275,13 +1215,7 @@ tdClass Object
 
     $this->Cell($iPrimeiraColuna + 10 + 42, 4, "", 1);
     $konta = 1;
-    //AQUI
 
-/*
-    Nesta situação as colunas em branco do cabeçalho não estavam descontando a quantidade de dias a ser impressos nos meses
-	e imprimia alem do limite, busquei aqui a qantidade de dias para fazer o desconto nas colunas em branco a ser impressas
-	isso acontecia apenas nos meses abaixo que fecham o total de faltas
-*/
 	$this->colunasImpressasCab = 0;
     if($oEstrutura->aMeses["12"]->sMes == "Dezembro"){
 	  $this->mesext = 'Dezembro';
@@ -1312,8 +1246,6 @@ tdClass Object
           if($contadiasj < 15){
 			  if( substr($calendario,0,11) == "ANOS FINAIS" and intval(substr($calendario,12,4) >= 2025 ) )
 			  {
-				 //$iLarguraColunaMes = 5.2;
-				 // é necessario ver porque a largura celula grade nesta situação teve que ficar tão baixo
 				 $iLarguraColunaMes = count($oMes->aDias) * ($oEstrutura->iLarguraCelulaGrade-3.26);
 			  }else{
                  $iLarguraColunaMes = count($oMes->aDias) * ($oEstrutura->iLarguraCelulaGrade+0.7);
@@ -1450,24 +1382,11 @@ tdClass Object
         }else{
           $this->Cell($this->iLarguraColunaPadrao + 30, 4, "", 1, 0, "C");
         }
-        //$this->Cell($this->iLarguraColunaPadrao + 30, 4, $sTitulo, 1, 0, "C");
-
       }
-      //$this->Cell($this->iLarguraColunaPadrao, 4, $sTitulo, 1, 0, "C");
-
     }
   }
 
-  /**
-   * Organiza os alunos de acordo com a por disciplina e quebrando as páginas
-   * Retorna uma estrutura no seguinte modelo:
-   *
-   * -> aAlunosOrganizados[codigoRegencia][iPagina][0] = {oAluno, oFaltas}
-   *
-   * Onde cada página pode ter até 35 alunos
-   *
-   * @return array
-   */
+  
   private function organizarListaAlunos() {
 
     if ( count($this->aAlunosOrganizados) > 0 ) {
@@ -1476,7 +1395,6 @@ tdClass Object
 
     $aMatriculas = $this->aMatriculas;
 
-
     foreach ( $this->estruturaSubCabecalho() as $iRegencia => $oEstrutura ) {
 
       $oRegencia = RegenciaRepository::getRegenciaByCodigo($iRegencia);
@@ -1484,16 +1402,9 @@ tdClass Object
 
       db_inicio_transacao();
 
-      foreach ($aMatriculas as $iIndice => $oMatricula ) {
-
-        // Usado metodo getDisciplinasPorDisciplina por causa das turmas com mais de uma etapa.
+      foreach ($aMatriculas as $iIndice => $oMatricula ) {        
         $oDiarioDiscplina   = $oMatricula->getDiarioDeClasse()->getDisciplinasPorDisciplina($oRegencia->getDisciplina());
-
-        /**
-         * Se o período for uma recuperação, só deve imprimir os alunos em Recuperação e que estejam matriculados
-         */
         if ( $this->lPeriodoDeRecuperacao ) {
-            //$this->testa($oDiarioDiscplina); die("Confere");
           if ( !$oDiarioDiscplina->emRecuperacao() ) {
             continue;
           }
@@ -1573,20 +1484,14 @@ tdClass Object
    */
   protected function escreverCorpo( $aAlunos, $oEstrutura, $coreg="", $nomcalen="") {
     $nomecalendario = $nomcalen;
-//    echo "<pre>";
-//    print_r($aAlunos);
-//    echo "</pre>";
 
     foreach ( $aAlunos as $aAlunosPagina ) {
-      //$this->testa($aAlunosPagina); die("Confere");
       $this->escreverSubCabecalho( $oEstrutura, $nomecalendario );
 
       $iAlunosImpressos = 0;
       foreach ( $aAlunosPagina as $oDadosAluno ) {
 
         if ( !$this->validaSituacaoAluno($oDadosAluno) ) {continue; }
-//if($oDadosAluno->oMatricula->getNumeroOrdemAluno() != 25){continue;}
-
         $this->SetFont("arial", '', $this->iTamanhoFonteGrade);
         $iClassificacao = $oDadosAluno->oMatricula->getNumeroOrdemAluno();
         $this->Cell($oEstrutura->iLarguraColunaNumero, 4, $iClassificacao, 1, 0, "C");
@@ -1598,27 +1503,22 @@ tdClass Object
         $this->Cell($oEstrutura->iLarguraColunaNumero + 2, 4, $sexo, 1, 0, "C");
         $dtmatricula = date("d/m/Y", $oDadosAluno->oMatricula->getDataMatricula()->getTimeStamp());
         $this->Cell($oEstrutura->iLarguraColunaNumero + 8, 4, $dtmatricula, 1, 0, "C");
-//******************************************************************************************************************
+
 		$transferencia2 = '';
         $dttransferencia = $this->retornaDataTransferencia2($oDadosAluno->oMatricula->getCodigo());
         $xsituacao = $oDadosAluno->oMatricula->getSituacao();
-		if( $xsituacao == 'DESISTENTE')
-		{
-// Divaldo 23/1/2024 - demanda 16792 verifica a data da desistencia e deixa em branco a presença
+		if( $xsituacao == 'DESISTENTE'){
 			 $dttransferencia = $this->retornaDataDesistencia($oDadosAluno->oMatricula->getCodigo());
 		}
 		$this->transferencia2 = $dttransferencia;
-		if( $xsituacao <> 'DESISTENTE')
-		{
+		if( $xsituacao <> 'DESISTENTE'){
             $this->Cell($oEstrutura->iLarguraColunaNumero + 12, 4, $dttransferencia, 1, 0, "C");
-        }else{
+    }else{
 			$this->Cell($oEstrutura->iLarguraColunaNumero + 12, 4, "", 1, 0, "C");
 		}
-        if ( !$this->validaAlunoAmparado($oDadosAluno->oMatricula, $oEstrutura) ) {
-          $this->imprimirGradeFaltasAluno($oDadosAluno->aFaltas, $oEstrutura, $xsituacao, $nomecalendario, $oDadosAluno->oMatricula->getAluno()->getCodigoAluno());
-        }
-//******************************************************************************************************************
-
+    if ( !$this->validaAlunoAmparado($oDadosAluno->oMatricula, $oEstrutura) ) {
+      $this->imprimirGradeFaltasAluno($oDadosAluno->aFaltas, $oEstrutura, $xsituacao, $nomecalendario, $oDadosAluno->oMatricula->getAluno()->getCodigoAluno());
+      }
 
         if($oEstrutura->mostrafalta){
           $xaluno = $oDadosAluno->oMatricula->getAluno()->getCodigoAluno();
@@ -1631,7 +1531,6 @@ tdClass Object
           $this->escreverColunaFalta("", $ttf);
 
         }
-        //$this->escreverColunaFalta();
 
         $this->ln();
         $iAlunosImpressos ++;
@@ -1642,21 +1541,15 @@ tdClass Object
 
         for ( $i = $iAlunosImpressos; $i < $this->iNumeroAlunosPagina; $i++) {
 
-          $this->Cell($oEstrutura->iLarguraColunaNumero, 4, "", 1, 0, "C");
-          //$this->Cell($oEstrutura->iLarguraColunaNome,   4, "", 1, 0, "L");
-          //$this->Cell($oEstrutura->iLarguraColunaNome + 52,   4, "", 1, 0, "L");
+          $this->Cell($oEstrutura->iLarguraColunaNumero, 4, "", 1, 0, "C");          
           $this->Cell($oEstrutura->iLarguraColunaNome + 42,   4, "", 1, 0, "L");
 
 
           $this->imprimirCelulasGradeFaltaSemAlunos( $oEstrutura, $nomecalendario );
-
-          //$this->escreverColunaNumeroAluno();
-          //$this->escreverColunasAvaliacao(false);
-          //$this->escreverColunasDisciplinasGlobalizada(false);
+          
           if($oEstrutura->mostrafalta){
             $this->escreverColunaFalta();
-          }
-          //$this->escreverColunaFalta();
+          }          
 
           $this->ln();
         }
@@ -1703,30 +1596,16 @@ tdClass Object
               }
             }
           }
-          //AQUI99
-          //if($xsituacao == "MATRICULADO"){
-        /**
-         * Uemerson Santana
-         * Data: 22/07/2025
-         * Demanda: 17578
-         */
+          
         $ano_calendario = $this->oTurma->getCalendario()->getAnoExecucao();
 		$data = $ano_calendario . '-'.$iMes.'-'.$oDia->iDia;
-/*
-        $sqlRegencia = "select
-		                *
-						from
-						diarioclasse
-						where
 
-						"
-*/
         $data1 = strtotime($data);
         $data2 = strtotime(substr($this->transferencia2,6,4).'-'.substr($this->transferencia2,3,2).'-'.substr($this->transferencia2,0,2));
-// alteração para não imprimir o ponto de presença quando o aluno for transferido
+
         if($data2 >0 )
 		{
-          // imprime
+
           if($data2 > $data1)
 		  {
             if(empty($sFalta)){
@@ -1742,18 +1621,14 @@ tdClass Object
               if(!empty($oDia->iDia)){
                 $this->exibePontos($oEstrutura->iLarguraCelulaGrade);
               }
-              //$this->exibePontos($oEstrutura->iLarguraCelulaGrade);
+              
             }
-            //$this->Cell($oEstrutura->iLarguraCelulaGrade, 4, $sFalta, 1, 0, "C");
+            
         }
 
         if($data2 >0){
 
-            /**
-             * Uemerson Santana
-             * Data: 15/07/2025
-             * Demanda: 17578
-             */
+            
 		    if($data2 > $data1){
                  $this->Cell($oEstrutura->iLarguraCelulaGrade+0.7, 4, $sFalta, 1, 0, "C");
 			}else{
@@ -1767,34 +1642,16 @@ tdClass Object
 				$this->Cell($oEstrutura->iLarguraCelulaGrade+0.7, 4, "", 1, 0, "C");
 			}
 		}
-
-          /*}else{
-            //$this->Cell($oEstrutura->iLarguraCelulaGrade, 4, "", 0, 0, "C");
-            $this->Cell($oEstrutura->iLarguraCelulaGrade+0.7, 4, "", 0, 0, "C");
-          }*/
+          
         }//foreach ***********************************************************************************************
 
         $this->Cell(6, 4, ($tf == 0) ? "0" : $tf, 1, 0, "C");
 //        $this->Cell(6, 4, "", 1, 0, "C");
         $contmes++;
-      }
-      /*if($xsituacao != "MATRICULADO"){
-        if($oEstrutura->mostrafalta){
-          $gx = $this->getX();
-          $this->setX(125);
-          $this->Cell($oEstrutura->iLarguraCelulaGrade, 4, $xsituacao, 0, 0, "C");
-          $this->setX($gx);
-        }else{
-          $this->Cell($oEstrutura->iLarguraCelulaGrade, 4, "", "L", 0, "C");
-          $this->setX(125);
-          $this->Cell($oEstrutura->iLarguraCelulaGrade, 4, $xsituacao, 0, 0, "C");
-        }
-      }*/
+      }      
       if(substr($nomecalendario,0,10) !== "EJA FINAIS" && $calendario !== "EJA ANOS FINAIS" && $nomecalendario !== "EJA ANOS FINAIS"){
         $this->escreverColunasFaltasEmBranco($oEstrutura);
-      }
-      //$this->escreverColunasFaltasEmBranco($oEstrutura);
-      //AQUI
+      }      
     }
 
 
@@ -1815,8 +1672,7 @@ tdClass Object
     } else {
 
       foreach ($oEstrutura->aMeses as $iMes =>  $oMes ) {
-        foreach ($oMes->aDias as $oDia) {
-            //$this->exibePontos($oEstrutura->iLarguraCelulaGrade);  tirei, verificar se precisa
+        foreach ($oMes->aDias as $oDia) {            
 			if( substr($calendario,0,11) == 'ANOS FINAIS')
 			{
 				if( $this->mesext == 'Julho' or $this->mesext == 'Setembro' or $this->mesext == 'Dezembro')
@@ -1836,8 +1692,7 @@ tdClass Object
       }
       if(substr($calendario,0,10) !== "EJA FINAIS" && $calendario !== "EJA ANOS FINAIS"){
         $this->escreverColunasFaltasEmBranco($oEstrutura);
-      }
-      //$this->escreverColunasFaltasEmBranco($oEstrutura);
+      }      
     }
   }
 
@@ -1873,19 +1728,11 @@ tdClass Object
 		$textoobs = $this->buscaobs($_GET["iCalendario"], $_GET["iTurma"], $_GET["iPeriodo"], $this->codDisciplina);
 		$this->pagina = 1;
 	}
-
-
-    /**
-     * Autor: Uemerson Santana
-     * Data: 07/10/2025
-     * Demanda: 17874
-     */
-    // Busca matrículas dos responsáveis (Regente, Assinatura Adicional, Diretor)
+    
     $matriculaRegente = '';
     $matriculaAssAdic = '';
     $matriculaDiretor = '';
-
-    // CGM do Regente a partir da regência atual
+    
     $iCodigoRegenciaAtual = $this->oRegenciaAtual ? $this->oRegenciaAtual->getCodigo() : null;
     if ($iCodigoRegenciaAtual) {
       $sqlRegenteCGM = "SELECT DISTINCT ON (z01_numcgm) z01_numcgm
@@ -1900,15 +1747,7 @@ tdClass Object
                          LIMIT 1";
       $rsRegenteCGM = pg_query($sqlRegenteCGM);
       if ($rsRegenteCGM && pg_num_rows($rsRegenteCGM) > 0) {
-        $oCGMRegente = db_utils::fieldsMemory($rsRegenteCGM, 0);
-        /**
-         * Autor: Uemerson Santana
-         * Data: 27/11/2025
-         * Demanda: 17982
-         * Razão: Corrigida busca da matrícula do regente para filtrar pela escola vinculada através de rechumanoescola,
-         *        garantindo que quando o profissional possui múltiplas matrículas, seja retornada a correta vinculada à escola atual.
-         *        Removido substr que removia os 2 primeiros dígitos, exibindo agora a matrícula completa.
-         */
+        $oCGMRegente = db_utils::fieldsMemory($rsRegenteCGM, 0);        
         $iEscola = db_getsession("DB_coddepto");
         $sqlMatReg = "SELECT ed284_i_rhpessoal as matricula
                       FROM rechumanopessoal
@@ -1920,22 +1759,13 @@ tdClass Object
                       LIMIT 1";
         $rsMatReg = pg_query($sqlMatReg);
         if ($rsMatReg && pg_num_rows($rsMatReg) > 0) {
-          $oMatReg = db_utils::fieldsMemory($rsMatReg, 0);
-          // Exibe a matrícula completa vinculada à escola (sem remover prefixo)
+          $oMatReg = db_utils::fieldsMemory($rsMatReg, 0);          
           $matriculaRegente = !empty($oMatReg->matricula) ? $oMatReg->matricula : '';
         }
       }
     }
 
-    /**
-     * Autor: Uemerson Santana
-     * Data: 27/11/2025
-     * Demanda: 17982
-     * Razão: Corrigida busca da matrícula da assinatura adicional (supervisor) para filtrar pela escola vinculada através de rechumanoescola,
-     *        garantindo que quando o profissional possui múltiplas matrículas, seja retornada a correta vinculada à escola atual.
-     *        Removido substr que removia os 2 primeiros dígitos, exibindo agora a matrícula completa.
-     */
-    // Matrícula da assinatura adicional, quando informada via GET (cgmaa)
+    
     if (isset($_GET["cgmaa"]) && !empty($_GET["cgmaa"])) {
       $cgmAssAdic = $_GET["cgmaa"];
       $iEscola = db_getsession("DB_coddepto");
@@ -1950,20 +1780,10 @@ tdClass Object
       $rsMatAssAdic = pg_query($sqlMatAssAdic);
       if ($rsMatAssAdic && pg_num_rows($rsMatAssAdic) > 0) {
         $oMatAssAdic = db_utils::fieldsMemory($rsMatAssAdic, 0);
-        // Exibe a matrícula completa vinculada à escola (sem remover prefixo)
         $matriculaAssAdic = !empty($oMatAssAdic->matricula) ? $oMatAssAdic->matricula : '';
       }
     }
-
-    /**
-     * Autor: Uemerson Santana
-     * Data: 27/11/2025
-     * Demanda: 17982
-     * Razão: Corrigida busca da matrícula do diretor para filtrar pela escola vinculada através de rechumanoescola,
-     *        garantindo que quando o profissional possui múltiplas matrículas, seja retornada a correta vinculada à escola atual.
-     *        Removido substr que removia os 2 primeiros dígitos, exibindo agora a matrícula completa.
-     */
-    // Matrícula do Diretor (CGM via escoladiretor)
+    
     $sqlDiretorCGM = "SELECT z01_numcgm
                        FROM rechumano
                        INNER JOIN rechumanopessoal ON ed284_i_rechumano = ed20_i_codigo
@@ -1987,29 +1807,11 @@ tdClass Object
       $rsMatDir = pg_query($sqlMatDir);
       if ($rsMatDir && pg_num_rows($rsMatDir) > 0) {
         $oMatDir = db_utils::fieldsMemory($rsMatDir, 0);
-        // Exibe a matrícula completa vinculada à escola (sem remover prefixo)
         $matriculaDiretor = !empty($oMatDir->matricula) ? $oMatDir->matricula : '';
       }
     }
 
-    if($_GET["aa"] == "nao"){
-		/*
-		  $iTamanhoLinha = 140.5;
-
-		  $sTexto = "OBS.:";
-		  $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 0, "L" );
-		  $sTexto = "Encerrado em ____/____/____                    Aulas Previstas: _____                Aulas Dadas: _____";
-		  $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 1, "L" );
-		  $sTexto = "Processado em ____/____/____ POR " . str_repeat("_", 29);
-		  $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 0, "L" );
-		  $sTexto = "Assinatura do professor ____/____/____ POR " . str_repeat("_", 29);
-		  $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 1, "L" );
-		  if ( $this->lPossuiMatriculaPorTurnoReferencia ) {
-			$this->SetFont("arial", '', 7);
-			$this->Cell( 281, $iAlturaLinha, "Legenda: Alunos matriculados somente em um turno ¹ - Manhã | ² - Tarde | ³ - Noite ", 1, 0, "L" );
-		  }
-		  $this->SetFont("arial", '', $this->iTamanhoFonteGrade);
-		*/
+    if($_GET["aa"] == "nao"){		
 		$sql = pg_query("select 'DIRETOR' as funcao, case when ed20_i_tiposervidor = 1 then cgmrh.z01_nome else cgmcgm.z01_nome end as nome, ed83_c_descr||' n°: '||ed05_c_numero::varchar as descricao,'D' as tipo FROM escoladiretor INNER JOIN turno ON turno.ed15_i_codigo = escoladiretor.ed254_i_turno LEFT JOIN atolegal ON atolegal.ed05_i_codigo = escoladiretor.ed254_i_atolegal LEFT JOIN tipoato ON tipoato.ed83_i_codigo = atolegal.ed05_i_tipoato INNER JOIN rechumano ON rechumano.ed20_i_codigo = escoladiretor.ed254_i_rechumano LEFT JOIN rechumanopessoal ON rechumanopessoal.ed284_i_rechumano = rechumano.ed20_i_codigo LEFT JOIN rhpessoal ON rhpessoal.rh01_regist = rechumanopessoal.ed284_i_rhpessoal LEFT JOIN cgm AS cgmrh ON cgmrh.z01_numcgm = rhpessoal.rh01_numcgm LEFT JOIN rechumanoescola ON rechumanoescola.ed75_i_rechumano = rechumano.ed20_i_codigo LEFT JOIN rechumanoativ ON rechumanoativ.ed22_i_rechumanoescola = rechumanoescola.ed75_i_codigo LEFT JOIN atividaderh ON atividaderh.ed01_i_codigo = rechumanoativ.ed22_i_atividade LEFT JOIN rhpessoalmov ON rh02_anousu = 2018 AND rh02_mesusu = 02 AND rh02_regist = rh01_regist AND rh02_instit = 96 LEFT JOIN rhfuncao ON rhfuncao.rh37_funcao = rhpessoal.rh01_funcao AND rh37_instit = rh02_instit LEFT JOIN rechumanocgm ON rechumanocgm.ed285_i_rechumano = rechumano.ed20_i_codigo LEFT JOIN cgm AS cgmcgm ON cgmcgm.z01_numcgm = rechumanocgm.ed285_i_cgm where ed254_i_escola = ".db_getsession("DB_coddepto")." AND ed254_c_tipo = 'A' AND ed01_i_funcaoadmin = 2");
 		$resultado = pg_fetch_all($sql);
 		$ndiretor = $resultado[0]["nome"];
@@ -2032,36 +1834,24 @@ tdClass Object
 		}
 
 		if(count($docentes2) > 1){
-		  $this->Rect($this->GetX(), $this->GetY(), 282, 24);
-	//      $this->Rect($this->GetX()+135, $this->GetY(), 144, 24);
+		  $this->Rect($this->GetX(), $this->GetY(), 282, 24);	
 		  $iAlturaLinha  = 4;
-
-		  //$this->Cell(135, $iAlturaLinha, "OBS.:", 1, 0, 'L');
+		  
 		  $this->Cell(282, $iAlturaLinha, "Encerrado em: ____/____/______", "B", 1, 'C');
-
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 0, 115), 1, 0, 'L');
-		  $this->Cell(282, $iAlturaLinha, "", 0, 0, 'L');
-
-		  //$this->Cell(135, $iAlturaLinha, "", 1, 0, 'L');
-		  //$this->Cell(144, $iAlturaLinha, "", 0, 1, 'L');
-
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 115, 115), 1, 0, 'L');
+	
+		  $this->Cell(282, $iAlturaLinha, "", 0, 0, 'L');		  
+	
 		  $this->Cell(70, $iAlturaLinha, "_______________________________________________", 0, 0, 'C');
 		  $this->Cell(70, $iAlturaLinha, "_______________________________________________", 0, 1, 'C');
-
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 230, 70), 0, 0, 'L');
+	
 		  $this->Cell(141, $iAlturaLinha, $docentes2[0], 0, 0, 'C');
-		  $this->Cell(141, $iAlturaLinha, $ndiretor, 0, 1, 'C');
-		  //$this->Cell(70, $iAlturaLinha, $docentes2[1], 0, 1, 'C');
+		  $this->Cell(141, $iAlturaLinha, $ndiretor, 0, 1, 'C');		  
 
 		  $this->Cell(282, $iAlturaLinha, '', 1, 0, 'L');
-		  $this->Cell(141, $iAlturaLinha, $docentes2[1], 0, 0, 'C');
-		  //$this->Cell(70, $iAlturaLinha, "Regentes", 0, 0, 'C');
+		  $this->Cell(141, $iAlturaLinha, $docentes2[1], 0, 0, 'C');		  
 		  $this->Cell(141, $iAlturaLinha, "Diretor Geral", 0, 1, 'C');
-
-		  //$this->Cell(282, $iAlturaLinha, "", 1, 0, 'L');
-          $this->Cell(141, $iAlturaLinha, "Regentes", 0, 0, 'C');
-          // Matrículas
+		  
+          $this->Cell(141, $iAlturaLinha, "Regentes", 0, 0, 'C');          
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
           $this->Cell(94, $iAlturaLinha, ($matriculaRegente != '' ? "Matrícula: ".$matriculaRegente : ""), 0, 0, 'C');
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
@@ -2072,35 +1862,33 @@ tdClass Object
 		}else{
 
 		  $this->Rect($this->GetX(), $this->GetY(), 282, 24);
-	//      $this->Rect($this->GetX()+135, $this->GetY(), 144, 24);
+
 		  $iAlturaLinha  = 4;
 
-	//      $this->Cell(135, $iAlturaLinha, "OBS.:", 1, 0, 'L');
+
 		  $this->Cell(282, $iAlturaLinha, "Encerrado em: ____/____/______", "B", 1, 'C');
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 0, 115), 1, 0, 'L');
+
 		  $this->Cell(282, $iAlturaLinha, "", 0, 1, 'L');
 
-		  //$this->Cell(135, $iAlturaLinha, "", 1, 0, 'L');
-		  //$this->Cell(144, $iAlturaLinha, "", 0, 1, 'L');
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 115, 115), 1, 0, 'L');
+
+
+
 		  $this->Cell(141, $iAlturaLinha, "_______________________________________________", 0, 0, 'C');
 		  $this->Cell(141, $iAlturaLinha, "_______________________________________________", 0, 1, 'C');
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 230, 70), 0, 0, 'L');
+
 		  $this->Cell(141, $iAlturaLinha, $sDocente, 0, 0, 'C');
 		  $this->Cell(141, $iAlturaLinha, $ndiretor, 0, 1, 'C');
 
-//		  $this->Cell(135, $iAlturaLinha, '', 1, 0, 'L');
+
           $this->Cell(141, $iAlturaLinha, "Regente", 0, 0, 'C');
           $this->Cell(141, $iAlturaLinha, "Diretor Geral", 0, 1, 'C');
           // Matrículas
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
           $this->Cell(137, $iAlturaLinha, ($matriculaRegente != '' ? "Matrícula: ".$matriculaRegente : ""), 0, 0, 'C');
           $this->Cell(144, $iAlturaLinha, ($matriculaDiretor != '' ? "Matrícula: ".$matriculaDiretor : ""), 0, 1, 'C');
-
-//		  $this->Cell(282, $iAlturaLinha, "", 1, 0, 'L');
 
 		}
 
@@ -2132,19 +1920,19 @@ tdClass Object
 		if(count($docentes2) > 1){
 		  $this->SetFont("arial", '', 6);
 		  $this->Rect($this->GetX(), $this->GetY(), 282, 24);
-	//      $this->Rect($this->GetX()+135, $this->GetY(), 144, 24);
+	
 		  $iAlturaLinha  = 4;
 
-	//      $this->Cell(135, $iAlturaLinha, "OBS.:", 1, 0, 'L');
+	
 		  $this->Cell(282, $iAlturaLinha, "Encerrado em: ____/____/______", "B", 1, 'C');
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 0, 125), 1, 0, 'L');
+	
 		  $this->Cell(282, $iAlturaLinha, "", 0, 1, 'L');
 
-		  //$this->Cell(135, $iAlturaLinha, "", 1, 0, 'L');
-		  //$this->Cell(144, $iAlturaLinha, "", 0, 1, 'L');
+	
+	
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 125, 125), 1, 0, 'L');
+	
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, "______________________________________", 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
@@ -2152,7 +1940,7 @@ tdClass Object
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, "______________________________________", 0, 1, 'C');
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 250, 125), 0, 0, 'L');
+	
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, $docentes2[0], 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
@@ -2160,18 +1948,18 @@ tdClass Object
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, $ndiretor, 0, 1, 'C');
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 375, 70), 1, 0, 'L');
+	
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
-		  //$this->Cell(45, $iAlturaLinha, "Regente", 0, 0, 'C');
+	
 		  $this->Cell(94, $iAlturaLinha, $docentes2[1], 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, $this->trataNome($_GET["at"]), 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, "Diretor Geral", 0, 1, 'C');
 
-	//      $this->Cell(282, $iAlturaLinha, "", 1, 0, 'L');
+	
           $this->Cell(94, $iAlturaLinha, "Regentes", 0, 0, 'C');
-          // Matrículas
+  
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
           $this->Cell(94, $iAlturaLinha, ($matriculaRegente != '' ? "Matrícula: ".$matriculaRegente : ""), 0, 0, 'C');
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
@@ -2181,35 +1969,29 @@ tdClass Object
 		}else{
 		  $this->SetFont("arial", '', 6);
 		  $this->Rect($this->GetX(), $this->GetY(), 282, 24);
-		  //$this->Rect($this->GetX()+135, $this->GetY(), 144, 24);
+	
 		  $iAlturaLinha  = 4;
 
-	//      $this->Cell(135, $iAlturaLinha, "OBS.:", 1, 0, 'L');
+	
 		  $this->Cell(282, $iAlturaLinha, "Encerrado em: ____/____/______", "B", 1, 'C');
 
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 0, 125), 1, 0, 'L');
+	
 		  $this->Cell(282, $iAlturaLinha, "", 0, 1, 'L');
-
-		  //$this->Cell(135, $iAlturaLinha, "", 1, 0, 'L');
-		  //$this->Cell(144, $iAlturaLinha, "", 0, 1, 'L');
-
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 125, 125), 1, 0, 'L');
+	
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, "______________________________________", 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, "______________________________________", 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, "______________________________________", 0, 1, 'C');
-
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 250, 125), 0, 0, 'L');
+	
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, $sDocente, 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, $_GET["aa"], 0, 0, 'C');
 		  $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
 		  $this->Cell(94, $iAlturaLinha, $ndiretor, 0, 1, 'C');
-
-	//      $this->Cell(135, $iAlturaLinha, substr($textoobs, 375, 70), 1, 0, 'L');
+	
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
           $this->Cell(94, $iAlturaLinha, "Regente", 0, 0, 'C');
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
@@ -2223,32 +2005,9 @@ tdClass Object
           $this->Cell(94, $iAlturaLinha, ($matriculaAssAdic != '' ? "Matrícula: ".$matriculaAssAdic : ""), 0, 0, 'C');
           $this->Cell(2, $iAlturaLinha, "", 0, 0, 'C');
           $this->Cell(94, $iAlturaLinha, ($matriculaDiretor != '' ? "Matrícula: ".$matriculaDiretor : ""), 0, 1, 'C');
-
-//		  $this->Cell(282, $iAlturaLinha, "", 1, 0, 'L');
 		}
-
-
     }
 
-
-    /*
-    $iTamanhoLinha = 140.5;
-    $iAlturaLinha  = 5;
-
-    $sTexto = "Entregue em ____/____/____ POR " . str_repeat("_", 31);
-    $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 0, "L" );
-    $sTexto = "Revisado em ____/____/____ POR " . str_repeat("_", 39);
-    $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 1, "L" );
-    $sTexto = "Processado em ____/____/____ POR " . str_repeat("_", 29);
-    $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 0, "L" );
-    $sTexto = "Assinatura do professor ____/____/____ POR " . str_repeat("_", 29);
-    $this->Cell( $iTamanhoLinha, $iAlturaLinha, $sTexto, 1, 1, "L" );
-    if ( $this->lPossuiMatriculaPorTurnoReferencia ) {
-      $this->SetFont("arial", '', 7);
-      $this->Cell( 281, $iAlturaLinha, "Legenda: Alunos matriculados somente em um turno ¹ - Manhã | ² - Tarde | ³ - Noite ", 1, 0, "L" );
-    }
-    $this->SetFont("arial", '', $this->iTamanhoFonteGrade);
-    */
   }
 
   /**
@@ -2269,9 +2028,8 @@ tdClass Object
 
     $this->Open();
     if($xnomecalendario == "EN FUN ANOS FINAIS" || substr($xnomecalendario,0,11) == "ANOS FINAIS"){
-      foreach ( $this->aEstruturaCabecalho as $iRegencia => $oEstrutura ) {     // e populada na linha 895
-        $this->oRegenciaAtual = RegenciaRepository::getRegenciaByCodigo($iRegencia);
-        //$this->testa($oEstrutura); die("Caça Novembro");
+      foreach ( $this->aEstruturaCabecalho as $iRegencia => $oEstrutura ) {
+        $this->oRegenciaAtual = RegenciaRepository::getRegenciaByCodigo($iRegencia);        
         $oEstruturaX1 = clone $oEstrutura;
         $oEstruturaX2 = clone $oEstrutura;
 
@@ -2288,9 +2046,6 @@ tdClass Object
 		  array_shift($oEstruturaX2->aMeses);
 		  array_shift($oEstruturaX2->aMeses);
 		}
-
-
-        //$this->testa($oEstruturaX2->aMeses); die("Confere2");
 
         $oEstruturaX1->mostrafalta = false;
         $oEstruturaX2->mostrafalta = true;
@@ -2318,7 +2073,6 @@ tdClass Object
     }elseif(substr($xnomecalendario,0,12) == "EJA INICIAIS"){
       foreach ( $this->aEstruturaCabecalho as $iRegencia => $oEstrutura ) {
         $this->oRegenciaAtual = RegenciaRepository::getRegenciaByCodigo($iRegencia);
-        //$this->testa($oEstrutura); die("Caça Julho");
         $oEstruturaX1 = clone $oEstrutura;
         $oEstruturaX2 = clone $oEstrutura;
 
@@ -2342,8 +2096,6 @@ tdClass Object
           array_shift($oEstruturaX2->aMeses);
           array_shift($oEstruturaX2->aMeses);
         }
-
-        //$this->testa($oEstruturaX2->aMeses); die("Confere2");
 
         $oEstruturaX1->mostrafalta = false;
         $oEstruturaX2->mostrafalta = true;
@@ -2381,9 +2133,7 @@ tdClass Object
           array_pop($oEstruturaX1->aMeses);
           array_shift($oEstruturaX2->aMeses);
           array_shift($oEstruturaX2->aMeses);
-        }
-
-        //$this->testa($oEstruturaX2->aMeses); die("Confere2");
+        }        
 
         $oEstruturaX1->mostrafalta = false;
         $oEstruturaX2->mostrafalta = true;
@@ -2424,8 +2174,7 @@ tdClass Object
             array_shift($oEstruturaX2->aMeses);
         }else{
           array_pop($oEstruturaX1->aMeses);
-          array_pop($oEstruturaX1->aMeses);
-          //array_pop($oEstruturaX1->aMeses);
+          array_pop($oEstruturaX1->aMeses);          
           array_shift($oEstruturaX2->aMeses);
           array_shift($oEstruturaX2->aMeses);
           array_shift($oEstruturaX2->aMeses);
@@ -2449,9 +2198,7 @@ tdClass Object
             $oEstruturaX2->aMeses[12] = $oEstruturaX2->aMeses[1];
             unset($oEstruturaX2->aMeses[1]);
           }
-        }
-
-        //$this->testa($oEstruturaX2->aMeses); die("Confere");
+        }        
 
         $this->escreverCorpo( $this->getAlunos($iRegencia), $oEstruturaX1, $iRegencia );
         $this->escreverCorpo( $this->getAlunos($iRegencia), $oEstruturaX2, $iRegencia );
@@ -2477,19 +2224,14 @@ tdClass Object
             array_shift($oEstruturaX2->aMeses);
         }else{
           array_pop($oEstruturaX1->aMeses);
-          array_pop($oEstruturaX1->aMeses);
-          //array_pop($oEstruturaX1->aMeses);
+          array_pop($oEstruturaX1->aMeses);          
           array_shift($oEstruturaX2->aMeses);
           array_shift($oEstruturaX2->aMeses);
           array_shift($oEstruturaX2->aMeses);
         }
 
         $oEstruturaX1->mostrafalta = false;
-        $oEstruturaX2->mostrafalta = true;
-
-        if($_GET["mcapa"] == "sim"){
-          //$this->AddPage();
-        }
+        $oEstruturaX2->mostrafalta = true;        
 
         if($oEstruturaX2->aMeses[0]){
           if($oEstruturaX2->aMeses[0]->sMes == "Novembro"){
@@ -2502,9 +2244,7 @@ tdClass Object
             $oEstruturaX2->aMeses[12] = $oEstruturaX2->aMeses[1];
             unset($oEstruturaX2->aMeses[1]);
           }
-        }
-
-        //$this->testa($oEstruturaX2->aMeses); die("Confere");
+        }        
 
         $this->escreverCorpo( $this->getAlunos($iRegencia), $oEstruturaX1, $iRegencia );
         $this->escreverCorpo( $this->getAlunos($iRegencia), $oEstruturaX2, $iRegencia );
@@ -2517,7 +2257,6 @@ tdClass Object
       }
     }
 
-    //die("Saída");
     $this->Output();
   }
 
@@ -2540,21 +2279,10 @@ tdClass Object
   }
 
 
-  /**
-   * Quando selecionado modelo de impressão com "Regitro = Frequência/Conteúdo" pode haver um número inferior
-   * a 30 dias de avaliação ( Exemplo uma disciplina com apenas um período de avaliação)
-   * Para a coluna nome não ocupar metade folha, foi decido que teria um minimo de 30 quadros para lançar faltas
-   *
-   * Essa função escreve as colunas em branco para lançamento de faltas
-   *
-   * @param $oEstrutura
-   */
+  
   protected function escreverColunasFaltasEmBranco($oEstrutura) {
 	$colunas = 0;
-/*
-   nos meses abaixo não estavam descontando as colunas impressas das colunas vazias
-   e imprimiam alem do limite
-*/
+
 
 	if( $this->mesext == 'Setembro' or $this->mesext == 'Dezembro')
 	{
@@ -2603,24 +2331,7 @@ tdClass Object
 			}
 		}
     }
-/*
-	if( $this->mesext == 'Setembro')
-	{
 
-	$arq = fopen("/dados/www/homologacao.epdvr.com.br/backup/busca.txt","a+");
-	fwrite($arq, $this->colunasImpressasCab.'--'.$oEstrutura->iNumeroColunasVazias);
-	fwrite($arq,"\r\n");
-	fclose($arq);
-
-//		if( substr($xnomecalendario,0,13) == "ANOS INICIAIS" )
-//		{
-//			if( intval(substr($this->nomecalendario,14,4)) >= 2025  )
-//			{
-//				$colunas = ($oEstrutura->iNumeroColunasVazias-$this->colunasImpressasCab);
-//			}
-//		}
-    }
-*/
     if( $this->colunasImpressasCab > 0 and $colunas > 0)
 	{
 	    for ($i = 0; $i <= $colunas; $i++) {
@@ -2685,15 +2396,7 @@ tdClass Object
 
     $sNomeAluno = '';
 
-    /*
-
-      Autor: Uemerson Santana
-      Demanda: 17338
-      Data: 02/06/2025
-      Descrição:
-      - Se o nome social do aluno for diferente de vazio, utiliza o nome social
-      - Se o nome social do aluno for vazio, utiliza o nome
-    */
+    
     if ($oMatricula->getAluno()->getNomeSocial() != '') {
       $sNomeAluno = $oMatricula->getAluno()->getNomeSocial();
     } else {

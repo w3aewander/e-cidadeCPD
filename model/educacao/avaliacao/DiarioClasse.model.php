@@ -241,13 +241,6 @@ class DiarioClasse
 
             $sSqlDiarioClasse = $oDaoDiarioClasse->sql_query_diario_classe( null,'diario.*, ed59_i_codigo',
 			                                                                "ed95_i_codigo", $sWhereDiario);
-//if( $this->getMatricula()->getCodigo() == 56209 )
-//{
-//	$arq = fopen("/dados/www/homologacao.epdvr.com.br/backup/diario.sql","a+");
-//	fwrite($arq, $sSqlDiarioClasse);
-//	fwrite($arq,"\r\n");
-//	fclose($arq);
-//}																			
 
             $rsDiarioClasse = $oDaoDiarioClasse->sql_record($sSqlDiarioClasse);
             if ($oDaoDiarioClasse->numrows > 0) {
@@ -819,7 +812,6 @@ class DiarioClasse
         /**
          * Verificamos quais disciplinas estao sem resultado final
          */
-//		 $GLOBALS["HTTP_POST_VARS"]["EscolaEncerrar"] = $this->getTurma()->getEscola()->getCodigo();
         $alunoPrimeiro = '';
         foreach ($this->getDisciplinas() as $oDisciplina) {
             if ($oDisciplina->isEncerrado()) {
@@ -836,14 +828,8 @@ class DiarioClasse
 					
 					$sPendencia .= "{$oDisciplina->getDisciplina()->getNomeDisciplina()}";
 					$aPendencias[] = $sPendencia;
-            }
-			
-//            if ($oDisciplina->emRecuperacao()) {
-//                $sPendencia = " Aluno esta em recupera??o em: ";
-//                $sPendencia .= "{$oDisciplina->getDisciplina()->getNomeDisciplina()}";
-//                $aPendencias[] = $sPendencia;
-//                continue;
-//            }
+            }			
+
 
 			$sqlt = "
 				select
@@ -866,29 +852,13 @@ class DiarioClasse
 			
 		
 
-/*
-Autor: Uemerson Santana
-Data: 07/02/2026
-Demanda: 18070
-Razao: Para alunos NEE avaliados por parecer descritivo, o campo ed74_c_resultadofinal
-nao eh preenchido (fica vazio), mesmo quando o resultado de aprovacao (ed74_c_resultadoaprov)
-ja foi informado ('A' ou 'R'). Isso fazia o sistema entrar no bloco de validacao secundaria
-desnecessariamente, gerando falsa pendencia de encerramento.
-Adicionada verificacao de getResultadoAprovacao() para que disciplinas com resultado
-de aprovacao ja lancado nao sejam marcadas como pendentes.
-*/
+
             if ($oResultadoFinal->getResultadoFinal() == "" && $oResultadoFinal->getResultadoAprovacao() == "" && $oDisciplina->getRegencia()->getCondicao() != 'OP') {
 				if($oDisciplina->getDisciplina()->getNomeDisciplina() <> 'CAMPOS DE EXPERIENCIA' and $oDisciplina->getDisciplina()->getNomeDisciplina() <> 'TECNOLOGIA E INOVA??O')
 				{
 					if( $serieTurma->ed11_i_codigo <> 1  )	
 					{	
-/*
-Divaldo - 27/12/2024 (n?o teve demanda)
-Algumas disciplinas do EJA 301 da escola ESPIRITO SANTO, por ex. aluna: Gabrielle Cristyna Silva de Paulo, tinham notas apenas no 1? e 2? bimestre
-O resultado final dessas disciplinas estavam retornando vazio e entrando nesta condi??o e n?o permitia o encerramento, porque faltava o resultado final
-na tabela diariofinal,  campo ed74_c_valoraprov='', mas essas disciplinas tinham o campo ed74_c_resultadoaprov='R', ent?o criei a query abaixo para 
-verificar o resultado da aprova??o e permitir o  encerramento
-*/				
+
 						$sqlRes = " 
 									select 
 									distinct on (ed72_i_procavaliacao)
@@ -911,16 +881,6 @@ verificar o resultado da aprova??o e permitir o  encerramento
 									ed232_c_descr = '{$oDisciplina->getDisciplina()->getNomeDisciplina()}'
 									and
 									ed60_i_codigo = {$this->getMatricula()->getCodigo()}
-/*
-Autor: Uemerson Santana
-Data: 07/02/2026
-Demanda: 18070
-Razao: Filtrar pelo calendario da turma atual para evitar que diarios de
-anos/turmas anteriores (com resultados vazios de alunos NEE transferidos)
-contaminem a validacao. Sem este filtro, a clausula DISTINCT ON com ORDER BY
-sem criterio de desempate pode selecionar registros antigos com resultado vazio,
-gerando falsa pendencia de encerramento para alunos com necessidades especiais.
-*/
 									and
 									ed95_i_calendario = {$this->getMatricula()->getTurma()->getCalendario()->getCodigo()}
 									ORDER BY ed72_i_procavaliacao
@@ -935,8 +895,7 @@ gerando falsa pendencia de encerramento para alunos com necessidades especiais.
 								$aPendencias[] = $sPendencia;
 							}
 				    }
-				}else{//se a disciplina for CAMPOS DE EXPERIENCIA (creche) e o aluno n?o estiver com as frequencias digitadas
-				    //ADICIONADO EM 20/12 PARA ATENDER ? DEMANDA 16784 - RAFAEL MATOS
+				}else{
                     $alunoPrimeiro = $this->getMatricula()->getAluno()->getCodigoAluno(); 
                     if( $alunoPrimeiro <> $this->getMatricula()->getAluno()->getCodigoAluno() )
 					{	
@@ -986,20 +945,13 @@ gerando falsa pendencia de encerramento para alunos com necessidades especiais.
 						
 
 						$result = db_query($sqlf);
-//						if( pg_num_rows($result) > 0) // se maior que zero, tem frequencia sem lan?ar
-//						{	
-//							$sPendencia = " Falta informar frequencia para o aluno ";
-//							$aPendencias[] = $sPendencia;
-//						}else{ // se tiver lan?ado todas as frequencias, verificar se o aluno tem frquencia suficiente 
 							$diasletivos = $this->percfrequencia($this->getMatricula()->getTurma()->getCalendario()->getCodigo());
 							$faltasAluno = $this->buscafaltas($this->getMatricula()->getAluno()->getCodigoAluno());
 							$percFreq    = ( $diasletivos - $faltasAluno ) / $diasletivos * 100;
 							if( $percFreq < 75)
 							{
 								$sPendencia = " % de frequencia inferior a 75% ";
-								//$aPendencias[] = $sPendencia;  
 							}
-//						}
 						$alunoPrimeiro = $this->getMatricula()->getAluno()->getCodigoAluno();
 					}	
 				}

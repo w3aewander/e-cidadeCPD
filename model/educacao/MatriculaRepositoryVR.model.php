@@ -381,13 +381,7 @@ class MatriculaRepositoryVR {
      * @throws DBException
      * @throws Exception
      */
-    public static function getMatriculaByFiltros($filtros = array())
-    {
-$arq = fopen("/dados/www/homologacao.epdvr.com.br/busca2.txt","w+");
-fwrite($arq, 'estou aqui');
-fwrite($arq,"\r\n");
-fclose($arq);
-
+    public static function getMatriculaByFiltros($filtros = array()){
         if (empty($filtros)) {
             throw new Exception("Não foi informado nenhum filtro.");
         }
@@ -396,13 +390,6 @@ fclose($arq);
         $dao = new cl_matricula();
         $sql = $dao->sql_query_censo_situacao_aluno(null, "ed60_i_codigo", null, $where);
         $rs = db_query($sql);
-
-// $rs estava retornando nulo quando chamado da lib db_stdlibwebseller.php na linha 4517, nesse caso não precisava de um array
-// uma vez que só era possivel mudar um aluno por vez, a etapa de origem seria sempre uma etapa, assim o where depois do implode
-// retornava where = 'ed60_matricula = 00000', então criei a condição abaixo para pegar apenas a matricula informada na opção de menu
-// Procedimentos->Matrículas->Trocar aluno de turma->com movimentação->por aluno
-// entretando caso a função fosse usada em outra situação e $rs retorne algo a função procede como criada
-// Divaldo 14/06/2024
 
 		if( pg_num_rows($rs) == 0 )
 		{
@@ -414,11 +401,7 @@ fclose($arq);
         if (!is_resource($rs)) {
             throw new DBException("Erro ao buscar matricula.");
         }
-// Como informado acima no caso da opção de Menu informada, sempre retornara nula e interrompia a execução
-// Mudei a condição abaxo, para que se a consulta sql, retornasse nula ou o parâmetro passado não tivesse valor
-// só nessa situação o retorno seria nulo
-// Divaldo 14/06/2024
-//		if( pg_num_rows($rs) == 0) {
+
         if( $ed60_i_codigo == '') {
             return null;
         }

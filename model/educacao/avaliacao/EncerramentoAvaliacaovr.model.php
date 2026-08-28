@@ -301,7 +301,7 @@ class EncerramentoAvaliacaovr {
    * @param  Etapa     $oEtapa
    * @param  Matricula $oMatricula
    * @throws BusinessException
-   *///*************************************************************************************************************************
+   */
   protected function encerrarMatriculaTurma($oTurma, $oEtapa, $oMatricula) {
 
     $oDiario = $oMatricula->getDiarioDeClasse();
@@ -354,14 +354,10 @@ class EncerramentoAvaliacaovr {
       $diarioAlunoService->encerrar();
       $resultadoFinal     = $diarioAlunoService->getDiarioAluno()->getResultadoFinal();
       $sResultadoFinal    = $resultadoFinal->getResultadoFinal();
-
-    /**
-     * alunocurso, alunopossib
-     */
+    
     $this->encerrarDadosMatricula($oMatricula, $oDiario, $sResultadoFinal);
     MatriculaRepository::removerMatricula($oMatricula);
   }
-//*************************************************************************************************************************
 
    /**
    * Cancela o encerramento da turma
@@ -774,9 +770,6 @@ class EncerramentoAvaliacaovr {
     $lDiarioSemPendencia = true;
     $oDiario->getMatricula()->getTurma()->getEscola()->getCodigo();
 	
-	// se a turma for creche, pré-escola, educacao especial ou ensino fundamental 1º ano
-	// avaliada por relatorio
-	// Divaldo 12/08/2021
 	$sqlt = "
 		select
 		ed29_i_codigo,
@@ -795,9 +788,7 @@ class EncerramentoAvaliacaovr {
 	$encerrar = db_utils::fieldsMemory($result,0);
 	
 
-	if( $encerrar->ed29_i_codigo == 3 or $encerrar->ed29_i_codigo == 4 or $encerrar->ed29_i_codigo == 7 )
-	{	
-    // aqui quando o aluno é avaliado por relatorio o sistema apenas exigirá o lançamento de presenças para o encerramento
+	if( $encerrar->ed29_i_codigo == 3 or $encerrar->ed29_i_codigo == 4 or $encerrar->ed29_i_codigo == 7 ){
         $sqlf ="
 				select
 				ed47_i_codigo,
@@ -821,26 +812,15 @@ class EncerramentoAvaliacaovr {
 				and
 				ed52_i_ano = ".db_getsession("DB_anousu");
 				
-// Foi bloqueado esse aviso a pedido de suellem em 17/12/2024    - Divaldo				
+
         $result = db_query($sqlf);
-//		if( pg_num_rows($result) > 0 )
-//		{
-//            $oErroMensagem->mensagem   = 'Falta lançamentos de presença';
-//            $this->informarErro($oErroMensagem);
-//			$lDiarioSemPendencia = false;
-//			return $lDiarioSemPendencia;
-//		}else{
+
 			$lDiarioSemPendencia = true;
 			return $lDiarioSemPendencia;
-//		}
     }	
 
 
-//******************************************************************************************************
-// só a materia de lingua portuguesa era possível lancar frequencia, por isso separei do if acima
-	if( $encerrar->ed11_i_codigo == 1)
-	{	
-    // aqui quando o aluno é avaliado por relatorio o sistema apenas exigirá o lançamento de presenças para o encerramento
+	if( $encerrar->ed11_i_codigo == 1){	    
         $sqlf ="
 				select
 				ed47_i_codigo,
@@ -871,37 +851,11 @@ class EncerramentoAvaliacaovr {
 				ed52_i_ano = ".db_getsession("DB_anousu");
 				
         $result = db_query($sqlf);
-// Foi bloqueado esse aviso a pedido de suellem em 17/12/2024    - Divaldo
-		
-//		if( pg_num_rows($result) > 0 )
-//		{
-			
-//            $oErroMensagem->mensagem   = 'Falta lançamentos de presença';
-//            $this->informarErro($oErroMensagem);
-//			$lDiarioSemPendencia = false;
-//			return $lDiarioSemPendencia;
-//		}else{
-		// pode ter o encerramento, mesmo com a frequencia inferior a 75%
-/*			
-			$diasletivos = $this->percfrequencia($oDiario->getMatricula()->getTurma()->getCalendario()->getCodigo());
-			$faltasAluno = $this->buscafaltas($oDiario->getMatricula()->getAluno()->getCodigoAluno());
-			$percFreq    = ( $diasletivos - $faltasAluno ) / $diasletivos * 100;
-			if( $percFreq < 75)
-			{
-				$oErroMensagem->mensagem   = " % de frequencia inferior a 75% ";
-				$this->informarErro($oErroMensagem);
-			    $lDiarioSemPendencia = false;
-			    return $lDiarioSemPendencia;
-			}
-*/			
+
 			$lDiarioSemPendencia = true;
 			return $lDiarioSemPendencia;
-//		}
     }	
-//******************************************************************************************************
-   	// se o aluno estiver em recuperação e no cadastro da escola na opção Procedimento->Parametros->Parametros globais
-	// no campo campo "Encerrar Ano Letivo sem Av. na Recuperação:" estiver sim
-	// Divaldo 11/08/2024
+
     $sql = "
 			select
 			ed233_encerrarecvazia
@@ -1033,19 +987,6 @@ class EncerramentoAvaliacaovr {
     $oDadosAlunoCurso   = null;
 
     if ($iLinhasAlunoPoss == 0) {
-/*		
-Demanda 16795 - Divaldo 02/01/2025
-o aluno 155120-Bernardo de Souza Consuelo Cabral da 20040-Escola Jonhn Kennedy - turma 302
-não estava cadastrado na tabela alunocurso na referida escola, portando acontecia o erro descrito na demanda,
-entretando o aluno estava cadastrado na tabela alunocurso, na escola 20061-LUND FERNANDES VIEIRA, o mesmo estava acontecendo com
-vários outros alunos, então ao tirar o campo escola da query o aluno pode ser encerrado.
-
-Obs: 
-Coloquei a condição apenas para o caso de quando o aluno teve alguma transferência e não estava na tabela
-alunocurso para a escola e turma encerrada 
-* pedir Suellem que faça o encerramento e check se ficou tudo correto
-*/
-// ***********************************************************************************************************
 		$sqlalusit = "select ed56_c_situacao from alunocurso where ed56_i_aluno = ".$iCodigoAluno;
 		$alusit    =  pg_query($sqlalusit);
 		$oalusit   =  db_utils::fieldsMemory($alusit,0);
@@ -1059,7 +1000,6 @@ alunocurso para a escola e turma encerrada
 		$iBaseAnterior      = "";
 		$iCodigoBase        = "";
 		$oDadosAlunoCurso   = null;
-// ***********************************************************************************************************			
 		if ($iLinhasAlunoPoss == 0) {
            throw new BusinessException("Aluno :  {$oMatricula->getAluno()->getNome()} sem situação atual, cadastrado no sistema. Contate o Suporte!");
 		}   
@@ -1155,17 +1095,7 @@ alunocurso para a escola e turma encerrada
       throw new BusinessException($sErroMensagem);
     }
   }
-
-  /**
-   * Verifica se o aluno esta apto a ser Aprovado ou se Aprovou Parcialmente nas disciplinas
-   * --> Para ser reprovado (R) o aluno só precisa reprovar em uma disciplina
-   * --> Para ser aprovado parcialmente (P) o Aluno precisa ter concluido com sucesso a metade do curso
-   *     (metade das disciplinas da base curricular)
-   * --> Para ser aprovado (A) o aluno tera que possuir aprovação em todas as diciplinas da base curricular
-   * @param Matricula $oMatricula
-   * @param Etapa $oEtapa
-   * @return string
-   */
+  
   public static function validaDiarioAlunoEja (Matricula $oMatricula, Etapa $oEtapa) {
 
     if (count($oMatricula->getDiarioDeClasse()->getDisciplinasComReprovacao()) >= 1) {
@@ -1377,10 +1307,7 @@ alunocurso para a escola e turma encerrada
     $oProcedimentoAvaliacao = $oTurma->getProcedimentoDeAvaliacaoDaEtapa($oEtapa);
     $sResultadoFinal        = $oDiario->getResultadoFinal();
 
-    /**
-     * Valida se a turma gera histórico
-     * Ate o momento somente as Turmas Normais (1) podem não gerar historico
-     */
+    
     if (($oTurma->getBaseCurricular()->getCurso()->geraHistorico()
         && $oTurma->getTipoDaTurma() == 1) || $oTurma->getTipoDaTurma() == 3) {
 
@@ -1391,13 +1318,7 @@ alunocurso para a escola e turma encerrada
     return $sResultadoFinal;
   }// Encerra Turma Normal
 
-  /**
-   * geracao dos historicos de Turmas de EJA
-   *
-   * @param Matricula $oMatricula
-   * @param Etapa $oEtapa
-   * @return string Retorna o resultado que foi encerrado
-   */
+  
   private function encerraTurmaEja(Matricula $oMatricula, Etapa $oEtapa) {
 
 
@@ -1560,12 +1481,6 @@ alunocurso para a escola e turma encerrada
 
         if (!is_null($areaConhecimento)) {
             $areaHistoricoRedeRepository = new \ECidade\Educacao\Escola\Repository\AreaHistoricoRedeRepository();
-			
-//$arq = fopen("/dados/www/homologacao.epdvr.com.br/busca.txt","a+");
-//fwrite($arq, $areaConhecimento);
-//fwrite($arq,"\r\n");
-//fclose($arq); 				
-
             $areaHistorico = $areaHistoricoRedeRepository->scopeHistoricoEtapaRede($oEtapaHistorico)->scopeAreaConhecimento($areaConhecimento)->first();
 
             if (empty($areaHistorico)) {

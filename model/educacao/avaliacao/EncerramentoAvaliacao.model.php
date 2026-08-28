@@ -1372,12 +1372,8 @@ class EncerramentoAvaliacao {
           $areaConhecimento = $oDiarioDisciplina->getRegencia()->getAreaConhecimento();
 
         if (!is_null($areaConhecimento)) {
-            $areaHistoricoRedeRepository = new \ECidade\Educacao\Escola\Repository\AreaHistoricoRedeRepository();
-			
-//$arq = fopen("/dados/www/homologacao.epdvr.com.br/busca.txt","a+");
-//fwrite($arq, $areaConhecimento);
-//fwrite($arq,"\r\n");
-//fclose($arq); 				
+            $areaHistoricoRedeRepository = new \ECidade\Educacao\Escola\Repository\AreaHistoricoRedeRepository();			
+
 
             $areaHistorico = $areaHistoricoRedeRepository->scopeHistoricoEtapaRede($oEtapaHistorico)->scopeAreaConhecimento($areaConhecimento)->first();
 

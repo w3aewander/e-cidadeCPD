@@ -176,7 +176,7 @@ final class GradeAproveitamentoAluno {
    * @throws Exception
    * @return stdClass
    */
-  public function getAproveitamentoParaRegenciaPorPeriodo(Regencia $oRegencia, IElementoAvaliacao $oElemento, $disciplina) { //*******************************************************
+  public function getAproveitamentoParaRegenciaPorPeriodo(Regencia $oRegencia, IElementoAvaliacao $oElemento, $disciplina) {
 
     $oDiarioClasse                            = $this->getDiarioDeClasse();
     $lAlunoAvaliadoParecer                    = $oDiarioClasse->getMatricula()->isAvaliadoPorParecer();
@@ -189,13 +189,8 @@ final class GradeAproveitamentoAluno {
     $oAproveitamentoRetorno->lApareceBoletim  = true;
     $oAproveitamentoRetorno->sFormaAvaliacao  = '';
     $oAproveitamentoRetorno->lAtingiuMinimo   = true;
-	$oAproveitamentoRetorno->bRegencia        = $oRegencia;
-
-
-    /**
-     * A propriedade dispensado eh usada quando temos Elementos de avaliacao usados como Recuperacao
-     * O Aluno está dispensado de cursar a recuperacao se atingir o Aproveitamento mínimo para a Avaliacao anterior
-     */
+	  $oAproveitamentoRetorno->bRegencia        = $oRegencia;
+    
     $oAproveitamentoRetorno->lDispensado                    = false;
     $oAproveitamentoRetorno->nAproveitamentoPeriodoAnterior = "";
 
@@ -207,7 +202,6 @@ final class GradeAproveitamentoAluno {
      */
 
        $oElementoDisciplina = $oDiarioAvaliacao->getPeriodoAvaliacaoPorOrdemSequencial($oElemento->getOrdemSequencia());
-// o erro estava nesta linha
     if ( is_null($oElementoDisciplina) ) {
 	    $oElementoDisciplina = [];
 	}
@@ -228,12 +222,6 @@ final class GradeAproveitamentoAluno {
       $oAproveitamentoRetorno->lEmRecuperacao = $oDiarioAvaliacao->emRecuperacao();
       $nAproveitamento = $oAproveitamento->getValorAproveitamento()->getAproveitamentoReal();
 
-//	$arq = fopen("/dados/www/homologacao.epdvr.com.br/notagrade.txt","a+");
-//	fwrite($arq,$nAproveitamento->nNota);
-//	fwrite($arq,"\r\n");
-//	fclose($arq);
-
-
       $nAproveitamento = ArredondamentoNota::formatar($nAproveitamento,
                                                         $oRegencia->getTurma()->getCalendario()->getAnoExecucao()
                                                        );
@@ -248,17 +236,7 @@ final class GradeAproveitamentoAluno {
 
         if (!empty($oElementoAvaliacaoVinculado)) {
 
-          $oAproveitamentoPeriodoAnterior = $oDiarioClasse->getDisciplinasPorRegenciaPeriodo($oRegencia,
-                                                                                             $oElementoAvaliacaoVinculado);
-/*
-          if (($oElementoAvaliacaoVinculado->getAproveitamentoMinimo() <=
-               $oAproveitamentoPeriodoAnterior->getValorAproveitamento()->getAproveitamento())) {
-
-            $oAproveitamentoRetorno->lDispensado                    = true;
-            $oAproveitamentoRetorno->nAproveitamentoPeriodoAnterior = $oAproveitamentoPeriodoAnterior->
-                                                                      getValorAproveitamento()->getAproveitamento();
-          }
-*/
+          $oAproveitamentoPeriodoAnterior = $oDiarioClasse->getDisciplinasPorRegenciaPeriodo($oRegencia,$oElementoAvaliacaoVinculado);
         }
       }
 
@@ -273,49 +251,11 @@ final class GradeAproveitamentoAluno {
       $oAproveitamentoRetorno->lTemNotaExterna  = $oAproveitamento->isAvaliacaoExterna();
       $oAproveitamentoRetorno->aPareceresPadronizados = array();
 
-//    echo "<pre>";
-//    print_r($oElemento);
-//    echo "</pre>";
-//$arq = fopen("/dados/www/homologacao.epdvr.com.br/busca.txt","a+");
-//fwrite($arq, $oAproveitamento->getElementoAvaliacao()->getFormaDeAvaliacao()->getTipo() );
-//fwrite($arq,"\r\n");
-//fclose($arq);
-
-//      if ( $oElemento->getFormaDeAvaliacao()->getTipo() == "PARECER" && $oAproveitamentoRetorno->nAproveitamento != '') {
-      /**
-       * Autor: Uemerson Santana
-       * Data: 17/12/2025
-       * Demanda: 18038
-       * Razao: Ajuste para exibir "PD" quando a forma de avaliação ? PARECER e existe
-       *        nota/conceito OU parecer descritivo lan?ado. Antes exigia apenas nota/conceito,
-       *        impedindo que disciplinas avaliadas somente por parecer descritivo (como TI)
-       *        exibissem "PD" no boletim. Alinhado com a tela de Encerramento/Cancelamento
-       *        de Avalia??es e com edu_diarioclasseresumoanual002.php.
-       */
       if ( $oAproveitamento->getElementoAvaliacao()->getFormaDeAvaliacao()->getTipo() == "PARECER" && ($oAproveitamentoRetorno->nAproveitamento != '' || !empty($oAproveitamentoRetorno->sParecer))) {
 
         $oAproveitamentoRetorno->nAproveitamento = 'PD';
       }
-
-      /**
-       * Autor: Uemerson Santana
-       * Data: 17/12/2025
-       * Demanda: 18038
-       * Razao: Ajuste para exibir "PD" quando o aluno ? avaliado por parecer (campo ed60_c_parecer='S')
-       *        e existe nota/conceito OU parecer descritivo lan?ado. Antes exigia apenas nota/conceito,
-       *        impedindo que alunos com necessidades especiais avaliados por parecer descritivo
-       *        exibissem "PD" no boletim. Alinhado com edu2_fichaindividualaluno002.php que verifica
-       *        isAlunoComNecessidadesEspeciais + ed60_c_parecer='S'.
-       *
-       * Autor: Uemerson Santana
-       * Data: 18/12/2025
-       * Demanda: 18038 (complemento)
-       * Razao: Ajuste adicional para alinhar completamente com a Ficha Individual. Quando o aluno
-       *        tem necessidades especiais E est? avaliado por parecer (ed60_c_parecer='S'), deve
-       *        exibir "PD" para TODAS as disciplinas, mesmo sem parecer lan?ado para aquela disciplina
-       *        espec?fica. Isso garante consist?ncia entre Ficha Individual e Boletim.
-       */
-      // Verifica se aluno tem necessidades especiais
+      
       $lAlunoComNecessidadesEspeciais = false;
       if ($oDiarioClasse->getMatricula()->getAluno() != null) {
         $iCodigoAluno = $oDiarioClasse->getMatricula()->getAluno()->getCodigoAluno();
@@ -323,14 +263,12 @@ final class GradeAproveitamentoAluno {
         $rsNecessidades = db_query($sSqlNecessidades);
         $lAlunoComNecessidadesEspeciais = (pg_num_rows($rsNecessidades) > 0);
       }
-
-      // Se aluno tem necessidades especiais E est? avaliado por parecer, exibe "PD" para todas as disciplinas
+      
       if ($lAlunoAvaliadoParecer && $lAlunoComNecessidadesEspeciais) {
         $oAproveitamentoRetorno->nAproveitamento = 'PD';
         $oAproveitamentoRetorno->lAtingiuMinimo  = true;
         $oAproveitamentoRetorno->sFormaAvaliacao = "PARECER";
       } elseif ( $lAlunoAvaliadoParecer && ($oAproveitamentoRetorno->nAproveitamento != '' || !empty($oAproveitamentoRetorno->sParecer))) {
-        // Caso contr?rio, mant?m a l?gica original: exige nota/conceito OU parecer lan?ado
         $oAproveitamentoRetorno->nAproveitamento = 'PD';
         $oAproveitamentoRetorno->lAtingiuMinimo  = true;
         $oAproveitamentoRetorno->sFormaAvaliacao = "PARECER";
@@ -382,12 +320,8 @@ final class GradeAproveitamentoAluno {
       }
     }
 
-//    echo "<pre>";
-//    print_r($oAproveitamentoRetorno);
-//    echo "</pre>";
-
     return $oAproveitamentoRetorno;
-  }//********************************************************************************************************************
+  }
 
   /**
    * Retorna os dados da Frequencia do Aluno para a Disciplina
@@ -412,26 +346,17 @@ final class GradeAproveitamentoAluno {
       $oDadosFrequencia->iTotalFaltas          = $oDadosDisciplina->getTotalFaltas();
       $oDadosFrequencia->iFaltasAbonadas       = $oDadosDisciplina->getTotalFaltasAbonadas();
 
-      /**
-          * Autor: Uemerson Santana
-          * Data: 30/07/2025
-          * Demanda: 17633
-        */
-      // Verificar se ? Anos Finais
+
       $sNomeCalendarioTmp = $oRegencia->getTurma()->getCalendario()->getDescricao();
       if (strpos($sNomeCalendarioTmp, 'ANOS FINAIS') !== false) {
-        // Usar fun??o customizada para Anos Finais
         $iCodigoAlunoTmp = $this->oMatricula->getAluno();
         $iCodigoAlunoTmp = $iCodigoAlunoTmp->getCodigoAluno();
         $iCodigoEscolaTmp = $oRegencia->getTurma()->getEscola()->getCodigo();
         $iCodigoCalendarioTmp = $oRegencia->getTurma()->getCalendario()->getCodigo();
 
         $objFreqCustom = $this->calcularFrequenciaAnosFinais($iCodigoAlunoTmp, $iCodigoEscolaTmp, $iCodigoCalendarioTmp);
-        $oDadosFrequencia->nPercentualFrequencia = "{$objFreqCustom->nPercentualFrequencia}";
-        // $oDadosFrequencia->iTotalAulas = $objFreqCustom->iTotalAulas;
-        // $oDadosFrequencia->iTotalFaltas = $objFreqCustom->iTotalFaltas;
-      } else {
-        // Usar m?todo padr?o para outros casos
+        $oDadosFrequencia->nPercentualFrequencia = "{$objFreqCustom->nPercentualFrequencia}";        
+      } else {        
         $oDadosFrequencia->nPercentualFrequencia = "{$oDadosDisciplina->calcularPercentualFrequencia()}";
       }
 
@@ -566,63 +491,8 @@ final class GradeAproveitamentoAluno {
             $oDisciplina->oNotaParcial->nNota = $sNota;
           }
         }
-
-
-//*************  O erro acontecia aqui quando ia imprimir RECUPERA??ES da disciplina TECNOLOGIA E INOVA??O,
-// não existe esta coluna no procedimento de avaliação de mat?rias por conceito, ent?o não retorna dados e da erro
-// verificar se no caso de ANOS FINAIS existe alguma outra mat?ria que seja por conceito
-/*
-Anos finais - colunas procedimento avaliacao
-LINGUA PORTUGUESA==1º BIMESTRE                    TECNOLOGIA E INOVA??O==1º BIMESTRE
-LINGUA PORTUGUESA==2º BIMESTRE                    TECNOLOGIA E INOVA??O==2º BIMESTRE
-LINGUA PORTUGUESA==RECUPERAÇÃO SEMESTRAL          proc avaliacao não tem essa colula - primeiro erro
-LINGUA PORTUGUESA==3? BIMESTRE                    TECNOLOGIA E INOVA??O==3? BIMESTRE
-LINGUA PORTUGUESA==4? BIMESTRE                    TECNOLOGIA E INOVA??O==4? BIMESTRE
-LINGUA PORTUGUESA==MÉDIA ANUAL                    não tem P. A.
-LINGUA PORTUGUESA==RECUPERAÇÃO FINAL              não tem P. A.
-LINGUA PORTUGUESA==NOTA FINAL                     CONCEITO FINAL
-
-Anos iniciais - colunas procedimento avaliacao
-LINGUA PORTUGUESA==1? TRIMESTRE                   TECNOLOGIA E INOVA??O==1? TRIMESTRE
-LINGUA PORTUGUESA==2? TRIMESTRE                   TECNOLOGIA E INOVA??O==2? TRIMESTRE
-LINGUA PORTUGUESA==3? TRIMESTRE                   TECNOLOGIA E INOVA??O==3? TRIMESTRE
-LINGUA PORTUGUESA==MÉDIA FINAL                    TECNOLOGIA E INOVA??O==MÉDIA FINAL
-
-Anos finais tem 8 colunas para notas e cinco para conceito
-Anos iniciais tem 4 colunas para todas as materias
-o erro acontece na primeira coluna que não existe em conceito
-*/
-
-//************************************************************************************************************************************************
-/*
-  if ($oDisciplina->sNome <> 'TECNOLOGIA E INOVAÇÃO' )
-  {
-//	   if( $oPeriodoAvalicao->sDescricao == $periodoP )
-//	   {
-           $oAvaliacaoPeriodo                 = $this->getAproveitamentoParaRegenciaPorPeriodo($oRegencia, $oPeriodo, $oDisciplina->sNome );
-//	   }
-
-  }else{
-	  if(    $oPeriodoAvalicao->sDescricao == '1º BIMESTRE'  or $oPeriodoAvalicao->sDescricao == '2º BIMESTRE'
- 	      or $oPeriodoAvalicao->sDescricao == '3º BIMESTRE'
-	      or $oPeriodoAvalicao->sDescricao == '4º BIMESTRE'
-//Per?odo de Avalia??o não encontrado no Di?rio do Aluno. Contate o Suporte.
-//Ao tentar lan?ar notas para verificar se o erro sumiria deu a mensagem acima
-	      or $oPeriodoAvalicao->sDescricao == '1º TRIMESTRE' or $oPeriodoAvalicao->sDescricao == '2º TRIMESTRE' or $oPeriodoAvalicao->sDescricao == '3º TRIMESTRE'
-		  or $oPeriodoAvalicao->sDescricao == 'MÉDIA FINAL'
-		)
-	  {
-*/
-         // o erro foi corrigido na linha 212, porque ele não estava encontrando o elemento de avaliação da disciplina TECNOLOGIA E INOVA??O devido o procedimento de
-		 // avaliação ser diferente e não ter recupera??o, acrescentei o valor vazio para quando isso acontecer e corrigiu
          $oAvaliacaoPeriodo                 = $this->getAproveitamentoParaRegenciaPorPeriodo($oRegencia, $oPeriodo, $oDisciplina->sNome );
-//	  }else{
-//		 $oAvaliacaoPeriodo = [];
-//	  }
-//  }
 
-
-//************************************************************************************************************************************************
         $oPeriodoAvalicao->oAproveitamento = $oAvaliacaoPeriodo;
         $oPeriodoAvalicao->sFormaAvaliacao = $oAvaliacaoPeriodo->sFormaAvaliacao;
 
@@ -663,10 +533,7 @@ o erro acontece na primeira coluna que não existe em conceito
       $oResultadoFinal->sResultadoAprovacao = $oResultadoFinalRegencia->getResultadoAprovacao();
       $oResultadoFinal->sResultadoFinal     = $oResultadoFinalRegencia->getResultadoFinal();
 
-      /**
-       * Se aluno foi aprovado pelo conselho de classe e a avaliação foi informada como SUBSTITUIR, a avaliação
-       * final ? substituida pela informada na altera??o do resultado final
-       */
+      
       $oAprovadoConselho = $oResultadoFinalRegencia->getFormaAprovacaoConselho();
 
       if ( !is_null($oAprovadoConselho) && $oAprovadoConselho->getFormaAprovacao() == AprovacaoConselho::APROVADO_CONSELHO
@@ -695,12 +562,8 @@ o erro acontece na primeira coluna que não existe em conceito
         $oResultadoFinal->sTermoResultadoFinal          = $this->encodeString($aTermosAprovado[0]->sDescricao);
         $oResultadoFinal->sTermoResultadoFinalAbreviado = $this->encodeString($aTermosAprovado[0]->sAbreviatura);
       }
-//    echo "<pre>";
-//    print_r($oDisciplina);
-//    echo "</pre>";
 
     $aGradeAproveitamento[] = $oDisciplina;
-//}	//**************************************************        retirar
 
     }
     return $aGradeAproveitamento;
@@ -767,17 +630,7 @@ o erro acontece na primeira coluna que não existe em conceito
   public function getAmparoDisciplina(Regencia $oRegencia) {
     return $this->getDiarioDeClasse()->getDisciplinasPorRegencia($oRegencia)->getAmparo();
   }
-
-  /**
-   * Controla se deve ser exibida a nota parcial
-   * De acordo com o implementado na db_stdlibwebseller as notas parciais s? devem ser apresentadas quando:
-   * - O Parâmetro Calcular m?dia parcial deve esta ativo (SIM)
-   * - O aluno esta com situa??o da matr?cula igual a MATRICULADO;
-   * - A matr?cula não esta conclu?da;
-   * - A forma de obten??o do procedimento ? 'ME', 'MP', 'SO'
-   *
-   * @return bool
-   */
+  
   public function exibeNotaParcial() {
 
     $sWhere = " ed233_i_escola = {$this->oMatricula->getTurma()->getEscola()->getCodigo()}";
@@ -820,28 +673,8 @@ o erro acontece na primeira coluna que não existe em conceito
   public function alunoAprovadoComProgressaoParcial() {
     return $this->getDiarioDeClasse()->aprovadoComProgressaoParcial();
   }
-
-
-  /**
-    * Autor: Uemerson Santana
-    * Data: 30/07/2025
-    * Demanda: 17633
-    *
-    * Corre??o: 17/12/2025 - Demanda: 17897
-    * A regra de 75% mínimo s? deve ser aplicada para alunos que foram
-    * efetivamente reclassificados por baixa frequ?ncia, não para todos.
-    *
-    * Corre??o: 19/01/2026 - Demanda: 18059
-    * Raz?o: Para Anos Finais, a frequ?ncia deve considerar o turno da turma do aluno.
-    *        Turno INTEGRAL deve usar 1522 horas/aula fixas, outros turnos usam 1000 horas/aula fixas.
-    *        Antes, todos os Anos Finais usavam 1000h fixo, causando c?lculo incorreto para turmas integrais.
-  */
+  
   private function calcularFrequenciaAnosFinais($iCodigoAluno, $iCodigoEscola, $iCodigoCalendario) {
-
-    // Autor: Uemerson Santana | Data: 19/01/2026 | Demanda: 18059
-    // Raz?o: Consultar turno da turma do aluno para aplicar carga hor?ria correta
-    //        (INTEGRAL = 1522h, outros = 1000h)
-    //        A turma ? obtida atrav?s da reg?ncia (diario -> regencia -> turma -> turno)
     $sSqlTurno = "SELECT trim(tu.ed15_c_nome) as turno_nome
                   FROM diario d
                   INNER JOIN regencia r ON r.ed59_i_codigo = d.ed95_i_regencia
@@ -853,13 +686,13 @@ o erro acontece na primeira coluna que não existe em conceito
                   LIMIT 1";
     
     $rsTurno = db_query($sSqlTurno);
-    $iTotalAulas = 1000; // Valor padr?o para outros turnos
+    $iTotalAulas = 1000;
     
     if (is_resource($rsTurno) && pg_num_rows($rsTurno) > 0) {
       $oTurno = db_utils::fieldsMemory($rsTurno, 0);
       $sTurnoNome = trim($oTurno->turno_nome);
       if (strtoupper($sTurnoNome) == 'INTEGRAL') {
-        $iTotalAulas = 1522; // Turno INTEGRAL usa 1522 horas/aula
+        $iTotalAulas = 1522;
       }
     }
 
@@ -875,11 +708,9 @@ o erro acontece na primeira coluna que não existe em conceito
     $iFaltas = pg_result($rs, 0, 'total_faltas') ?: 0;
 
     $nFrequencia = floor(($iTotalAulas - $iFaltas) / $iTotalAulas * 100);
-
-    // Verifica se o aluno foi reclassificado por baixa frequ?ncia
+    
     $lReclassificado = $this->getDiarioDeClasse()->reclassificadoPorBaixaFrequencia();
-
-    // Regra 75% mínimo SOMENTE para alunos reclassificados
+    
     if ($lReclassificado && $nFrequencia < 75) {
         $nFrequencia = 75;
     }

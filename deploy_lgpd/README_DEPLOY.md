@@ -9,7 +9,7 @@ Este pacote contém todos os artefatos necessários para implantar o **Painel de
 | Arquivo | Finalidade |
 | :--- | :--- |
 | `con4_lgpd_painel001.php` | Script da interface visual (4 abas: ROPA Art. 37, Termos de Sigilo, Trilha de Auditoria, Dossiê do Titular Art. 18 com Privacy by Default). Codificação UTF-8 blindada. |
-| `lgpd_schema_migration.sql` | Script SQL 100% idempotente (transacional com `BEGIN...COMMIT`) para registro do módulo, menu e permissões. |
+| `lgpd_migration_remote.sql` | Script SQL 100% idempotente (transacional com `BEGIN...COMMIT`) para registro do módulo, menu e permissões. |
 | `deploy_remote_lgpd.sh` | Script bash de implantação automatizada no servidor remoto. |
 
 ---
@@ -48,19 +48,16 @@ Se preferir realizar a operação manualmente:
 
 1. **Copiar o arquivo PHP para os webroots**:
    ```bash
-   sudo cp con4_lgpd_painel001.php /var/www/html/
-   sudo cp con4_lgpd_painel001.php /var/www/html/e-cidadeCPD/
-   sudo chown www-data:www-data /var/www/html/con4_lgpd_painel001.php /var/www/html/e-cidadeCPD/con4_lgpd_painel001.php
-   sudo chmod 644 /var/www/html/con4_lgpd_painel001.php /var/www/html/e-cidadeCPD/con4_lgpd_painel001.php
+   sudo cp con4_lgpd_painel001.php /var/www/html/e-cidade_ontem/
+   sudo chown www-data:www-data /var/www/html/e-cidade_ontem/con4_lgpd_painel001.php
+   sudo chmod 644 /var/www/html/e-cidade_ontem/con4_lgpd_painel001.php
    ```
 
 2. **Executar a Migração no Banco de Dados**:
    ```bash
-   # Diretamente no host ou via container Docker:
-   docker exec -i e_cidade_container psql -U ecidade -d ecidade < lgpd_schema_migration.sql
+   PGPASSWORD='...' psql -h 127.0.0.1 -U ecidade -d ecidade -f lgpd_migration_remote.sql
    ```
 
 3. **Verificar no e-Cidade Desktop**:
    - Faça login no e-Cidade.
    - Navegue em: `Instituições` $\rightarrow$ `DB:CONFIGURAÇÃO` $\rightarrow$ `LGPD - Governança` $\rightarrow$ `Painel de Governança LGPD`.
-

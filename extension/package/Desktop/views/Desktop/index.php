@@ -14,11 +14,6 @@
 </head>
 <body><!--<div class="ribbon"><a href="#">HOMOLOGA&Ccedil;&Atilde;O</a></div>-->
 <div class="topbar">
-    <div style="float: left; display: flex; align-items: center; height: 35px; padding-left: 12px; gap: 10px;">
-        <span style="font-weight: bold; color: #1e3a8a; font-size: 13px;">e-Cidade <span style="background: #1e3a8a; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold;">CPD-MUNICIPAL</span></span>
-        <div id="btn-lgpd-topbar" onclick="Desktop.Window.create('Painel de Governança LGPD', { action: 'con4_lgpd_painel001.php', iModuloId: 1, iInstitId: <?=$instituicaoLogada?>, iAreaId: 11, lAtalhoDesktop: true })" style="cursor: pointer; background-color: #2e7d32; color: #ffffff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.15);" title="Clique para abrir o Painel de Governança LGPD">
-        <div id="btn-lgpd-topbar" style="cursor: pointer; background-color: #2e7d32; color: #ffffff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.15);" title="Clique para abrir o Painel de Governança LGPD">
-            <span>🛡️</span> Sistema Adequado à LGPD (Lei 13.709/2018)
     <div style="float: left; display: flex; align-items: center; height: 35px; padding-left: 12px; gap: 12px;">
         <span style="font-weight: bold; color: #1e3a8a; font-size: 13px; letter-spacing: -0.2px;">e-Cidade <span style="background: #1e3a8a; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold;">CPD-MUNICIPAL</span></span>
         <div id="btn-lgpd-topbar" style="cursor: pointer; background-color: #2e7d32; color: #ffffff; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); line-height: 18px;" title="Clique para abrir o Painel de Governança LGPD">
@@ -171,55 +166,31 @@ $instituicaoLogada = is_null($this->instituicaoUsuario) ? 1 : $this->instituicao
 ?>
 <script>
     const btnDocumentos = document.getElementById("documentos-atividades");
-    btnDocumentos.addEventListener('click', () => {
-        var parametros = {
-            action: 'con4_atividades_documentos.php',
-            iInstitId: <?=$instituicaoLogada?>, // Instituição Prefeitura
-            iAreaId: 4, // Area Patrimonial
-            iModuloId: 604, // Módulo Protocolo
-            lAtalhoDesktop: true
-        }
-    var btnDocumentos = document.getElementById("documentos-atividades");
     if (btnDocumentos) {
         btnDocumentos.addEventListener('click', () => {
-        btnDocumentos.addEventListener('click', function() {
             var parametros = {
                 action: 'con4_atividades_documentos.php',
                 iInstitId: <?=$instituicaoLogada?>, // Instituição Prefeitura
                 iAreaId: 4, // Area Patrimonial
                 iModuloId: 604, // Módulo Protocolo
-                iInstitId: <?=$instituicaoLogada?>,
-                iAreaId: 4,
-                iModuloId: 604,
                 lAtalhoDesktop: true
             };
-            if (window.Desktop && Desktop.Window) {
-                Desktop.Window.create('Andamento de Documentos', parametros);
-                var ic = document.querySelector("#documentos-atividades .icon-document");
-                if (ic) ic.innerHTML = "";
-            }
 
-        Desktop.Window.create('Andamento de Documentos', parametros);
-        document.querySelector("#documentos-atividades .icon-document").innerHTML = "";
-    });
             Desktop.Window.create('Andamento de Documentos', parametros);
             document.querySelector("#documentos-atividades .icon-document").innerHTML = "";
         });
     }
 
     const btnLgpd = document.getElementById("btn-lgpd-topbar");
-    var btnLgpd = document.getElementById("btn-lgpd-topbar");
     if (btnLgpd) {
         btnLgpd.addEventListener('click', () => {
-        btnLgpd.addEventListener('click', function() {
             var parametros = {
                 action: 'con4_lgpd_painel001.php',
                 iInstitId: <?=$instituicaoLogada?>,
                 iAreaId: 11,
-                iModuloId: 1,
+                iModuloId: 3000300,
                 lAtalhoDesktop: true
             };
-            Desktop.Window.create('Painel de Governança LGPD', parametros);
             if (window.Desktop && Desktop.Window) {
                 Desktop.Window.create('Painel de Governança LGPD', parametros);
             }

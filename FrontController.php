@@ -11,9 +11,14 @@ if (preg_match('/.*v4\//', $requestUri)) {
     return require_once 'public/index.php';
 }
 
+if (preg_match('/.*web\//', $requestUri)) {
+    return require_once 'public/index.php';
+}
+
 if (preg_match('/rest\/v1\//', $requestUri)) {
     return require_once 'public/index.php';
 }
+
 
 return require('app.php');
 

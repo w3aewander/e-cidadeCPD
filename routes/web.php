@@ -13,6 +13,14 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('bi', function () {
+    return view('bi.index');
+})->middleware('legacyAuthenticated');
+
+Route::get('bi/balancete-receita-recurso', function () {
+    return view('bi.balancete-receita-recurso');
+})->middleware('legacyAuthenticated');
+
 Route::prefix('assistencia-social')->group(function () {
     Route::prefix('habitacao')->group(base_path('routes/web/assistencia-social/habitacao.php'));
     Route::prefix('social')->group(base_path('routes/web/assistencia-social/social.php'));
@@ -28,6 +36,7 @@ Route::prefix('educacao')->group(function () {
     Route::prefix('alimentacao-escolar')->group(base_path('routes/web/educacao/alimentacao-escolar.php'));
     Route::prefix('biblioteca')->group(base_path('routes/web/educacao/biblioteca.php'));
     Route::prefix('escola')->group(base_path('routes/web/educacao/escola.php'));
+    Route::prefix('manuais')->group(base_path('routes/web/educacao/manuais.php'));
     Route::prefix('secretaria')->group(base_path('routes/web/educacao/secretaria.php'));
     Route::prefix('transporte-escolar')->group(base_path('routes/web/educacao/transporte-escolar.php'));
     Route::prefix('matricula-online')->group(base_path('routes/web/educacao/matricula-online.php'));

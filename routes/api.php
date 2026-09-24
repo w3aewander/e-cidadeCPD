@@ -213,3 +213,7 @@ Route::prefix('/dbpref')
 Route::prefix('/processo-eletronico')->group(function () {
     Route::prefix('/tributario')->group(base_path('routes/api/processo-eletronico/tributario.php'));
 });
+
+Route::prefix('bi')->middleware(['legacyAuthenticated'])->namespace('App\\Domain\\BI\\Controllers')->group(
+    base_path('routes/api/bi/bi.php')
+);

@@ -217,6 +217,7 @@ $instituicaoLogada = is_null($this->instituicaoUsuario) ? 1 : $this->instituicao
                 iInstitId: <?=$instituicaoLogada?>,
                 iAreaId: 11,
                 iModuloId: 1,
+                iModuloId: 3000300,
                 lAtalhoDesktop: true
             };
             Desktop.Window.create('Painel de Governança LGPD', parametros);
@@ -228,3 +229,4 @@ $instituicaoLogada = is_null($this->instituicaoUsuario) ? 1 : $this->instituicao
 </script>
 </body>
 </html>
+

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Configuracao\Usuario\Services;
 
+use App\Domain\Configuracao\Usuario\Exceptions\MaxLoginAttemptsException;
 use App\Domain\Configuracao\Usuario\Models\Usuario;
 use App\Domain\Configuracao\Usuario\Requests\LoginRequest;
 use App\Domain\Configuracao\Usuario\Requests\UnblockRequest;
@@ -12,16 +13,18 @@ use GuzzleHttp\Psr7\ServerRequest;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use ECidade\V3\Extension\Registry;
-use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 const MENSAGEM = 'configuracao.configuracao.abrir.';
 
 /**
- *
+ * Serviço de Autenticação do e-Cidade
  */
 class AuthService
 {
     private $authorizationServer;
+    const MAX_LOGIN_ATTEMPTS = 3;
 
     public function __construct(AuthorizationServer $authorizationServer)
     {
@@ -29,33 +32,86 @@ class AuthService
     }
 
     /**
-     * @todo revisar esse fluxo
-     * A maneira que est? atualmente, foi basicamente "copiada" do fluxo de login antigo.
-     *
      * @param LoginRequest $request
      * @return array
      * @throws SecuriImageException
+     * @throws MaxLoginAttemptsException
      * @throws \Exception
      */
     public function authenticate(LoginRequest $request)
-    {   
-        
-
-
+    {
         try {
             $this->start($request);
-            $this->validaCaptcha($request->usuario, $request->username, $request->conteudoCaptcha);
-            if ($request->usuario === null || $request->usuario->usuext !== 0) {
-                $mensagem = _M(MENSAGEM . "login_invalido");
-                db_logsmanual_demais($mensagem);
 
-                throw new \BusinessException($mensagem, 400);
+            $loginKey = 'login_attempts_' . strtolower(trim($request->username));
+            $tentativas = (int) Cache::get($loginKey, 0);
+
+            // Se já excedeu as 3 tentativas, bloqueia o acesso
+            if ($tentativas >= self::MAX_LOGIN_ATTEMPTS) {
+                if ($request->usuario instanceof Usuario && !$request->usuario->isAdministrador()) {
+                    DB::table('configuracoes.db_usuarios')
+                        ->where('id_usuario', (int)$request->usuario->id_usuario)
+                        ->update(['usuarioativo' => 2]);
+                    DB::commit();
+                }
+
+                throw new MaxLoginAttemptsException(
+                    "Você atingiu o limite de " . self::MAX_LOGIN_ATTEMPTS . " tentativas de login. Seu acesso foi bloqueado por segurança. Solicite a recuperação de senha.",
+                    $tentativas,
+                    $request->username,
+                    403
+                );
             }
-            if (!$request->usuario->validateForPassportPasswordGrant($request->password)) {
-                $log = _M(MENSAGEM . 'logs_senha_invalida', (object)['sCampo' => $request->usuario->login]);
-                db_logsmanual_demais($log, $request->usuario->getCodigo());
 
-                throw new \BusinessException(_M(MENSAGEM . 'senha_invalida'), 400);
+            $this->validaCaptcha($request->usuario, $request->username, $request->conteudoCaptcha, $tentativas);
+
+            if ($request->usuario === null || (int)$request->usuario->usuext !== 0) {
+                $tentativas++;
+                Cache::put($loginKey, $tentativas, 1800); // 30 minutos
+
+                $mensagem = _M(MENSAGEM . "login_invalido");
+                if (function_exists('db_logsmanual_demais')) {
+                    db_logsmanual_demais($mensagem);
+                }
+
+                if ($tentativas >= self::MAX_LOGIN_ATTEMPTS) {
+                    throw new MaxLoginAttemptsException(
+                        "Você atingiu o limite de " . self::MAX_LOGIN_ATTEMPTS . " tentativas de login. Usuário bloqueado por segurança.",
+                        $tentativas,
+                        $request->username,
+                        403
+                    );
+                }
+
+                throw new \BusinessException("Login ou senha inválido. Tentativa {$tentativas} de " . self::MAX_LOGIN_ATTEMPTS . ".", 400);
+            }
+
+            if (!$request->usuario->validateForPassportPasswordGrant($request->password)) {
+                $tentativas++;
+                Cache::put($loginKey, $tentativas, 1800);
+
+                $log = _M(MENSAGEM . 'logs_senha_invalida', (object)['sCampo' => $request->usuario->login]);
+                if (function_exists('db_logsmanual_demais')) {
+                    db_logsmanual_demais($log, $request->usuario->getCodigo());
+                }
+
+                if ($tentativas >= self::MAX_LOGIN_ATTEMPTS) {
+                    if (!$request->usuario->isAdministrador()) {
+                        DB::table('configuracoes.db_usuarios')
+                            ->where('id_usuario', (int)$request->usuario->id_usuario)
+                            ->update(['usuarioativo' => 2]);
+                        DB::commit();
+                    }
+
+                    throw new MaxLoginAttemptsException(
+                        "Você atingiu o limite de " . self::MAX_LOGIN_ATTEMPTS . " tentativas de login. Seu usuário foi bloqueado por segurança.",
+                        $tentativas,
+                        $request->usuario->login,
+                        403
+                    );
+                }
+
+                throw new \BusinessException("Senha ou login inválido. Tentativa {$tentativas} de " . self::MAX_LOGIN_ATTEMPTS . ".", 400);
             }
 
             $this->validaUsuario($request->usuario);
@@ -64,6 +120,9 @@ class AuthService
             $token = $this->createToken($request->username, $request->password);
 
             $this->buildSession($request);
+
+            // Login bem-sucedido: limpa o contador de tentativas
+            Cache::forget($loginKey);
 
             return $token;
         } catch (\Exception $e) {
@@ -80,11 +139,10 @@ class AuthService
      * @throws \Exception
      */
     public function unblock(UnblockRequest $request)
-    {   
-
+    {
         $session = new Session('MAIN');
         $session->create()->start();
-        
+
         if (!$session->has('DB_id_usuario')) {
             throw new \BusinessException('Sessão inválida.');
         }
@@ -92,7 +150,9 @@ class AuthService
         $usuario = Usuario::find($session->get('DB_id_usuario'));
         if (!$usuario->validateForPassportPasswordGrant($request->password)) {
             $log = _M(MENSAGEM . 'logs_senha_invalida', (object)['sCampo' => $usuario->login]);
-            db_logsmanual_demais($log, $usuario->getCodigo());
+            if (function_exists('db_logsmanual_demais')) {
+                db_logsmanual_demais($log, $usuario->getCodigo());
+            }
 
             throw new \BusinessException(_M(MENSAGEM . 'senha_invalida'), 403);
         }
@@ -111,7 +171,6 @@ class AuthService
     public function logout(Usuario $usuario)
     {
         $usuario->token()->revoke();
-
         $this->kill();
     }
 
@@ -136,21 +195,19 @@ class AuthService
         $session = new Session('MAIN');
         $session->create()->start();
 
-        /**
-         * Verificamos se existe outra sessao ja registrada e caso exista
-         * efetua o unset e o destroy da mesma
-         */
         if (!empty($_SESSION['DB_id_usuario'])) {
             session_unset();
             session_destroy();
             session_start();
         }
 
-        db_query("select fc_startsession()");
-        //DB::statement("SET search_path TO configuracoes, public");
+        if (function_exists('db_query')) {
+            db_query("select fc_startsession()");
+        }
 
-        db_logsmanual_demais(_M(MENSAGEM . "abrindo_sistema", (object)['sCampo' => $request->username]));
-
+        if (function_exists('db_logsmanual_demais')) {
+            db_logsmanual_demais(_M(MENSAGEM . "abrindo_sistema", (object)['sCampo' => $request->username]));
+        }
 
         $request->usuario = (new Usuario())->findForPassport($request->username);
     }
@@ -159,65 +216,21 @@ class AuthService
      * @param Usuario|null $usuario
      * @param string $login
      * @param string $conteudoCaptcha
+     * @param int $tentativas
      * @return void
      * @throws SecuriImageException
-     * @throws \BusinessException
      */
-    private function validaCaptcha($usuario, $login, $conteudoCaptcha = '')
+    private function validaCaptcha($usuario, $login, $conteudoCaptcha = '', $tentativas = 0)
     {
-        /**
-         * Valida Tentativas de login do usu?rio
-         *
-         * Buscamos o parametro de configura??o do n?mero de tentativas de acesso ao portal
-         */
-        $preferenciaCliente = new \PreferenciaCliente();
-        $maxTentativaLogin = $preferenciaCliente->getTentativasLogin();
-
-        /**
-         * Verificamos se existe a variavel de tentativ de acesso na sessao
-         */
-        if (empty($_SESSION['DB_tentativasAcesso'])) {
-            $_SESSION['DB_tentativasAcesso'] = new \stdClass();
-        }
-
-        $totalTentativas = array_sum((array) $_SESSION['DB_tentativasAcesso']);
-
-        //$utilizaCaptcha = env('UTILIZA_CAPTCHA', false);
         $utilizaCaptcha = false;
-        /*
-        if (env('VERIFICA_IP_PRIVADO', false) && $utilizaCaptcha) {
-            if (verifica_ip_privado($_SERVER["REMOTE_ADDR"])) {
-                $utilizaCaptcha = false;
-            }
-        }
-        */
 
-        if ($utilizaCaptcha || $totalTentativas >= 3) {
+        if ($utilizaCaptcha || $tentativas >= self::MAX_LOGIN_ATTEMPTS) {
             require_once modification('securimage/securimage.php');
             $securiImage = new \Securimage();
 
             if (!$securiImage->check($conteudoCaptcha)) {
                 throw new SecuriImageException(_M(MENSAGEM . "codigo_seguranca_invalido"), 403);
             }
-        }
-
-        if (empty($_SESSION['DB_tentativasAcesso']->{$login})) {
-            $_SESSION['DB_tentativasAcesso']->{$login} = 1;
-            return;
-        }
-
-        $_SESSION['DB_tentativasAcesso']->{$login}++;
-
-        /**
-         * Validamos se o numero de tentativas excedeu o numero limite configurado
-         */
-        if ($_SESSION['DB_tentativasAcesso']->{$login} > $maxTentativaLogin) {
-            if ($usuario instanceof Usuario && $usuario->isUsuarioAtivo() && !$usuario->isAdministrador()) {
-                $usuario->usuarioativo = 2;
-                $usuario->save();
-            }
-
-            throw new \BusinessException(_M(MENSAGEM . "excedeu_tentativas_acesso"), 403);
         }
     }
 
@@ -230,16 +243,18 @@ class AuthService
         if (!$usuario->isUsuarioAtivo()) {
             throw new \BusinessException(_M(MENSAGEM . 'usuario_bloqueado'), 403);
         }
-        // valida data limite para  login
+
         $dataExpira = $usuario->getDataExpiracao();
         if (!empty($dataExpira) && $dataExpira->getTimestamp() < strtotime(date('Y-m-d'))) {
             $log = _M(MENSAGEM . 'logs_data_expira', (object)['sCampo' => $usuario->login]);
-            db_logsmanual_demais($log, $usuario->getCodigo());
+            if (function_exists('db_logsmanual_demais')) {
+                db_logsmanual_demais($log, $usuario->getCodigo());
+            }
 
             throw new \BusinessException(_M(MENSAGEM . 'data_expira'), 403);
         }
 
-        if (db_verifica_ip_banco($usuario->id_usuario) != '1') {
+        if (function_exists('db_verifica_ip_banco') && db_verifica_ip_banco($usuario->id_usuario) != '1') {
             throw new \BusinessException(_M(MENSAGEM . 'ip_nao_autorizado'), 403);
         }
 
@@ -249,24 +264,30 @@ class AuthService
 
         $rs = db_query("SELECT db21_ativo FROM db_config WHERE prefeitura = TRUE");
         if (!$rs) {
-            throw new \DBException('Erro ao verificar se o sistema est? liberado! Contate o suporte.');
+            throw new \DBException('Erro ao verificar se o sistema está liberado! Contate o suporte.');
         }
 
         $ativo = pg_fetch_result($rs, 0, 0);
         if (pg_num_rows($rs) == 0) {
             $mensagemLogs = _M(MENSAGEM . "logs_login_sem_departamento", (object)['sCampo' => $usuario->login]);
-            db_logsmanual_demais($mensagemLogs);
+            if (function_exists('db_logsmanual_demais')) {
+                db_logsmanual_demais($mensagemLogs);
+            }
 
             throw new \BusinessException(_M(MENSAGEM . "login_sem_departamento"), 403);
         }
 
         if ($ativo == 3) {
             $mensagem = _M(MENSAGEM . "sistema_desativado");
-            db_logsmanual_demais($mensagem);
+            if (function_exists('db_logsmanual_demais')) {
+                db_logsmanual_demais($mensagem);
+            }
             throw new \BusinessException($mensagem, 403);
         } elseif ($ativo == 2) {
             $mensagemLogs = _M(MENSAGEM . "logs_acesso_negado", (object)['sCampo' => $usuario->login]);
-            db_logsmanual_demais($mensagemLogs);
+            if (function_exists('db_logsmanual_demais')) {
+                db_logsmanual_demais($mensagemLogs);
+            }
 
             throw new \BusinessException(_M(MENSAGEM . "acesso_negado"), 403);
         }
@@ -305,7 +326,9 @@ class AuthService
                 'sVersaoBanco' => $versaoBanco->db30_codversao . $versaoBanco->db30_codrelease
             ];
 
-            db_logsmanual_demais(_M(MENSAGEM . 'logs_versao_banco', $opcoes), $usuario->getCodigo());
+            if (function_exists('db_logsmanual_demais')) {
+                db_logsmanual_demais(_M(MENSAGEM . 'logs_versao_banco', $opcoes), $usuario->getCodigo());
+            }
 
             throw new \DBException(_M(MENSAGEM . 'versao_banco', $opcoes));
         }
@@ -317,22 +340,18 @@ class AuthService
      */
     private function buildSession(LoginRequest $request)
     {
-        /**
-         * Desregistramos a variavel que controla as tentativas de acesso
-         */
         unset($_SESSION['DB_tentativasAcesso']);
 
         if (!isset($_SESSION["DB_acessado"])) {
             $_SESSION["DB_acessado"] = '0';
         }
 
-        // Seta os dados de conex?o com o banco para serem usados pela V3
-        $_SESSION["DB_base"] = env('DB_DATABASE', '');
-        $_SESSION["DB_NBASE"] = env('DB_DATABASE', '');
-        $_SESSION["DB_servidor"] = env('DB_HOST', '');
-        $_SESSION["DB_porta"] = env('DB_PORT', '');
-        $_SESSION["DB_senha"] = env('DB_PASSWORD', '');
-        $_SESSION["DB_user"] = env('DB_USERNAME', '');
+        $_SESSION["DB_base"] = env('DB_DATABASE', 'ecidade');
+        $_SESSION["DB_NBASE"] = env('DB_DATABASE', 'ecidade');
+        $_SESSION["DB_servidor"] = env('DB_HOST', '127.0.0.1');
+        $_SESSION["DB_porta"] = env('DB_PORT', '5433');
+        $_SESSION["DB_senha"] = env('DB_PASSWORD', 'ecidade');
+        $_SESSION["DB_user"] = env('DB_USERNAME', 'ecidade');
 
         if (app()->isLocal() && !empty($request->DB_HOST) && !empty($request->DB_DATABASE)) {
             $_SESSION["DB_servidor"] = $request->DB_HOST;
@@ -348,12 +367,9 @@ class AuthService
         $_SESSION["DB_administrador"] = $request->usuario->isAdministrador() ? 1 : 0;
         $_SESSION["DB_desativar_account"] = false;
 
-        /**
-         * Realiza a busca das prefer?ncias do usu?rio.
-         */
         $preferenciaUsuario = (new \UsuarioSistema(null, null, $request->usuario))->getPreferenciasUsuario();
         $_SESSION["DB_preferencias_usuario"] = base64_encode(serialize($preferenciaUsuario));
-        $_SESSION["DB_ip"] = $_SERVER["REMOTE_ADDR"];
+        $_SESSION["DB_ip"] = isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : '';
     }
 
     /**

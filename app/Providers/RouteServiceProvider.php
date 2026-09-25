@@ -51,6 +51,9 @@ class RouteServiceProvider extends ServiceProvider
             Route::put('kill', 'App\Domain\Configuracao\Usuario\Controller\LoginController@kill');
             Route::put('logout', 'App\Domain\Configuracao\Usuario\Controller\LoginController@logout')
                 ->middleware(['api', 'auth:api']);
+            Route::post('auth/esqueci-senha', 'App\Domain\Configuracao\Usuario\Controller\LoginController@solicitarRecuperacaoSenha');
+            Route::post('auth/validar-token', 'App\Domain\Configuracao\Usuario\Controller\LoginController@validarToken');
+            Route::post('auth/redefinir-senha', 'App\Domain\Configuracao\Usuario\Controller\LoginController@redefinirSenha');
         });
     }
 

@@ -44,7 +44,7 @@ class LoginRequest extends DBFormRequest
     public function messages()
     {
         return [
-            'username.required' => mb_convert_encoding(_M(MENSAGEM . 'login_invalido'), 'UTF-8', 'ISO-8859-1')
+            'username.required' => mb_convert_encoding(\_M(MENSAGEM . 'login_invalido'), 'UTF-8', 'ISO-8859-1')
         ];
     }
 }

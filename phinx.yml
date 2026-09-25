@@ -15,11 +15,11 @@ environments:
         port: 5432
         charset: latin1
 
-    production:
+    testing:
         adapter: pgsql
-        host: 10.1.0.51
-        name: voltaredonda
-        user: ecidade
-        pass: 'db#vltrdnd12'
+        host: localhost
+        name: ecidade
+        user: postgres
+        pass: ''
         port: 5432
         charset: latin1

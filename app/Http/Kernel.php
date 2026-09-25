@@ -79,7 +79,6 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'legacySession' => LegacySessionMiddleware::class,
-        'legacyAuthenticated' => LegacySessionMiddleware::class,
         'clientCredential' => CheckClientCredentials::class,
         'AuthSim' => AuthSimMiddleware::class,
         'AuthRedesim' => AuthRedesimMiddleware::class,

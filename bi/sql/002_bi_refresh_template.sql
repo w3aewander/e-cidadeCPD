@@ -1,0 +1,7 @@
+-- Modelo para views materializadas de métricas custosas.
+-- O job de refresh deve rodar fora do caminho transacional da aplicação.
+--
+-- CREATE MATERIALIZED VIEW bi.nome_do_indicador AS
+-- SELECT ...;
+-- CREATE UNIQUE INDEX ON bi.nome_do_indicador (chave_unica);
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY bi.nome_do_indicador;

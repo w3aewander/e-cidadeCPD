@@ -116,11 +116,6 @@ if ($tipo == "A") {
   $info_tipo = " Conferência";
 }
 
-//++
-if ( isset($grupos) && trim($grupos) != "" )  {
-  $txt_where  .= " and db121_sequencial in ({$grupos}) ";
-}
-
 $head3 = "Relatório de Estoque";
 $head4 = "$info_tipo";
 $head5 = "$info";

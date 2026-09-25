@@ -31,12 +31,12 @@ $_SESSION                                  = $HTTP_SESSION_VARS;
  * [usuario]      -> Usuário do FTP
  * [senha]        -> Senha do FTP
  * [diretorio]    -> Diretorio do FTP onde os arquivos serão postados
- * [passive_mode] -> No modo passivo, as conexões de dados são iniciadas pelo cliente, ao invés do servidor. 
+ * [passive_mode] -> No modo passivo, as conexões de dados são iniciadas pelo cliente, ao invés do servidor.
  *                   Pode ser necessário se o cliente estiver atrás de um firewall
  */
 $configCuboBi                         = array();
-$configCuboBi['ftp']['server']        = "ftp.bimachine.com.br";
-$configCuboBi['ftp']['usuario']       = "dbseller";
-$configCuboBi['ftp']['senha']         = "dbseller2015";
-$configCuboBi['ftp']['diretorio']     = "gp-voltaredonda";
+$configCuboBi['ftp']['server']        = "bimachine.com.br";
+$configCuboBi['ftp']['usuario']       = "";
+$configCuboBi['ftp']['senha']         = "";
+$configCuboBi['ftp']['diretorio']     = "";
 $configCuboBi['ftp']['passive_mode']  = true;

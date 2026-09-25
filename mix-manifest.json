@@ -1,5 +1,15 @@
 {
-    "/public/extension/package/desktop/views/desktop/index.js": "/public/extension/package/desktop/views/desktop/index.js",
-    "/public/js/app.js": "/public/js/app.js",
-    "/public/css/app.css": "/public/css/app.css"
+    "/js/app.js": "/js/app.js?id=5a2f426ba2c7306435ff43e8d50ff313",
+    "/extension/package/desktop/views/desktop/index.js": "/extension/package/desktop/views/desktop/index.js?id=57ec9aed8348fa73b73bd687ad1e898b",
+    "/vue/modulo/rh/recadastramento.js": "/vue/modulo/rh/recadastramento.js?id=6b84dc28294f9fe5b630c35a5b886272",
+    "/vue/js/app.js": "/vue/js/app.js?id=d54498eda91f0bc272fd94dccbf40b56",
+    "/vue/css/style.css": "/vue/css/style.css?id=44c365530bfdc5b685c04bcd3274a285",
+    "/css/app.css": "/css/app.css?id=68b329da9893e34099c7d8ad5cb9c940",
+    "/primevue.css": "/primevue.css?id=4e0da701c8ad7106e0f6706eeb0e4ac7",
+    "/fonts/primeicons.eot": "/fonts/primeicons.eot?id=5447280781a6f00cb73c4f0ffd5db7db",
+    "/fonts/primeicons.svg": "/fonts/primeicons.svg?id=1d854e3ab2c37173804a0d1d1af229ee",
+    "/fonts/primeicons.ttf": "/fonts/primeicons.ttf?id=2e196e362c250afcfc3ade6c84f0db30",
+    "/fonts/primeicons.woff": "/fonts/primeicons.woff?id=bb18e2dc80c517c6fc3b7dfa90c7c5c7",
+    "/fonts/primeicons.woff2": "/fonts/primeicons.woff2?id=e62a69161550cde6ac973cc66fbd0797",
+    "/trumbowyg/ui/icons.svg": "/trumbowyg/ui/icons.svg?id=96cbddc6e1052a6d1fd5984185cffa45"
 }

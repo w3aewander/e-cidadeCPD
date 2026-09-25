@@ -36,7 +36,7 @@
   const exerciseInput = document.getElementById('bi-exercicio');
   const startInput = document.getElementById('bi-periodo-inicial');
   const endInput = document.getElementById('bi-periodo-final');
-  const exercise = parseInt('{{ (int) db_getsession('DB_anousu') }}', 10);
+  const exercise = parseInt('{{ (int) (function_exists("db_getsession") ? db_getsession("DB_anousu", false) : date("Y")) ?: date("Y") }}', 10);
   exerciseInput.value = exercise;
   startInput.value = exercise + '-01-01';
   endInput.value = exercise + '-12-31';
@@ -69,7 +69,7 @@
     }
 
     const data = await response.json();
-    if (status.parentNode) status.remove();
+    if (status && status.parentNode) status.remove();
     mountPoint.innerHTML = '';
     const embeddedDashboard = await window.supersetEmbeddedSdk.embedDashboard({
       id: data.dashboardUuid,
@@ -84,7 +84,7 @@
     });
 
     var themeMode = 'default';
-    if (embeddedDashboard.setThemeMode) {
+    if (embeddedDashboard && embeddedDashboard.setThemeMode) {
       embeddedDashboard.setThemeMode(themeMode);
       themeButton.addEventListener('click', function () {
         themeMode = themeMode === 'default' ? 'dark' : 'default';
@@ -121,4 +121,3 @@
 
   loadDashboard().catch(showError);
 </script>
-

@@ -257,8 +257,6 @@ $sqlOrdem = "
   order by e85_codtipo,z01_nome,pc63_banco,pc63_agencia";  
 	$sqlMov = $sqlOrdem." union ".$sqlSlip;	 
 
-
-
 //die($sqlMov);exit;
 $result_empagegera = $clempagegera->sql_record($sqlMov);
 echo pg_last_error();
@@ -307,20 +305,11 @@ $tota_ted = 0;
 $nTotalBruto = 0;
 $nTotalRetencoes = 0;
 
-
-
 for($i =0 ; $i < $numrows_empagegera;$i++) {
   
   db_fieldsmemory($result_empagegera,$i);
   $e81_valor -= $vlrretencao;
-
-  //INÍCIO - ALTERAÇÃO RAFAEL
-  //Coloca o número do processo administrativo no relatório
-  $buscaProcesso = db_query("SELECT e03_numeroprocesso FROM pagordemprocesso WHERE e03_pagordem = {$e82_codord}");
-    $noprocesso = pg_fetch_result($buscaProcesso, 0, 0);
-  //FIM - ALTERAÇÃO RAFAEL
   
-
   $pdf->setfont('arial','b',8);
   if($pdf->gety() > $pdf->h - 30 || $i==0){
     if($pdf->gety() > $pdf->h - 30){
@@ -329,20 +318,17 @@ for($i =0 ; $i < $numrows_empagegera;$i++) {
     }    
     $pdf->cell(15,$alt,"ARQUIVO",1,0,"C",1);
     $pdf->cell(262,$alt,"DESCRIÇÃO",1,1,"C",1);
-    //INÍCIO - ALTERAÇÃO RAFAEL
-    $pdf->cell(15,$alt, 'P.A.',1,0,"C",0);
-    //FIM - ALTERAÇÃO RAFAEL    
     $pdf->cell(15,$alt, 'Nº Emp.',1,0,"C",0);
     $pdf->cell(15,$alt,"OP/Slip",1,0,"C",0);
     $pdf->cell(45,$alt,"Recurso",1,0,"C",0);
     $pdf->cell(15,$alt,$RLz01_numcgm,1,0,"C",0);
-    $pdf->cell(75,$alt,$RLz01_nome,1,0,"C",0);
+    $pdf->cell(85,$alt,$RLz01_nome,1,0,"C",0);
     $pdf->cell(21,$alt,$RLz01_cgccpf,1,0,"C",0);
 //    $pdf->cell(20,$alt,"Retenção",1,0,"C",0);
     $pdf->cell(10,$alt,"Tipo",1,0,"C",0);
     $pdf->cell(10,$alt,"Banco",1,0,"C",0);
     $pdf->cell(15,$alt,$RLpc63_agencia,1,0,"C",0);
-    $pdf->cell(15,$alt,$RLpc63_conta,1,0,"C",0);
+    $pdf->cell(23,$alt,$RLpc63_conta,1,0,"C",0);
     $pdf->cell(23,$alt,"Valor a Pagar",1,1,"C",0);
 //    $pdf->cell(20,$alt,$RLe81_codmov,1,1,"C",0);
 //    $pdf->cell(20,$alt,$RLe81_numemp,1,1,"C",0);
@@ -421,9 +407,6 @@ for($i =0 ; $i < $numrows_empagegera;$i++) {
     $pc63_conta_dig = "-".$pc63_conta_dig;
   }
   $pdf->setfont('arial','',7);
-  //INÍCIO - ALTERAÇÃO RAFAEL
-  $pdf->cell(15,$alt,$noprocesso,1,0,"C",0);  
-  //FIM - ALTERAÇÃO RAFAEL
   $pdf->cell(15,$alt,$e60_codemp,1,0,"C",0);
   $pdf->cell(15,$alt,$e82_codord,1,0,"C",0);
   if($o15_codigo != 0){
@@ -432,14 +415,14 @@ for($i =0 ; $i < $numrows_empagegera;$i++) {
      $pdf->cell(45,$alt,' ',1,0,"L",0);
   }
   $pdf->cell(15,$alt,$z01_numcgm,1,0,"C",0);
-  $pdf->cell(75,$alt,$z01_nome,1,0,"L",0);
+  $pdf->cell(85,$alt,$z01_nome,1,0,"L",0);
   $pdf->cell(21,$alt,$cnpj,1,0,"R",0);
 //  $pdf->cell(20,$alt,db_formatar($vlrretencao,'f'),1,0,"R",0);
   $pdf->cell(10,$alt,$codpgto,1,0,"C",0);
 
   $pdf->cell(10,$alt,$pc63_banco,1,0,"C",0);
   $pdf->cell(15,$alt,$pc63_agencia.$pc63_agencia_dig,1,0,"R",0);
-  $pdf->cell(15,$alt,$pc63_conta.$pc63_conta_dig,1,0,"R",0);
+  $pdf->cell(23,$alt,$pc63_conta.$pc63_conta_dig,1,0,"R",0);
   $pdf->cell(23,$alt,db_formatar($e81_valor,'f'),1,1,"R",0);
   
 //  $pdf->cell(20,$alt,$e81_codmov,1,1,"C",0);
@@ -503,22 +486,24 @@ $pdf->setfont('arial','',8);
 $pdf->text(20,$pdf->h - 27,' * Esta listagem só tem valor com, pelo menos, duas assinaturas autorizadas da Secretaria Municipal de Fazenda, com o respectivo carimbo e identificação.',0,4);
 $pdf->text(20,$pdf->h - 23,' * O encaminhamento desta listagem ao banco é de responsabilidade da DTS/DF, após a conferência dos respectivos processos de pagamento.',0,4);
 
-$pdf->text(100,$pdf->h - 17,'______________________________',0,4);
-$pdf->text(100,$pdf->h - 14,'LYGIA C. DE CARVALHO MORELLI',0,4);
-$pdf->text(100,$pdf->h - 11,'SUBSECRETÁRIA DE FAZENDA',0,4);
-
 $pdf->text(20,$pdf->h - 17,'______________________________',0,4);
-$pdf->text(20,$pdf->h - 14,'NILSOMAR FIRMINO DA SILVA JUNIOR',0,4);
-$pdf->text(20,$pdf->h - 11,'DIRETOR FINANCEIRO',0,4);
+$pdf->text(25,$pdf->h - 14,'Cleide C. da S. Ferreira',0,4);
+$pdf->text(26,$pdf->h - 11,' Tesoureira DF/SMF',0,4);
 
-$pdf->text(170,$pdf->h - 17,'______________________________',0,4);
-$pdf->text(170,$pdf->h - 14,'VINICIUS MICHEL ARBACH',0,4);
-$pdf->text(170,$pdf->h - 11,'SECRETÁRIO DE FAZENDA',0,4);
+$pdf->text(86,$pdf->h - 17,'______________________________',0,4);
+$pdf->text(98,$pdf->h - 14,'Claudionor de Souza',0,4);
+$pdf->text(95,$pdf->h - 11,'  DIRETOR DE DF/SMF',0,4);
 
-$pdf->text(240,$pdf->h - 17,'______________________________',0,4);
-$pdf->text(240,$pdf->h - 14,'KATIA REGINA COSTA FAGUNDES',0,4);
-$pdf->text(240,$pdf->h - 11,'CHEFE DE GABINETE',0,4);
+$pdf->text(150,$pdf->h - 17,'______________________________',0,4);
+$pdf->text(158,$pdf->h - 14,'Jorge Luis dos Santos',0,4);
+$pdf->text(152,$pdf->h - 11,'SUBSECRETÁRIO DE FAZENDA',0,4);
 
+$pdf->text(218,$pdf->h - 17,'______________________________',0,4);
+$pdf->text(225,$pdf->h - 14,'Norma Lydia Borba Chaffin',0,4);
+$pdf->text(224,$pdf->h - 11,'SECRETÁRIA DE FAZENDA',0,4);
+
+///$pdf->text(200,$pdf->h - 14,'______________________________',0,4);
+///$pdf->text(217,$pdf->h - 11,'Tesoureiro',0,4);
 
 
 /*

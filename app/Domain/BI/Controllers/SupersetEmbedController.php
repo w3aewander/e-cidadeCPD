@@ -43,13 +43,25 @@ class SupersetEmbedController extends Controller
 
     public function guestToken(Request $request)
     {
-        $userId = (int) \db_getsession('DB_id_usuario');
+        $userId = function_exists('db_getsession') ? (int) \db_getsession('DB_id_usuario', false) : (int) session('DB_id_usuario');
+        if (!$userId && isset($_SESSION['DB_id_usuario'])) {
+            $userId = (int) $_SESSION['DB_id_usuario'];
+        }
         $administrator = $userId === 1
             ? 1
-            : (int) \db_getsession('DB_administrador');
-        $institution = (int) \db_getsession('DB_instit');
-        $sessionExercise = (int) \db_getsession('DB_anousu');
-        $exercise = (int) $request->input('exercicio', $sessionExercise);
+            : (function_exists('db_getsession') ? (int) \db_getsession('DB_administrador', false) : (int) session('DB_administrador'));
+        if (!$administrator && isset($_SESSION['DB_administrador'])) {
+            $administrator = (int) $_SESSION['DB_administrador'];
+        }
+        $institution = function_exists('db_getsession') ? (int) \db_getsession('DB_instit', false) : (int) session('DB_instit', 1);
+        if (!$institution && isset($_SESSION['DB_instit'])) {
+            $institution = (int) $_SESSION['DB_instit'];
+        }
+        $sessionExercise = function_exists('db_getsession') ? (int) \db_getsession('DB_anousu', false) : (int) session('DB_anousu', date('Y'));
+        if (!$sessionExercise && isset($_SESSION['DB_anousu'])) {
+            $sessionExercise = (int) $_SESSION['DB_anousu'];
+        }
+        $exercise = (int) $request->input('exercicio', $sessionExercise ?: date('Y'));
 
         abort_unless($userId && ($administrator === 1 || $userId === 1), 403);
         abort_unless($institution === (int) $this->biSetting('BI_INSTITUICAO_ID', 1), 403);
@@ -58,6 +70,7 @@ class SupersetEmbedController extends Controller
 
         $startDate = $request->input('periodoInicial', $exercise . '-01-01');
         $endDate = $request->input('periodoFinal', $exercise . '-12-31');
+
         $start = \DateTime::createFromFormat('!Y-m-d', $startDate);
         $end = \DateTime::createFromFormat('!Y-m-d', $endDate);
         abort_unless(

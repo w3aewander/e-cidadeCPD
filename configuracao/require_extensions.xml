@@ -83,4 +83,3 @@
 
   <template_login label='Diretorio padrao para templates de login' src='templates/template_login_e-cidade.php'></template_login>
 </configuracoes>
-

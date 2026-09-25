@@ -1,7 +1,7 @@
 <?
 /*
  *     E-cidade Software Publico para Gestao Municipal                
- *  Copyright (C) 2009  DBSeller Servicos de Informatica             
+ *  Copyright (C) 2013  DBselller Servicos de Informatica             
  *                            www.dbseller.com.br                     
  *                         e-cidade@dbseller.com.br                   
  *                                                                    
@@ -25,13 +25,13 @@
  *                                licenca/licenca_pt.txt 
  */
 
-require(modification("libs/db_stdlib.php"));
-require(modification("libs/db_conecta.php"));
-include(modification("libs/db_sessoes.php"));
-include(modification("libs/db_usuariosonline.php"));
-include(modification("libs/db_liborcamento.php"));
-include(modification("dbforms/db_funcoes.php"));
-include(modification("dbforms/db_classesgenericas.php"));
+require("libs/db_stdlib.php");
+require("libs/db_conecta.php");
+include("libs/db_sessoes.php");
+include("libs/db_usuariosonline.php");
+include("libs/db_liborcamento.php");
+include("dbforms/db_funcoes.php");
+include("dbforms/db_classesgenericas.php");
 
 db_postmemory($HTTP_POST_VARS);
 
@@ -40,7 +40,7 @@ $aux = new cl_arquivo_auxiliar;
 
 <html>
 <head>
-<title>Microsist</title>
+<title>DBSeller Inform&aacute;tica Ltda - P&aacute;gina Inicial</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <meta http-equiv="Expires" CONTENT="0">
 <script language="JavaScript" type="text/javascript" src="scripts/scripts.js"></script>

@@ -24,9 +24,13 @@ class StartWebSessionMiddleware
      */
     public function handle($request, Closure $next)
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $this->logAcesso(substr($request->getPathInfo(), 1));
-        session($_SESSION);
+        if (isset($_SESSION)) {
+            session($_SESSION);
+        }
 
         return $next($request);
     }
@@ -44,7 +48,7 @@ class StartWebSessionMiddleware
     }
 
     /**
-     * Retorna a chave primária do item de menu acessado, conforme a rota da requisição
+     * Retorna a chave primÃ¡ria do item de menu acessado, conforme a rota da requisiÃ§Ã£o
      *
      * @param string $pathMenu
      * @return object
@@ -57,15 +61,16 @@ class StartWebSessionMiddleware
             ->where(function (Builder $query) use ($pathMenu) {
                 $query->whereRaw("trim(funcao) = '{$pathMenu}'");
 
-                if (isset($_SESSION["DB_modulo"])) {
-                    $query->where('modulo', $_SESSION['DB_modulo']);
+                $modulo = function_exists('db_getsession') ? db_getsession('DB_modulo', false) : (isset($_SESSION['DB_modulo']) ? $_SESSION['DB_modulo'] : null);
+                if ($modulo) {
+                    $query->where('modulo', $modulo);
                 }
             })
             ->first();
     }
 
     /**
-     * Loga o acesso no banco e salva o item na sessão
+     * Loga o acesso no banco e salva o item na sessÃ£o
      *
      * @param string $item
      * @param string $pathMenu
@@ -78,18 +83,36 @@ class StartWebSessionMiddleware
         $_SESSION['DB_itemmenu_acessado'] = $item;
         $_SESSION['DB_acessado'] = $codsequen;
 
+        $ip = isset($_SESSION['DB_ip']) ? $_SESSION['DB_ip'] : (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1');
+        $idUsuario = function_exists('db_getsession') ? (int) db_getsession('DB_id_usuario', false) : (isset($_SESSION['DB_id_usuario']) ? (int) $_SESSION['DB_id_usuario'] : 1);
+        if (!$idUsuario) {
+            $idUsuario = isset($_SESSION['DB_id_usuario']) ? (int) $_SESSION['DB_id_usuario'] : 1;
+        }
+        $idModulo = function_exists('db_getsession') ? (int) db_getsession('DB_modulo', false) : (isset($_SESSION['DB_modulo']) ? (int) $_SESSION['DB_modulo'] : 209);
+        if (!$idModulo) {
+            $idModulo = isset($_SESSION['DB_modulo']) ? (int) $_SESSION['DB_modulo'] : 209;
+        }
+        $codDepto = function_exists('db_getsession') ? (int) db_getsession('DB_coddepto', false) : (isset($_SESSION['DB_coddepto']) ? (int) $_SESSION['DB_coddepto'] : 20);
+        if (!$codDepto) {
+            $codDepto = isset($_SESSION['DB_coddepto']) ? (int) $_SESSION['DB_coddepto'] : 20;
+        }
+        $instit = function_exists('db_getsession') ? (int) db_getsession('DB_instit', false) : (isset($_SESSION['DB_instit']) ? (int) $_SESSION['DB_instit'] : 1);
+        if (!$instit) {
+            $instit = isset($_SESSION['DB_instit']) ? (int) $_SESSION['DB_instit'] : 1;
+        }
+
         $rs = DB::table('db_logsacessa')->insert([
             'codsequen' => $codsequen,
-            'ip' => $_SESSION['DB_ip'],
+            'ip' => $ip,
             'data' => date('Y-m-d'),
             'hora' => date('H:i:s'),
             'arquivo' => $pathMenu,
             'obs' => '',
-            'id_usuario' => $_SESSION['DB_id_usuario'],
-            'id_modulo' => $_SESSION['DB_modulo'],
+            'id_usuario' => $idUsuario,
+            'id_modulo' => $idModulo,
             'id_item' => $item,
-            'coddepto' => $_SESSION['DB_coddepto'],
-            'instit' => $_SESSION['DB_instit']
+            'coddepto' => $codDepto,
+            'instit' => $instit
         ]);
 
         if (!$rs) {

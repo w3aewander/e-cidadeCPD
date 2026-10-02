@@ -12,12 +12,24 @@ class CorsMiddleware
 {
     public function handle($request, Closure $next)
     {
-        return $next($request)
-            ->header('Access-Control-Allow-Origin', $this->originAllow())
-            ->header('Access-Control-Allow-Methods', "PUT, POST, DELETE, GET, OPTIONS")
-            ->header('Access-Control-Allow-Headers', "Accept, Authorization, Content-Type, x-requested-with")
-            ->header("Vary", "Origin")
-            ->header('Access-Control-Allow-Credentials', "true");
+        $response = $next($request);
+
+        if (method_exists($response, 'header')) {
+            return $response
+                ->header('Access-Control-Allow-Origin', $this->originAllow())
+                ->header('Access-Control-Allow-Methods', "PUT, POST, DELETE, GET, OPTIONS")
+                ->header('Access-Control-Allow-Headers', "Accept, Authorization, Content-Type, x-requested-with")
+                ->header("Vary", "Origin")
+                ->header('Access-Control-Allow-Credentials', "true");
+        }
+
+        $response->headers->set('Access-Control-Allow-Origin', $this->originAllow());
+        $response->headers->set('Access-Control-Allow-Methods', "PUT, POST, DELETE, GET, OPTIONS");
+        $response->headers->set('Access-Control-Allow-Headers', "Accept, Authorization, Content-Type, x-requested-with");
+        $response->headers->set("Vary", "Origin");
+        $response->headers->set('Access-Control-Allow-Credentials', "true");
+
+        return $response;
     }
 
     private function originAllow()

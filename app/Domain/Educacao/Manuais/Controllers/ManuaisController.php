@@ -302,6 +302,30 @@ class ManuaisController extends Controller
     }
 
     /**
+     * Localiza o arquivo físico com fallbacks resilientes
+     */
+    public function getCaminhoFisico($caminhoRelativo)
+    {
+        $caminhos = array(
+            storage_path('app/' . $caminhoRelativo),
+            '/var/www/html/storage/app/' . $caminhoRelativo,
+            '/home/administrador/containers/web/storage/app/' . $caminhoRelativo,
+            '/home/administrador/containers/web_producao/storage/app/' . $caminhoRelativo,
+            '/var/www/html/e-cidadeCPD/storage/app/' . $caminhoRelativo,
+            public_path('manuais/' . basename($caminhoRelativo)),
+            storage_path($caminhoRelativo)
+        );
+
+        foreach ($caminhos as $caminho) {
+            if (file_exists($caminho) && is_file($caminho)) {
+                return $caminho;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Visualizar PDF inline no navegador / modal
      */
     public function visualizar($id)
@@ -312,9 +336,9 @@ class ManuaisController extends Controller
             abort(404, 'Manual não encontrado.');
         }
 
-        $caminhoCompleto = storage_path('app/' . $manual->caminho_arquivo);
+        $caminhoCompleto = $this->getCaminhoFisico($manual->caminho_arquivo);
 
-        if (!file_exists($caminhoCompleto)) {
+        if (!$caminhoCompleto || !file_exists($caminhoCompleto)) {
             abort(404, 'Arquivo físico do manual não encontrado.');
         }
 
@@ -335,9 +359,9 @@ class ManuaisController extends Controller
             abort(404, 'Manual não encontrado.');
         }
 
-        $caminhoCompleto = storage_path('app/' . $manual->caminho_arquivo);
+        $caminhoCompleto = $this->getCaminhoFisico($manual->caminho_arquivo);
 
-        if (!file_exists($caminhoCompleto)) {
+        if (!$caminhoCompleto || !file_exists($caminhoCompleto)) {
             abort(404, 'Arquivo físico do manual não encontrado.');
         }
 

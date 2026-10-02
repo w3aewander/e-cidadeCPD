@@ -11,7 +11,7 @@ if (preg_match('/.*v4\//', $requestUri)) {
     return require_once 'public/index.php';
 }
 
-if (preg_match('/.*web\//', $requestUri)) {
+if (preg_match('/^\/web\//', $requestUri)) {
     return require_once 'public/index.php';
 }
 

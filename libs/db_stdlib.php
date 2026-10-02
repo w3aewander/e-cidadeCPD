@@ -365,7 +365,7 @@ function db_hora($id_timestamp = 0, $formato = "H:i") {
     return date($formato);
   }
 }
-function db_verifica_ip_banco() {
+function db_verifica_ip_banco($iIdUsuario = null) {
   //#00#//db_verifica_ip_anco
   //#10#//Verifica se o IP que esta acessando poderá abrir o dbportal, pesquisando o arquivo db_acessa
   //#10#//e verificando as permissões
@@ -392,7 +392,7 @@ function db_verifica_ip_banco() {
                inner join db_sysregrasacessoip   on db46_idacesso = db48_idacesso
                left join db_sysregrasacessocanc on db46_idacesso = db49_idacesso
           where db49_idacesso is null
-            and db47_id_usuario = ".db_getsession("DB_id_usuario")."
+            and db47_id_usuario = " . (!empty($iIdUsuario) ? (int)$iIdUsuario : (int)db_getsession("DB_id_usuario", false)) . "
             and (( db46_dtinicio  < '".date('Y-m-d')."' and db46_datafinal > '".date('Y-m-d')."' )
             or  ( db46_dtinicio = '".date('Y-m-d')."' and db46_horaini   <= '".date("G:i")."' )
             or  ( db46_datafinal = '".date('Y-m-d')."' and db46_horafinal >= '".date("G:i")."' ))

@@ -90,26 +90,26 @@ Route::post('/profissional/excluir-vacinacao/{profissionalVacinacao}', $path  . 
 Route::get('/alunos-matriculados/{escola}', $path . "AlunosController@buscarAlunosMatriculadosPorEscola");
 Route::get('/periodos-calendario/{calendario}', "{$path}CalendarioController@periodosCalendario");
 
-Route::prefix('transposicao')->group(function () {
-    $path = "\App\Domain\Educacao\Escola\Controllers\\";
-    Route::post('buscar-candidatos', $path . "TransposicaoController@buscarCandidatos");
-    Route::post('salvar-candidatos', $path . "TransposicaoController@salvarCandidatos");
-    Route::post('relatorio', $path . "TransposicaoController@relatorio");
-    Route::post('vagas-etapa', $path . "TransposicaoController@vagasPorEtapa");
-    Route::post('vagas', $path . "TransposicaoController@salvarVagas");
-    Route::post('criterios-ordenacao', $path . "CriteriosTransposicaoController@criteriosOrdenacao");
-    Route::post('salvar-criterios-ordenacao', $path . "CriteriosTransposicaoController@salvarCriteriosOrdenacao");
-
-    Route::post('/toggle', $path . "TransposicaoController@toggle");
-
-    Route::post('/relatorio-inscritos', $path . "TransposicaoController@relatorioGeralInscritos");
-    Route::post('/processar', $path . "TransposicaoController@processar");
-
-    Route::post('/matriculas-designados', $path . "TransposicaoController@matriculasDesignados");
-    Route::post('/aluno-designado', $path . "TransposicaoController@alunoDesignado");
-    Route::post('/cancelar-designacao', $path . "TransposicaoController@cancelarDesignacao");
-});
-
+//Route::prefix('transposicao')->group(function () {
+//    $path = "\App\Domain\Educacao\Escola\Controllers\\";
+//    Route::post('buscar-candidatos', $path . "TransposicaoController@buscarCandidatos");
+//    Route::post('salvar-candidatos', $path . "TransposicaoController@salvarCandidatos");
+//    Route::post('relatorio', $path . "TransposicaoController@relatorio");
+//    Route::post('vagas-etapa', $path . "TransposicaoController@vagasPorEtapa");
+//    Route::post('vagas', $path . "TransposicaoController@salvarVagas");
+//    Route::post('criterios-ordenacao', $path . "CriteriosTransposicaoController@criteriosOrdenacao");
+//    Route::post('salvar-criterios-ordenacao', $path . "CriteriosTransposicaoController@salvarCriteriosOrdenacao");
+//
+//    Route::post('/toggle', $path . "TransposicaoController@toggle");
+//
+//    Route::post('/relatorio-inscritos', $path . "TransposicaoController@relatorioGeralInscritos");
+//    Route::post('/processar', $path . "TransposicaoController@processar");
+//
+//    Route::post('/matriculas-designados', $path . "TransposicaoController@matriculasDesignados");
+//    Route::post('/aluno-designado', $path . "TransposicaoController@alunoDesignado");
+//    Route::post('/cancelar-designacao', $path . "TransposicaoController@cancelarDesignacao");
+//});
+//
 Route::get('/', "{$path}EscolasController@getEscolas");
 Route::get('/{escola}', "{$path}EscolasController@getEscola");
 Route::get('{escola}/calendario', "{$path}CalendarioController@buscarCalendariosAtivosEscola");
@@ -147,7 +147,7 @@ Route::post('debug', function () {
     return response()->json(true);
 })->name("debug");
 
-Route::post('envio-notificacao', "{$path}EnvioNotificacaoController@filtrarNotificacao");
+//Route::post('envio-notificacao', "{$path}EnvioNotificacaoController@filtrarNotificacao");
 
 Route::get(
     'alunoAtendimentosEspecial/atendimentos/{aluno}',

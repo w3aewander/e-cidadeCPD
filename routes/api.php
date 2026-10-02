@@ -75,6 +75,13 @@ Route::prefix('educacao')
      Route::prefix('files')->group(base_path('routes/api/educacao/files.php'));
 });
 
+
+Route::prefix('educacao')
+    ->middleware(['api'])
+    ->group(function () {
+        Route::prefix('pauta-mobile')->group(base_path('routes/api/educacao/pauta-mobile.php'));
+    });
+
 Route::prefix('financeiro')
     ->middleware(['auth:api'])
     ->namespace('App\Domain\Financeiro\\')
@@ -103,6 +110,9 @@ Route::prefix('financeiro')
             base_path('routes/api/financeiro/empenho.php')
         );
 });
+
+
+
 
 Route::prefix('financeiro')
     ->middleware(['api'])

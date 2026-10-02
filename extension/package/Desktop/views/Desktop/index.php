@@ -188,11 +188,7 @@ $instituicaoLogada = is_null($this->instituicaoUsuario) ? 1 : $this->instituicao
                 action: 'con4_lgpd_painel001.php',
                 iInstitId: <?=$instituicaoLogada?>,
                 iAreaId: 11,
-<<<<<<< HEAD
-=======
-                iModuloId: 1,
->>>>>>> main
-                iModuloId: 3000300,
+iModuloId: 1,
                 lAtalhoDesktop: true
             };
             if (window.Desktop && Desktop.Window) {

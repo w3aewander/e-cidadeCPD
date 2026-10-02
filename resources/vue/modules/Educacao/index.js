@@ -37,9 +37,11 @@ import GeralInscricoes from "@modules/Educacao/MatriculaOnline/Relatorios/GeralI
 import DemandaReprimida from "@modules/Educacao/MatriculaOnline/Relatorios/DemandaReprimida.vue";
 import EmissaoAtas from "./Secretaria/Relatorios/Turmas/EmissaoAtas";
 import ManuaisEducacao from "./Manuais/ManuaisEducacao.vue";
+import PautaEletronicaMobile from "./Escola/Procedimentos/DiarioClasse/PautaEletronicaMobile.vue";
 
 export default function (app) {
     app.component('manuais_educacao', ManuaisEducacao);
+    app.component('pauta_eletronica_mobile', PautaEletronicaMobile);
     app.component('demanda_reprimida', DemandaReprimida);
     app.component('geral_inscricoes', GeralInscricoes);
     app.component('mensagens_enviadas', MensagensEnviadas);

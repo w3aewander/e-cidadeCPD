@@ -49,6 +49,15 @@ Route::prefix('procedimentos')->group(function () {
         Route::get('atualizador-aulas-dadas', function (Request $request) {
             return view("educacao.escola.procedimentos.diario-classe.atualizador-aulas-dadas");
         });
+        Route::get('pauta-eletronica-mobile', function (\Illuminate\Http\Request $request) {
+            $scheme = $request->header('x-forwarded-proto') ?: ($request->isSecure() ? 'https' : $request->getScheme());
+            $host = $request->header('x-forwarded-host') ?: $request->getHttpHost();
+            $serverUrl = $scheme . '://' . $host;
+
+            return view("educacao.escola.procedimentos.diario-classe.pauta-eletronica-mobile", [
+                'serverUrl' => $serverUrl
+            ]);
+        });
     });
 });
 

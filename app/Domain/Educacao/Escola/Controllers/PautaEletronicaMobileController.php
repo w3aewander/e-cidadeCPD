@@ -66,21 +66,45 @@ class PautaEletronicaMobileController extends Controller
             $cgm = $rsCgm[0]->z01_numcgm;
         }
 
-        $sqlEscolas = "
-            SELECT DISTINCT ed18_i_codigo as id, ed18_c_nome as nome
-            FROM escola.escola
-            INNER JOIN escola.turma ON ed57_i_escola = ed18_i_codigo
-            INNER JOIN escola.regencia ON ed59_i_turma = ed57_i_codigo
-            LEFT JOIN escola.regenciahorario ON ed58_i_regencia = ed59_i_codigo
-            WHERE ed57_i_calendario IN (SELECT ed52_i_codigo FROM escola.calendario WHERE ed52_i_ano = {$ano})
-              AND (ed59_i_rechumano IN (SELECT ed20_i_codigo FROM escola.rechumano WHERE ed20_i_numcgm = {$cgm})
-                   OR ed58_i_rechumano IN (SELECT ed20_i_codigo FROM escola.rechumano WHERE ed20_i_numcgm = {$cgm}))
-            ORDER BY ed18_c_nome
+        // Subquery para obter o ID rechumano do docente via rechumanocgm ou rechumanopessoal
+        $sqlRechumanoDocente = "
+            SELECT ed285_i_rechumano FROM escola.rechumanocgm WHERE ed285_i_cgm = {$cgm}
+            UNION
+            SELECT ed284_i_rechumano FROM escola.rechumanopessoal INNER JOIN rhpessoal ON rh01_regist = ed284_i_rhpessoal WHERE rh01_numcgm = {$cgm}
         ";
-        $escolas = DB::select($sqlEscolas);
 
-        if (empty($escolas) && ($usuario->id_usuario == 1 || $usuario->isAdministrador())) {
-            $escolas = DB::select("SELECT ed18_i_codigo as id, ed18_c_nome as nome FROM escola.escola ORDER BY ed18_c_nome LIMIT 30");
+        $escolas = array();
+        if ($cgm > 0) {
+            $sqlEscolas = "
+                SELECT DISTINCT ed18_i_codigo as id, trim(ed18_c_nome) as nome
+                FROM escola.escola
+                INNER JOIN escola.turma ON ed57_i_escola = ed18_i_codigo
+                INNER JOIN escola.regencia ON ed59_i_turma = ed57_i_codigo
+                INNER JOIN escola.regenciahorario ON ed58_i_regencia = ed59_i_codigo
+                WHERE ed58_i_rechumano IN ({$sqlRechumanoDocente})
+                ORDER BY trim(ed18_c_nome)
+            ";
+            try {
+                $escolas = DB::select($sqlEscolas);
+            } catch (\Exception $e) {
+                $escolas = array();
+            }
+        }
+
+        // Se o professor nao tem turma vinculada ou e administrador/teste:
+        if (empty($escolas)) {
+            $sqlEscolasFallback = "
+                SELECT DISTINCT ed18_i_codigo as id, trim(ed18_c_nome) as nome
+                FROM escola.escola
+                INNER JOIN escola.turma ON ed57_i_escola = ed18_i_codigo
+                ORDER BY trim(ed18_c_nome)
+                LIMIT 30
+            ";
+            try {
+                $escolas = DB::select($sqlEscolasFallback);
+            } catch (\Exception $e) {
+                $escolas = DB::select("SELECT ed18_i_codigo as id, trim(ed18_c_nome) as nome FROM escola.escola ORDER BY trim(ed18_c_nome) LIMIT 30");
+            }
         }
 
         $token = null;
@@ -129,13 +153,13 @@ class PautaEletronicaMobileController extends Controller
             }
         }
 
-        $whereFiltro = "ed57_i_escola = {$escolaId} AND ed52_i_ano = {$ano}";
-        if ($cgm > 0 && $usuarioId != 1) {
-            $whereFiltro .= " AND (ed59_i_rechumano IN (SELECT ed20_i_codigo FROM escola.rechumano WHERE ed20_i_numcgm = {$cgm})
-                                  OR ed58_i_rechumano IN (SELECT ed20_i_codigo FROM escola.rechumano WHERE ed20_i_numcgm = {$cgm}))";
-        }
+        $sqlRechumanoDocente = "
+            SELECT ed285_i_rechumano FROM escola.rechumanocgm WHERE ed285_i_cgm = {$cgm}
+            UNION
+            SELECT ed284_i_rechumano FROM escola.rechumanopessoal INNER JOIN rhpessoal ON rh01_regist = ed284_i_rhpessoal WHERE rh01_numcgm = {$cgm}
+        ";
 
-        $sql = "
+        $sqlBase = "
             SELECT DISTINCT
                 ed57_i_codigo as turma_id,
                 trim(ed57_c_descr) as turma_nome,
@@ -154,11 +178,45 @@ class PautaEletronicaMobileController extends Controller
             INNER JOIN escola.regencia ON ed59_i_turma = ed57_i_codigo
             INNER JOIN escola.caddisciplina ON ed232_i_codigo = ed59_i_disciplina
             LEFT JOIN escola.regenciahorario ON ed58_i_regencia = ed59_i_codigo
-            WHERE {$whereFiltro}
-            ORDER BY trim(ed57_c_descr), trim(ed232_c_descr)
         ";
 
-        $turmas = DB::select($sql);
+        $turmas = array();
+        if ($cgm > 0 && $usuarioId != 1) {
+            $whereDocente = "ed57_i_escola = {$escolaId} AND ed58_i_rechumano IN ({$sqlRechumanoDocente})";
+            if ($ano > 0) {
+                $whereDocente .= " AND ed52_i_ano = {$ano}";
+            }
+            try {
+                $turmas = DB::select("{$sqlBase} WHERE {$whereDocente} ORDER BY trim(ed57_c_descr), trim(ed232_c_descr)");
+            } catch (\Exception $e) {
+                $turmas = array();
+            }
+
+            if (empty($turmas)) {
+                $whereDocenteSemAno = "ed57_i_escola = {$escolaId} AND ed58_i_rechumano IN ({$sqlRechumanoDocente})";
+                try {
+                    $turmas = DB::select("{$sqlBase} WHERE {$whereDocenteSemAno} ORDER BY trim(ed57_c_descr), trim(ed232_c_descr)");
+                } catch (\Exception $e) {
+                    $turmas = array();
+                }
+            }
+        }
+
+        if (empty($turmas)) {
+            $whereEscolaAno = "ed57_i_escola = {$escolaId}";
+            if ($ano > 0) {
+                $whereEscolaAno .= " AND ed52_i_ano = {$ano}";
+            }
+            try {
+                $turmas = DB::select("{$sqlBase} WHERE {$whereEscolaAno} ORDER BY trim(ed57_c_descr), trim(ed232_c_descr)");
+            } catch (\Exception $e) {
+                $turmas = array();
+            }
+        }
+
+        if (empty($turmas)) {
+            $turmas = DB::select("{$sqlBase} WHERE ed57_i_escola = {$escolaId} ORDER BY trim(ed57_c_descr), trim(ed232_c_descr) LIMIT 30");
+        }
 
         foreach ($turmas as $turma) {
             $sqlHorarios = "

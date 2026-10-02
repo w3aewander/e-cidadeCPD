@@ -8,7 +8,7 @@
           <div>
             <div class="flex align-items-center gap-2">
               <h2 class="text-900 font-bold m-0 text-xl md:text-2xl">e-Cidade - Pauta Eletrônica Mobile</h2>
-              <Tag value="v1.0.0" severity="success" class="text-xs"></Tag>
+              <Tag value="v1.0.1" severity="success" class="text-xs"></Tag>
               <Tag :value="isDev ? 'Ambiente: Desenvolvimento' : 'Ambiente: Produção'" :severity="isDev ? 'warning' : 'info'" class="text-xs"></Tag>
               <Tag value="Offline-First" severity="info" class="text-xs"></Tag>
             </div>

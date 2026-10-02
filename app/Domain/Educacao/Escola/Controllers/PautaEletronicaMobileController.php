@@ -16,15 +16,81 @@ class PautaEletronicaMobileController extends Controller
      */
     public function status()
     {
+        $anosDisponiveis = array();
+        try {
+            $rsAnos = DB::select("SELECT DISTINCT ed52_i_ano FROM escola.calendario ORDER BY ed52_i_ano DESC");
+            foreach ($rsAnos as $row) {
+                $anosDisponiveis[] = (int)$row->ed52_i_ano;
+            }
+        } catch (\Exception $e) {
+            $anosDisponiveis = array((int)date('Y'));
+        }
+        if (empty($anosDisponiveis)) {
+            $anosDisponiveis = array((int)date('Y'));
+        }
+
         $dados = array(
-            'status'     => 'online',
-            'modulo'     => 'Ecidade - Pauta Eletronica Mobile API',
-            'versao_api' => '1.0.0',
-            'timestamp'  => date('Y-m-d H:i:s'),
-            'database'   => 'conectado'
+            'status'           => 'online',
+            'modulo'           => 'Ecidade - Pauta Eletronica Mobile API',
+            'versao_api'       => '1.0.1',
+            'versao_app'       => array(
+                'versao_mais_recente' => '1.0.1',
+                'codigo_versao'       => 2,
+                'url_download'        => url('/download/ecidade-pauta-eletronica.apk'),
+                'novidades'           => 'Seleção de ano letivo e sincronização aprimorada.',
+                'obrigatoria'         => false
+            ),
+            'anos_disponiveis' => $anosDisponiveis,
+            'timestamp'        => date('Y-m-d H:i:s'),
+            'database'         => 'conectado'
         );
 
         return new DBJsonResponse($dados, 'API Pauta Eletronica operacional');
+    }
+
+    /**
+     * Informacoes sobre a versao mais recente do aplicativo mobile
+     */
+    public function getVersaoApp()
+    {
+        $dados = array(
+            'versao_mais_recente' => '1.0.1',
+            'codigo_versao'       => 2,
+            'url_download'        => url('/download/ecidade-pauta-eletronica.apk'),
+            'novidades'           => 'Seleção de ano letivo e sincronização aprimorada.',
+            'obrigatoria'         => false
+        );
+
+        return new DBJsonResponse($dados, 'Informacoes de versao do aplicativo');
+    }
+
+    /**
+     * Lista de anos letivos cadastrados no sistema
+     */
+    public function getAnosLetivos()
+    {
+        $anosDisponiveis = array();
+        try {
+            $rsAnos = DB::select("SELECT DISTINCT ed52_i_ano FROM escola.calendario ORDER BY ed52_i_ano DESC");
+            foreach ($rsAnos as $row) {
+                $anosDisponiveis[] = (int)$row->ed52_i_ano;
+            }
+        } catch (\Exception $e) {
+            $anosDisponiveis = array((int)date('Y'));
+        }
+        if (empty($anosDisponiveis)) {
+            $anosDisponiveis = array((int)date('Y'));
+        }
+
+        $anoPadrao = in_array(2025, $anosDisponiveis) ? 2025 : $anosDisponiveis[0];
+
+        $dados = array(
+            'anos'       => $anosDisponiveis,
+            'ano_atual'  => (int)date('Y'),
+            'ano_padrao' => $anoPadrao
+        );
+
+        return new DBJsonResponse($dados, 'Anos letivos recuperados com sucesso');
     }
 
     /**
@@ -34,7 +100,7 @@ class PautaEletronicaMobileController extends Controller
     {
         $login = $request->input('login');
         $senha = $request->input('senha');
-        $ano   = $request->input('ano') ? (int)$request->input('ano') : (int)date('Y');
+        $anoParam = $request->input('ano');
 
         if (empty($login) || empty($senha)) {
             return new DBJsonResponse(null, 'Informe o usuario e a senha de acesso.', 400);
@@ -107,6 +173,27 @@ class PautaEletronicaMobileController extends Controller
             }
         }
 
+        // Anos letivos disponiveis
+        $anosDisponiveis = array();
+        try {
+            $rsAnos = DB::select("SELECT DISTINCT ed52_i_ano FROM escola.calendario ORDER BY ed52_i_ano DESC");
+            foreach ($rsAnos as $row) {
+                $anosDisponiveis[] = (int)$row->ed52_i_ano;
+            }
+        } catch (\Exception $e) {
+            $anosDisponiveis = array((int)date('Y'));
+        }
+        if (empty($anosDisponiveis)) {
+            $anosDisponiveis = array((int)date('Y'));
+        }
+
+        if ($anoParam) {
+            $ano = (int)$anoParam;
+        } else {
+            // Se ano letivo nao foi especificado, prioriza 2025 onde ha turmas cadastradas, ou o mais recente com dados
+            $ano = in_array(2025, $anosDisponiveis) ? 2025 : $anosDisponiveis[0];
+        }
+
         $token = null;
         try {
             $tokenResult = $usuario->createToken('pauta-mobile-token');
@@ -124,8 +211,16 @@ class PautaEletronicaMobileController extends Controller
                 'email' => $usuario->email,
                 'cgm'   => $cgm
             ),
-            'ano_letivo' => $ano,
-            'escolas'    => $escolas
+            'ano_letivo'       => $ano,
+            'anos_disponiveis' => $anosDisponiveis,
+            'escolas'          => $escolas,
+            'versao_app'       => array(
+                'versao_mais_recente' => '1.0.1',
+                'codigo_versao'       => 2,
+                'url_download'        => url('/download/ecidade-pauta-eletronica.apk'),
+                'novidades'           => 'Seleção de ano letivo e sincronização aprimorada.',
+                'obrigatoria'         => false
+            )
         );
 
         return new DBJsonResponse($dadosRetorno, 'Autenticacao realizada com sucesso');
@@ -137,12 +232,8 @@ class PautaEletronicaMobileController extends Controller
     public function getTurmas(Request $request)
     {
         $escolaId  = (int)$request->input('escola_id');
-        $ano       = $request->input('ano') ? (int)$request->input('ano') : (int)date('Y');
+        $ano       = $request->input('ano') ? (int)$request->input('ano') : 0;
         $usuarioId = $request->input('usuario_id') ? (int)$request->input('usuario_id') : 0;
-
-        if (!$escolaId) {
-            return new DBJsonResponse(null, 'ID da escola e obrigatorio.', 400);
-        }
 
         $cgm = 0;
         if ($usuarioId > 0) {
@@ -159,6 +250,34 @@ class PautaEletronicaMobileController extends Controller
             SELECT ed284_i_rechumano FROM escola.rechumanopessoal INNER JOIN rhpessoal ON rh01_regist = ed284_i_rhpessoal WHERE rh01_numcgm = {$cgm}
         ";
 
+        // Se escola_id nao foi informado, resolve automaticamente para a escola do docente
+        if (!$escolaId && $cgm > 0) {
+            $rsEscolaDocente = DB::select("
+                SELECT DISTINCT ed18_i_codigo
+                FROM escola.escola
+                INNER JOIN escola.turma ON ed57_i_escola = ed18_i_codigo
+                INNER JOIN escola.regencia ON ed59_i_turma = ed57_i_codigo
+                INNER JOIN escola.regenciahorario ON ed58_i_regencia = ed59_i_codigo
+                WHERE ed58_i_rechumano IN ({$sqlRechumanoDocente})
+                LIMIT 1
+            ");
+            if (!empty($rsEscolaDocente)) {
+                $escolaId = (int)$rsEscolaDocente[0]->ed18_i_codigo;
+            }
+        }
+
+        if (!$escolaId) {
+            $rsEscolaFallback = DB::select("
+                SELECT DISTINCT ed18_i_codigo
+                FROM escola.escola
+                INNER JOIN escola.turma ON ed57_i_escola = ed18_i_codigo
+                LIMIT 1
+            ");
+            if (!empty($rsEscolaFallback)) {
+                $escolaId = (int)$rsEscolaFallback[0]->ed18_i_codigo;
+            }
+        }
+
         $sqlBase = "
             SELECT DISTINCT
                 ed57_i_codigo as turma_id,
@@ -168,6 +287,7 @@ class PautaEletronicaMobileController extends Controller
                 ed59_i_codigo as regencia_id,
                 trim(ed232_c_descr) as disciplina_nome,
                 ed232_i_codigo as disciplina_id,
+                ed52_i_ano as ano_letivo,
                 (SELECT count(*) FROM escola.matricula WHERE ed60_i_turma = ed57_i_codigo AND ed60_c_situacao = 'MATRICULADO') as total_alunos
             FROM escola.turma
             INNER JOIN escola.calendario ON ed52_i_codigo = ed57_i_calendario
@@ -182,7 +302,7 @@ class PautaEletronicaMobileController extends Controller
 
         $turmas = array();
         if ($cgm > 0 && $usuarioId != 1) {
-            $whereDocente = "ed57_i_escola = {$escolaId} AND ed58_i_rechumano IN ({$sqlRechumanoDocente})";
+            $whereDocente = ($escolaId > 0) ? "ed57_i_escola = {$escolaId} AND ed58_i_rechumano IN ({$sqlRechumanoDocente})" : "ed58_i_rechumano IN ({$sqlRechumanoDocente})";
             if ($ano > 0) {
                 $whereDocente .= " AND ed52_i_ano = {$ano}";
             }
@@ -192,8 +312,9 @@ class PautaEletronicaMobileController extends Controller
                 $turmas = array();
             }
 
-            if (empty($turmas)) {
-                $whereDocenteSemAno = "ed57_i_escola = {$escolaId} AND ed58_i_rechumano IN ({$sqlRechumanoDocente})";
+            if (empty($turmas) && $ano > 0) {
+                // Tenta sem filtro de ano como fallback resiliente
+                $whereDocenteSemAno = ($escolaId > 0) ? "ed57_i_escola = {$escolaId} AND ed58_i_rechumano IN ({$sqlRechumanoDocente})" : "ed58_i_rechumano IN ({$sqlRechumanoDocente})";
                 try {
                     $turmas = DB::select("{$sqlBase} WHERE {$whereDocenteSemAno} ORDER BY trim(ed57_c_descr), trim(ed232_c_descr)");
                 } catch (\Exception $e) {
@@ -202,7 +323,7 @@ class PautaEletronicaMobileController extends Controller
             }
         }
 
-        if (empty($turmas)) {
+        if (empty($turmas) && $escolaId > 0) {
             $whereEscolaAno = "ed57_i_escola = {$escolaId}";
             if ($ano > 0) {
                 $whereEscolaAno .= " AND ed52_i_ano = {$ano}";
@@ -215,7 +336,15 @@ class PautaEletronicaMobileController extends Controller
         }
 
         if (empty($turmas)) {
-            $turmas = DB::select("{$sqlBase} WHERE ed57_i_escola = {$escolaId} ORDER BY trim(ed57_c_descr), trim(ed232_c_descr) LIMIT 30");
+            $whereFallback = ($escolaId > 0) ? "ed57_i_escola = {$escolaId}" : "1=1";
+            if ($ano > 0) {
+                $whereFallback .= " AND ed52_i_ano = {$ano}";
+            }
+            try {
+                $turmas = DB::select("{$sqlBase} WHERE {$whereFallback} ORDER BY trim(ed57_c_descr), trim(ed232_c_descr) LIMIT 30");
+            } catch (\Exception $e) {
+                $turmas = array();
+            }
         }
 
         foreach ($turmas as $turma) {
@@ -234,7 +363,11 @@ class PautaEletronicaMobileController extends Controller
                   AND (ed58_ativo IS TRUE OR ed58_ativo IS NULL)
                 ORDER BY ed32_i_codigo, ed17_h_inicio
             ";
-            $turma->grade_horaria = DB::select($sqlHorarios);
+            try {
+                $turma->grade_horaria = DB::select($sqlHorarios);
+            } catch (\Exception $e) {
+                $turma->grade_horaria = array();
+            }
         }
 
         return new DBJsonResponse($turmas, 'Turmas carregadas com sucesso');
@@ -273,6 +406,15 @@ class PautaEletronicaMobileController extends Controller
     }
 
     /**
+     * Endpoint retrocompativel para busca de alunos
+     */
+    public function getAlunosCompat(Request $request)
+    {
+        $turmaId = $request->input('id_turma') ? $request->input('id_turma') : $request->input('turma_id');
+        return $this->getAlunosTurma($turmaId);
+    }
+
+    /**
      * Consulta registros de frequencia e faltas lancadas
      */
     public function getFrequencias(Request $request)
@@ -285,47 +427,82 @@ class PautaEletronicaMobileController extends Controller
             return new DBJsonResponse(null, 'Regencia nao informada.', 400);
         }
 
-        $sqlAulas = "
-            SELECT DISTINCT
-                ed300_sequencial as diarioclasse_id,
+        $sql = "
+            SELECT 
+                ed300_sequencial as diario_id,
                 ed300_datalancamento as data_aula,
-                trim(ed300_hora) as hora,
-                ed300_auladesenvolvida as conteudo,
-                ed302_sequencial as diarioclasseregenciahorario_id,
-                ed302_regenciahorario as regencia_horario_id
+                ed300_hora as hora,
+                trim(ed300_auladesenvolvida) as conteudo_ministrado,
+                ed302_regenciahorario as regencia_horario_id,
+                ed301_aluno as aluno_falta_id
             FROM escola.diarioclasse
             INNER JOIN escola.diarioclasseregenciahorario ON ed302_diarioclasse = ed300_sequencial
-            INNER JOIN escola.regenciahorario ON ed58_i_codigo = ed302_regenciahorario
-            WHERE ed58_i_regencia = {$regenciaId}
+            LEFT JOIN escola.diarioclassealunofalta ON ed301_diarioclasseregenciahorario = ed302_sequencial
+            WHERE ed302_regenciahorario IN (SELECT ed58_i_codigo FROM escola.regenciahorario WHERE ed58_i_regencia = {$regenciaId})
               AND ed300_datalancamento BETWEEN '{$dataInicio}' AND '{$dataFim}'
-            ORDER BY ed300_datalancamento DESC
+            ORDER BY ed300_datalancamento DESC, ed300_hora DESC
         ";
 
-        $aulas = DB::select($sqlAulas);
+        $resultados = DB::select($sql);
 
-        foreach ($aulas as $aula) {
-            $sqlFaltas = "
-                SELECT ed301_aluno as aluno_id
-                FROM escola.diarioclassealunofalta
-                WHERE ed301_diarioclasseregenciahorario = {$aula->diarioclasseregenciahorario_id}
-            ";
-            $rsFaltas = DB::select($sqlFaltas);
-            $aula->alunos_faltosos = array();
-            foreach ($rsFaltas as $f) {
-                $aula->alunos_faltosos[] = (int)$f->aluno_id;
+        $agrupados = array();
+        foreach ($resultados as $row) {
+            $key = $row->diario_id;
+            if (!isset($agrupados[$key])) {
+                $agrupados[$key] = array(
+                    'diario_id'           => (int)$row->diario_id,
+                    'data_aula'           => $row->data_aula,
+                    'hora'                => $row->hora,
+                    'conteudo_ministrado' => $row->conteudo_ministrado,
+                    'regencia_horario_id' => (int)$row->regencia_horario_id,
+                    'faltas'              => array()
+                );
+            }
+            if ($row->aluno_falta_id) {
+                $agrupados[$key]['faltas'][] = (int)$row->aluno_falta_id;
             }
         }
 
-        return new DBJsonResponse($aulas, 'Frequencias consultadas com sucesso');
+        return new DBJsonResponse(array_values($agrupados), 'Frequencias consultadas com sucesso');
     }
 
     /**
-     * Sincronizacao em lote de Chamadas registradas Offline
+     * Sincronizacao em lote de Presencas/Faltas e Diarios registrados Offline
      */
     public function sincronizarFrequencia(Request $request)
     {
         $chamadas = $request->input('chamadas');
         $usuarioId = $request->input('usuario_id') ? (int)$request->input('usuario_id') : 1;
+
+        // Suporte flexivel caso venha na estrutura flat 'frequencias'
+        if ((!is_array($chamadas) || empty($chamadas)) && $request->input('frequencias')) {
+            $freqList = $request->input('frequencias');
+            $agrupadas = array();
+            foreach ($freqList as $f) {
+                $dataF = isset($f['data_aula']) ? $f['data_aula'] : date('Y-m-d');
+                $turmaId = isset($f['id_turma']) ? (int)$f['id_turma'] : 0;
+                $chave = $dataF . '_' . $turmaId;
+
+                if (!isset($agrupadas[$chave])) {
+                    $sqlHor = "SELECT ed58_i_codigo FROM escola.regencia INNER JOIN escola.regenciahorario ON ed58_i_regencia = ed59_i_codigo WHERE ed59_i_turma = {$turmaId} LIMIT 1";
+                    $rsHor = DB::select($sqlHor);
+                    $regHorId = !empty($rsHor) ? (int)$rsHor[0]->ed58_i_codigo : 0;
+
+                    $agrupadas[$chave] = array(
+                        'data'                => $dataF,
+                        'regencia_horario_id' => $regHorId,
+                        'conteudo'            => 'Aula regular ministrada',
+                        'hora'                => date('H:i'),
+                        'faltas'              => array()
+                    );
+                }
+
+                if (isset($f['status']) && ($f['status'] === 'F' || $f['status'] === 'J')) {
+                    $agrupadas[$chave]['faltas'][] = (int)$f['id_aluno'];
+                }
+            }
+            $chamadas = array_values($agrupadas);
+        }
 
         if (!is_array($chamadas) || empty($chamadas)) {
             return new DBJsonResponse(null, 'Nenhuma chamada informada para sincronizacao.', 400);
@@ -386,10 +563,10 @@ class PautaEletronicaMobileController extends Controller
                     ));
 
                     $seqRegRes = DB::select("SELECT nextval('escola.diarioclasseregenciahorario_ed302_sequencial_seq') as nextseq");
-                    $regHorarioSeqId = (int)$seqRegRes[0]->nextseq;
+                    $regHorSeqId = (int)$seqRegRes[0]->nextseq;
 
                     DB::table('escola.diarioclasseregenciahorario')->insert(array(
-                        'ed302_sequencial'      => $regHorarioSeqId,
+                        'ed302_sequencial'      => $regHorSeqId,
                         'ed302_regenciahorario' => $regenciaHorarioId,
                         'ed302_diarioclasse'    => $diarioClasseId
                     ));
@@ -404,7 +581,7 @@ class PautaEletronicaMobileController extends Controller
                         DB::table('escola.diarioclassealunofalta')->insert(array(
                             'ed301_sequencial'                  => $faltaId,
                             'ed301_aluno'                       => $alunoId,
-                            'ed301_diarioclasseregenciahorario' => $regHorarioSeqId
+                            'ed301_diarioclasseregenciahorario' => $regHorSeqId
                         ));
                     }
                 }
@@ -426,53 +603,138 @@ class PautaEletronicaMobileController extends Controller
     }
 
     /**
+     * Sincronizacao de Conteudos/Aulas Ministradas registradas Offline
+     */
+    public function sincronizarAulas(Request $request)
+    {
+        $aulas = $request->input('aulas');
+        $usuarioId = $request->input('usuario_id') ? (int)$request->input('usuario_id') : 1;
+
+        if (!is_array($aulas) || empty($aulas)) {
+            return new DBJsonResponse(null, 'Nenhuma aula informada para sincronizacao.', 400);
+        }
+
+        $processados = 0;
+        DB::beginTransaction();
+
+        try {
+            foreach ($aulas as $item) {
+                $turmaId   = isset($item['id_turma']) ? (int)$item['id_turma'] : 0;
+                $dataAula  = isset($item['data_aula']) ? $item['data_aula'] : date('Y-m-d');
+                $conteudo  = isset($item['conteudo_ministrado']) ? $item['conteudo_ministrado'] : 'Aula desenvolvida';
+                $numAulas  = isset($item['numero_aulas']) ? (int)$item['numero_aulas'] : 1;
+
+                if (!$turmaId) {
+                    continue;
+                }
+
+                $sqlReg = "SELECT ed59_i_codigo FROM escola.regencia WHERE ed59_i_turma = {$turmaId} LIMIT 1";
+                $rsReg = DB::select($sqlReg);
+                $regenciaId = !empty($rsReg) ? (int)$rsReg[0]->ed59_i_codigo : 0;
+
+                $sqlHor = "SELECT ed58_i_codigo FROM escola.regenciahorario WHERE ed58_i_regencia = {$regenciaId} LIMIT 1";
+                $rsHor = DB::select($sqlHor);
+                $regHorarioId = !empty($rsHor) ? (int)$rsHor[0]->ed58_i_codigo : 0;
+
+                if ($regHorarioId > 0) {
+                    $sqlBusca = "
+                        SELECT ed300_sequencial
+                        FROM escola.diarioclasse
+                        INNER JOIN escola.diarioclasseregenciahorario ON ed302_diarioclasse = ed300_sequencial
+                        WHERE ed302_regenciahorario = {$regHorarioId}
+                          AND ed300_datalancamento = '{$dataAula}'
+                    ";
+                    $rsBusca = DB::select($sqlBusca);
+
+                    if (!empty($rsBusca)) {
+                        $diarioId = (int)$rsBusca[0]->ed300_sequencial;
+                        DB::table('escola.diarioclasse')
+                            ->where('ed300_sequencial', $diarioId)
+                            ->update(array(
+                                'ed300_auladesenvolvida' => $conteudo,
+                                'ed300_id_usuario'       => $usuarioId
+                            ));
+                    } else {
+                        $seqRes = DB::select("SELECT nextval('escola.diarioclasse_ed300_sequencial_seq') as nextseq");
+                        $diarioId = (int)$seqRes[0]->nextseq;
+
+                        DB::table('escola.diarioclasse')->insert(array(
+                            'ed300_sequencial'       => $diarioId,
+                            'ed300_id_usuario'       => $usuarioId,
+                            'ed300_datalancamento'   => $dataAula,
+                            'ed300_hora'             => date('H:i'),
+                            'ed300_auladesenvolvida' => $conteudo
+                        ));
+
+                        $seqRegRes = DB::select("SELECT nextval('escola.diarioclasseregenciahorario_ed302_sequencial_seq') as nextseq");
+                        $regHorSeqId = (int)$seqRegRes[0]->nextseq;
+
+                        DB::table('escola.diarioclasseregenciahorario')->insert(array(
+                            'ed302_sequencial'      => $regHorSeqId,
+                            'ed302_regenciahorario' => $regHorarioId,
+                            'ed302_diarioclasse'    => $diarioId
+                        ));
+                    }
+                }
+
+                $processados++;
+            }
+
+            DB::commit();
+
+            return new DBJsonResponse(array(
+                'total_processados' => $processados
+            ), "Sincronizacao de {$processados} aula(s) realizada com sucesso");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return new DBJsonResponse(null, 'Erro ao sincronizar aulas: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Retorna periodos de avaliacao e notas atuais da turma
      */
     public function getAvaliacoesTurma(Request $request, $turmaId)
     {
-        $turmaId    = (int)$turmaId;
-        $regenciaId = (int)$request->input('regencia_id');
+        $turmaId = (int)$turmaId;
+        $periodo = $request->input('periodo') ? (int)$request->input('periodo') : null;
 
         if (!$turmaId) {
-            return new DBJsonResponse(null, 'Turma invalida.', 400);
+            return new DBJsonResponse(null, 'Codigo da turma invalido.', 400);
         }
 
         $sqlPeriodos = "
             SELECT DISTINCT
-                ed41_i_codigo as periodo_id,
+                ed09_i_codigo as periodo_id,
                 trim(ed09_c_descr) as periodo_nome,
-                trim(ed09_c_abrev) as periodo_sigla,
-                trim(ed37_c_tipo) as forma_avaliacao,
-                ed37_i_menorvalor as menor_valor,
-                ed37_i_maiorvalor as maior_valor
-            FROM escola.turma
-            INNER JOIN escola.turmaserieregimemat ON ed220_i_turma = ed57_i_codigo
-            INNER JOIN escola.procedimento ON ed40_i_codigo = ed220_i_procedimento
-            INNER JOIN escola.procavaliacao ON ed41_i_procedimento = ed40_i_codigo
-            INNER JOIN escola.periodoavaliacao ON ed09_i_codigo = ed41_i_periodoavaliacao
-            INNER JOIN escola.formaavaliacao ON ed37_i_codigo = ed41_i_formaavaliacao
-            WHERE ed57_i_codigo = {$turmaId}
-            ORDER BY ed41_i_codigo
+                trim(ed09_c_abrev) as periodo_abrev
+            FROM escola.procavaliacao
+            INNER JOIN escola.turma ON ed57_i_codigo = {$turmaId}
+            ORDER BY ed09_i_codigo
         ";
         $periodos = DB::select($sqlPeriodos);
 
-        $notas = array();
-        if ($regenciaId > 0) {
-            $sqlNotas = "
-                SELECT 
-                    ed72_i_codigo as avaliacao_id,
-                    ed95_i_aluno as aluno_id,
-                    ed72_i_procavaliacao as periodo_id,
-                    ed72_i_valornota as nota,
-                    trim(ed72_c_valorconceito) as conceito,
-                    ed72_t_parecer as parecer,
-                    ed72_i_numfaltas as faltas
-                FROM escola.diario
-                INNER JOIN escola.diarioavaliacao ON ed72_i_diario = ed95_i_codigo
-                WHERE ed95_i_regencia = {$regenciaId}
-            ";
-            $notas = DB::select($sqlNotas);
+        $sqlNotas = "
+            SELECT 
+                ed95_i_regencia as regencia_id,
+                ed95_i_aluno as aluno_id,
+                ed72_i_procavaliacao as periodo_id,
+                ed72_i_valornota as nota,
+                trim(ed72_c_valorconceito) as conceito,
+                trim(ed72_t_parecer) as parecer,
+                ed72_i_numfaltas as faltas
+            FROM escola.diario
+            INNER JOIN escola.regencia ON ed59_i_codigo = ed95_i_regencia
+            INNER JOIN escola.diarioavaliacao ON ed72_i_diario = ed95_i_codigo
+            WHERE ed59_i_turma = {$turmaId}
+        ";
+
+        if ($periodo) {
+            $sqlNotas .= " AND ed72_i_procavaliacao = {$periodo}";
         }
+
+        $notas = DB::select($sqlNotas);
 
         return new DBJsonResponse(array(
             'periodos' => $periodos,
@@ -486,6 +748,26 @@ class PautaEletronicaMobileController extends Controller
     public function sincronizarAvaliacoes(Request $request)
     {
         $avaliacoes = $request->input('avaliacoes');
+
+        // Suporte flexivel para envio sob a chave 'notas'
+        if ((!is_array($avaliacoes) || empty($avaliacoes)) && $request->input('notas')) {
+            $notasList = $request->input('notas');
+            $avaliacoes = array();
+            foreach ($notasList as $n) {
+                $turmaId = isset($n['id_turma']) ? (int)$n['id_turma'] : 0;
+                $sqlReg = "SELECT ed59_i_codigo FROM escola.regencia WHERE ed59_i_turma = {$turmaId} LIMIT 1";
+                $rsReg = DB::select($sqlReg);
+                $regId = !empty($rsReg) ? (int)$rsReg[0]->ed59_i_codigo : 0;
+
+                $avaliacoes[] = array(
+                    'regencia_id' => $regId,
+                    'aluno_id'    => isset($n['id_aluno']) ? (int)$n['id_aluno'] : 0,
+                    'periodo_id'  => isset($n['periodo']) ? (int)$n['periodo'] : 1,
+                    'nota'        => isset($n['nota']) ? $n['nota'] : null,
+                    'parecer'     => isset($n['parecer_descritivo']) ? $n['parecer_descritivo'] : null
+                );
+            }
+        }
 
         if (!is_array($avaliacoes) || empty($avaliacoes)) {
             return new DBJsonResponse(null, 'Nenhuma avaliacao informada.', 400);

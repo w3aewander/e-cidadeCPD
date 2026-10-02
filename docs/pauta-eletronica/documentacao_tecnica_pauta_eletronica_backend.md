@@ -4,7 +4,7 @@
 > **Data:** 02 de Outubro de 2026  
 > **Sistema:** e-Cidade (CPD-MUNICIPAL)  
 > **Ambiente de Execução:** PHP 5.6.40 / Laravel 5.x / PostgreSQL 9.x+ (Container Docker)  
-> **Webroot:** `/var/www/html/` (Espelhado: `/var/www/html/e-cidadeCPD/`)  
+> **Webroot:** `/var/www/html/` (Montado diretamente em `./web` no host: `/home/administrador/containers/web`)  
 > **Módulo:** Educação (`escola`) & Configurações (`configuracoes`)  
 > **App Mobile:** Flutter 3.x / Dart 3.x (Versão 1.0.1+2 Release APK)  
 > **Servidor Produção:** `https://ecidade-ontem.cpd-municipal.com.br`
